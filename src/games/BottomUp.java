@@ -1,12 +1,13 @@
 package src.games;
+
 import java.util.List;
 
 import src.objs.Card;
 import src.objs.Suit;
 
-public class TopDown implements IGame {
+public class BottomUp implements IGame{
     public String getName() {
-        return "Top-Down";
+        return "Bottom-Up";
     }
 
     public void setup(int type) {
@@ -16,7 +17,7 @@ public class TopDown implements IGame {
         Suit masterSuit = trick.get(0).getSuit();
         int winner = 0;
         for (int i = 0; i < trick.size(); i++) {
-            if (trick.get(i).getSuit() == masterSuit && trick.get(i).getVal() > trick.get(winner).getVal()) {
+            if (trick.get(i).getSuit() == masterSuit && trick.get(i).getVal() < trick.get(winner).getVal()) {
                 winner = i;
             }
         }
@@ -24,6 +25,6 @@ public class TopDown implements IGame {
     }
 
     public int score(List<Card> cards){
-        return Scoring.TDScore(cards);
+        return Scoring.BUScore(cards);
     }
 }

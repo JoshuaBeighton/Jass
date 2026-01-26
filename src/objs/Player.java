@@ -47,7 +47,7 @@ public class Player {
         this.cards = new ArrayList<Card>();
     }
 
-    public boolean canPlayCard(Card c, List<Card> played, List<Card> available) {
+    public boolean canPlayCard(Card c, List<Card> played, List<Card> available, int trump) {
         boolean hasCard = false;
         for (Card card : cards) {
             if (c.equals(card))
@@ -56,9 +56,10 @@ public class Player {
         if (!hasCard) {
             System.out.print("\u001B[2J\u001B[H");
             System.err.println("You don't have that card!");
+            return false;
         }
 
-        if (played.size() > 0 && c.getSuit() != played.get(0).getSuit()) {
+        if (played.size() > 0 && c.getSuit() != played.get(0).getSuit() && trump != -1 && Suit.fromIndex(trump) != c.getSuit()) {
             for (Card card : available) {
                 if (card.getSuit() == played.get(0).getSuit()) {
                     System.out.print("\u001B[2J\u001B[H");

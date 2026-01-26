@@ -14,4 +14,19 @@ public enum Suit {
     public int index() { 
         return index; 
     }
+
+    public static Suit fromIndex(int i) throws IndexOutOfBoundsException{
+        switch (i) {
+            case 0:
+                return HEARTS;
+            case 1:
+                return CLUBS;
+            case 2:
+                return DIAMONDS;
+            case 3:
+                return SPADES;
+            default:
+                throw new IndexOutOfBoundsException();
+        }
+    }
 }

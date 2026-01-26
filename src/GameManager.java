@@ -6,9 +6,12 @@ import java.util.Scanner;
 import javax.naming.InvalidNameException;
 
 import src.games.IGame;
+import src.games.Middle;
 import src.games.TopDown;
+import src.games.Trumps;
 import src.objs.Card;
 import src.objs.Player;
+import src.objs.Suit;
 
 public class GameManager {
     private final int LAST_BONUS = 5;
@@ -24,7 +27,8 @@ public class GameManager {
 
     public void playGame() {
         s = new Scanner(System.in);
-        currentGame = new TopDown();
+        currentGame = new Trumps();
+        currentGame.setup(Suit.CLUBS.index());
         int lastWinner = 0;
         while (players.get(0).getCards().size() > 0) {
             lastWinner = playTrick(lastWinner);
@@ -59,7 +63,7 @@ public class GameManager {
                 try {
                     // Get which card was played
                     Card played = Card.parseCard(s.nextLine());
-                    if (players.get(player).canPlayCard(played, cards, players.get(player).getCards())) {
+                    if (players.get(player).canPlayCard(played, cards, players.get(player).getCards(), Suit.CLUBS.index())) {
                         cards.add(played);
                         players.get(player).removeCard(played);
                         success = true;

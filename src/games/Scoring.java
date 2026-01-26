@@ -80,6 +80,9 @@ public class Scoring {
                     if (c.getSuit() == trumpSuit){
                         score += 20;
                     }
+                    else{
+                        score += 2;
+                    }
                     break;
                 case 10:
                     score += 10;
