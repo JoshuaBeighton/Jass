@@ -1,15 +1,19 @@
 package src.games;
+
 import java.util.List;
 
 import src.objs.Card;
 import src.objs.Suit;
 
 public class TopDown implements IGame {
-    public String getName() {
-        return "Top-Down";
+    private int type;
+
+    public int getType() {
+        return type;
     }
 
-    public void setup(int type) {
+    public String getName() {
+        return "Top-Down";
     }
 
     public int wins(List<Card> trick) {
@@ -23,7 +27,7 @@ public class TopDown implements IGame {
         return winner;
     }
 
-    public int score(List<Card> cards){
+    public int score(List<Card> cards) {
         return Scoring.TDScore(cards);
     }
 }

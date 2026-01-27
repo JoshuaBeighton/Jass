@@ -5,12 +5,15 @@ import java.util.List;
 import src.objs.Card;
 import src.objs.Suit;
 
-public class BottomUp implements IGame{
-    public String getName() {
-        return "Bottom-Up";
+public class BottomUp implements IGame {
+    private int type;
+
+    public int getType() {
+        return type;
     }
 
-    public void setup(int type) {
+    public String getName() {
+        return "Bottom-Up";
     }
 
     public int wins(List<Card> trick) {
@@ -24,7 +27,7 @@ public class BottomUp implements IGame{
         return winner;
     }
 
-    public int score(List<Card> cards){
+    public int score(List<Card> cards) {
         return Scoring.BUScore(cards);
     }
 }

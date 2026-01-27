@@ -8,6 +8,14 @@ import src.objs.Suit;
 public class Trumps implements IGame {
     private Suit trump;
 
+    public Trumps(Suit s) {
+        this.trump = s;
+    }
+
+    public int getType() {
+        return trump.index();
+    }
+
     public String getName() {
         return "Trumps";
     }
@@ -15,7 +23,8 @@ public class Trumps implements IGame {
     public void setup(int type) {
         try {
             this.trump = Suit.fromIndex(type);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             System.out.println("Something went wrong!");
         }
     }
@@ -32,11 +41,12 @@ public class Trumps implements IGame {
                     winner = beats(trick.get(winner).getVal(), trick.get(i).getVal()) ? winner : i;
                 }
                 trumped = true;
-            } else if (!trumped) {
-                if (trick.get(i).getSuit() == masterSuit && trick.get(i).getVal() > trick.get(winner).getVal()) {
-                    winner = i;
+            } else
+                if (!trumped) {
+                    if (trick.get(i).getSuit() == masterSuit && trick.get(i).getVal() > trick.get(winner).getVal()) {
+                        winner = i;
+                    }
                 }
-            }
         }
         return winner;
     }
@@ -48,12 +58,14 @@ public class Trumps implements IGame {
     private boolean beats(int trump1, int trump2) {
         if (trump1 == 11) {
             return true;
-        } else if (trump1 == 9 && trump2 != 11) {
-            return true;
-        } else if (trump2 == 9 || trump2 == 11) {
-            return false;
-        } else {
-            return trump1 > trump2;
-        }
+        } else
+            if (trump1 == 9 && trump2 != 11) {
+                return true;
+            } else
+                if (trump2 == 9 || trump2 == 11) {
+                    return false;
+                } else {
+                    return trump1 > trump2;
+                }
     }
 }
