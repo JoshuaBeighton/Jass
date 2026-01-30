@@ -1,9 +1,14 @@
 package src.objs;
+
 import javax.naming.InvalidNameException;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Observable;
 
 import src.utils.Utils;
 
-public class Card{
+public class Card {
     private Suit suit;
     private int val;
 
@@ -28,14 +33,14 @@ public class Card{
         this.val = val;
     }
 
-    public boolean equals(Card c2){
+    public boolean equals(Card c2) {
         return (suit == c2.suit) && (val == c2.val);
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         StringBuilder sb = new StringBuilder();
-        if (suit == Suit.HEARTS || suit == Suit.DIAMONDS){
+        if (suit == Suit.HEARTS || suit == Suit.DIAMONDS) {
             sb.append("\u001B[31m");
         }
         sb.append(Utils.getCardVal(val));
@@ -44,7 +49,7 @@ public class Card{
         return sb.toString();
     }
 
-    public static Card parseCard(String s) throws InvalidNameException{
+    public static Card parseCard(String s) throws InvalidNameException {
         Suit suit = Utils.getSuitFromChar(s.charAt(s.length() - 1));
 
         try {
@@ -68,8 +73,16 @@ public class Card{
             }
             Card c = new Card(suit, val);
             return c;
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new InvalidNameException();
         }
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> result = new HashMap<String, Object>();
+        result.put("suit", suit.name());
+        result.put("number", val);
+        return result;
     }
 }

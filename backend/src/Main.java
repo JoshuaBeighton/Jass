@@ -7,6 +7,7 @@ import java.util.List;
 import java.io.*;
 import java.net.*;
 
+import src.JassHttpServer;
 import src.objs.Card;
 import src.objs.Player;
 import src.objs.Suit;
@@ -17,12 +18,14 @@ public class Main {
     private static List<Card> undealt;
     private static List<Player> players;
     private static List<Team> teams;
+    public static boolean cardsDealt = false;
 
     public static void main(String[] args) {
         players = new ArrayList<Player>();
         teams = new ArrayList<Team>();
         teams.add(new Team());
         teams.add(new Team());
+        JassHttpServer.init();
         netInit();
         fillDeck();
         // Shuffle Deck
@@ -120,6 +123,41 @@ public class Main {
     private static void sendCards() {
         for (Player player : players) {
             player.sendHand();
+        }
+    }
+
+    public static List<Player> getPlayers() {
+        return players;
+    }
+
+    public static List<Team> getTeams() {
+        return teams;
+    }
+
+    public static Team getTeam(int idx) {
+        for (Team t : teams) {
+            if (t.getIndex() == idx) {
+                return t;
+            }
+        }
+        Team newTeam = new Team();
+        teams.add(newTeam);
+        return newTeam;
+    }
+
+    public static void addPlayer(Player p) {
+        players.add(p);
+        p.getTeam().players.add(p);
+        if (players.size() == 4) {
+            fillDeck();
+            System.out.println("1");
+            Collections.shuffle(undealt);
+            System.out.println("1");
+            dealCards();
+            System.out.println("1");
+            sortCards();
+            System.out.println("1");
+            cardsDealt = true;
         }
     }
 }

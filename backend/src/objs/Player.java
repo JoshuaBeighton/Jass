@@ -6,7 +6,9 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import src.games.BottomUp;
 import src.games.IGame;
@@ -71,12 +73,13 @@ public class Player {
                 }
                 input = new String(buffer).trim();
                 if (input.charAt(0) == '0' || input.charAt(0) == '1') {
-                    this.team = t.get(Integer.parseInt(input.substring(0,1)));
-                    t.get(Integer.parseInt(input.substring(0,1))).players.add(this);
+                    this.team = t.get(Integer.parseInt(input.substring(0, 1)));
+                    t.get(Integer.parseInt(input.substring(0, 1))).players.add(this);
                     accept = true;
                 }
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -97,7 +100,8 @@ public class Player {
                     writeLine(card.toString());
                 }
                 writeLine("\n");
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 e.printStackTrace();
             }
         });
@@ -187,7 +191,8 @@ public class Player {
                     sendHand();
                     writeLine("You can't play that card!");
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 sendPlayedCards(played);
                 sendHand();
                 writeLine("Invalid Card Format!");
@@ -247,7 +252,8 @@ public class Player {
                         chosen = true;
                         Suit s = Utils.getSuitFromChar(input.charAt(1));
                         return new Trumps(s);
-                    } catch (Exception e) {
+                    }
+                    catch (Exception e) {
 
                     }
 
@@ -267,5 +273,13 @@ public class Player {
             writeLine("Choose Game:");
         }
         return null;
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> m = new HashMap<String, Object>();
+        m.put("name", name);
+        m.put("team", team.getIndex());
+
+        return m;
     }
 }
