@@ -16,6 +16,8 @@ public class GameManager {
     private List<Player> players;
     private Scanner s;
     private IGame currentGame;
+    private int nextToChoose;
+
 
     public GameManager(List<Player> players) {
         this.players = players;
@@ -24,7 +26,8 @@ public class GameManager {
 
     public void playGame() throws IOException {
         s = new Scanner(System.in);
-        int lastWinner = chooseGame(0);;
+        int lastWinner = chooseGame(0);
+        ;
         while (players.get(0).getCards().size() > 0) {
             lastWinner = playTrick(lastWinner);
         }
@@ -37,7 +40,7 @@ public class GameManager {
     private int chooseGame(int start) throws IOException {
         for (int i = 0; i < players.size(); i++) {
             IGame g = players.get((start + i) % 4).chooseGame(false);
-            if (g != null){
+            if (g != null) {
                 currentGame = g;
                 return i;
             }
@@ -71,5 +74,19 @@ public class GameManager {
         System.out.printf("%d Points for %s\n", currentGame.score(cards), players.get(winner).getPlayerName());
         players.get(winner).getTeam().addScore(currentGame.score(cards));
         return winner;
+
+    }
+
+    public int getNextToChoose() {
+        return nextToChoose;
+    }
+
+    public IGame getGame() {
+        return currentGame;
+    }
+
+    public void setGame(IGame g) {
+        currentGame = g;
+        nextToChoose = -1;
     }
 }

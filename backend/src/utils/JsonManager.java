@@ -3,6 +3,11 @@ package src.utils;
 import java.util.List;
 
 import src.Main;
+import src.games.BottomUp;
+import src.games.IGame;
+import src.games.Middle;
+import src.games.TopDown;
+import src.games.Trumps;
 import src.objs.*;
 
 import org.json.JSONArray;
@@ -30,7 +35,6 @@ public class JsonManager {
     }
 
     public static Player JsonToPlayer(String json) {
-        System.out.println(json);
         JSONObject jo = new JSONObject(json);
         String name = jo.getString("name");
         int idx = jo.getInt("team");
@@ -43,5 +47,36 @@ public class JsonManager {
             result.put(c.toMap());
         });
         return result.toString();
+    }
+
+    public static IGame jsonToIGame(String json){
+        JSONObject jo = new JSONObject(json);
+        String name = jo.getString("name");
+        int modifier = jo.getInt("modifier");
+        switch (name) {
+            case "pass":
+                return null;
+            case "topDown":
+                return new TopDown();
+            case "bottomUp":
+                return new BottomUp();
+            case "middle":
+                return new Middle();
+            case "trumps":
+                return new Trumps(Suit.fromIndex(modifier));
+            default:
+                break;
+        }
+        return null;
+    }   
+
+    public static String gameChoiceToJson(String player, int index, List<Player> players, IGame g){
+        if (players.get(index).getPlayerName().equals(player)){
+            return "YOURTURN";
+        }
+        JSONObject jo  = new JSONObject();
+        jo.put("game", g.getName());
+        jo.put("type", g.getType());
+        return jo.toString();
     }
 }

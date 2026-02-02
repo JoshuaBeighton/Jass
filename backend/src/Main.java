@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import java.io.*;
-import java.net.*;
 
-import src.JassHttpServer;
 import src.objs.Card;
 import src.objs.Player;
 import src.objs.Suit;
@@ -25,25 +22,68 @@ public class Main {
         teams = new ArrayList<Team>();
         teams.add(new Team());
         teams.add(new Team());
-        JassHttpServer.init();
-        netInit();
         fillDeck();
-        // Shuffle Deck
-        Collections.shuffle(undealt);
-        dealCards();
-        sortCards();
-        sendCards();
+        JassHttpServer.init();
+    }
 
-        GameManager m = new GameManager(players);
-        try {
-            m.playGame();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
+    private static void dealCards() {
+        int playerIndex = 0;
+        while (!undealt.isEmpty()) {
+            players.get(playerIndex).getCards().addAll(undealt.subList(0, 3));
+            undealt.removeAll(undealt.subList(0, 3));
+            playerIndex++;
+            if (playerIndex >= players.size())
+                playerIndex = 0;
         }
     }
 
-    private static void netInit() {
+    private static void sortCards() {
+        for (Player player : players) {
+            Collections.sort(player.getCards(), new CardComparator());
+        }
+    }
+
+    private static void fillDeck() {
+        undealt = new ArrayList<Card>();
+        for (Suit s : Suit.values()) {
+            for (int i = 6; i <= 14; i++) {
+                undealt.add(new Card(s, i));
+            }
+        }
+    }
+
+    public static List<Player> getPlayers() {
+        return players;
+    }
+
+    public static List<Team> getTeams() {
+        return teams;
+    }
+
+    public static Team getTeam(int idx) {
+        for (Team t : teams) {
+            if (t.getIndex() == idx) {
+                return t;
+            }
+        }
+        Team newTeam = new Team();
+        teams.add(newTeam);
+        return newTeam;
+    }
+
+    public static void addPlayer(Player p) {
+        players.add(p);
+        p.getTeam().players.add(p);
+        if (players.size() == 4) {
+            fillDeck();
+            Collections.shuffle(undealt);
+            dealCards();
+            sortCards();
+            cardsDealt = true;
+        }
+    }
+
+    /*     private static void netInit() {
         int portNo = 8000;
         try {
             ServerSocket server = new ServerSocket(5000);
@@ -94,70 +134,10 @@ public class Main {
         players.add(p);
     }
 
-    private static void dealCards() {
-        int playerIndex = 0;
-        while (!undealt.isEmpty()) {
-            players.get(playerIndex).getCards().addAll(undealt.subList(0, 3));
-            undealt.removeAll(undealt.subList(0, 3));
-            playerIndex++;
-            if (playerIndex >= players.size())
-                playerIndex = 0;
-        }
-    }
-
-    private static void sortCards() {
-        for (Player player : players) {
-            Collections.sort(player.getCards(), new CardComparator());
-        }
-    }
-
-    private static void fillDeck() {
-        undealt = new ArrayList<Card>();
-        for (Suit s : Suit.values()) {
-            for (int i = 6; i <= 14; i++) {
-                undealt.add(new Card(s, i));
-            }
-        }
-    }
-
     private static void sendCards() {
         for (Player player : players) {
             player.sendHand();
         }
     }
-
-    public static List<Player> getPlayers() {
-        return players;
-    }
-
-    public static List<Team> getTeams() {
-        return teams;
-    }
-
-    public static Team getTeam(int idx) {
-        for (Team t : teams) {
-            if (t.getIndex() == idx) {
-                return t;
-            }
-        }
-        Team newTeam = new Team();
-        teams.add(newTeam);
-        return newTeam;
-    }
-
-    public static void addPlayer(Player p) {
-        players.add(p);
-        p.getTeam().players.add(p);
-        if (players.size() == 4) {
-            fillDeck();
-            System.out.println("1");
-            Collections.shuffle(undealt);
-            System.out.println("1");
-            dealCards();
-            System.out.println("1");
-            sortCards();
-            System.out.println("1");
-            cardsDealt = true;
-        }
-    }
+*/
 }
