@@ -1,45 +1,61 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 
-const team1 = ref<any>(null)
-const team2 = ref<any>(null)
+const team1 = ref<Array<{ name: string; team: number }>>([])
+const team2 = ref<Array<{ name: string; team: number }>>([])
 const selectedClass = ref('selected')
 const selected = ref(-1)
+let counter = -1
 
-onMounted(async () => {
+async function fetchTeams() {
   const host = window.location.hostname
-  const response = await fetch(`http://${host}:9000/teams`)
-  const data = await response.json()
 
-  
-  team1.value = data[0].players;
-  team2.value = data[1].players;
+  try {
+    // Long-poll request
+    const res = await fetch(`http://${host}:9000/teamWait/${counter}`)
+    if (!res.ok) throw new Error('Network response was not OK')
+
+    const data = await res.json()
+    team1.value = data[0].players
+    team2.value = data[1].players
+    counter++
+  } catch (err) {
+    console.error('Error fetching teams:', err)
+  } finally {
+    // Immediately poll again
+    fetchTeams()
+  }
+}
+
+onMounted(() => {
+  fetchTeams()
 })
 
 const emit = defineEmits<{
   (e: 'update:selected', value: number): void
 }>()
 
-function isTeam1(){
-    return selected.value == 0;
+function isTeam1() {
+  return selected.value == 0
 }
 
-function isTeam2(){
-    return selected.value == 1;
+function isTeam2() {
+  return selected.value == 1
 }
 
 function setTeam1() {
-  if (team1.value.length() < 2){
+  if (team1.value == undefined || team1.value.length < 2) {
     selected.value = 0
-  emit('update:selected', selected.value) 
+    emit('update:selected', selected.value)
   }
 }
 
 function setTeam2() {
-  selected.value = 1
-  emit('update:selected', selected.value)
+  if (team2.value == undefined || team2.value.length < 2) {
+    selected.value = 1
+    emit('update:selected', selected.value)
+  }
 }
-
 </script>
 
 <template>
@@ -83,7 +99,6 @@ function setTeam2() {
 }
 
 .selected {
-
-    border-color: var(--c-accent);
+  border-color: var(--c-accent);
 }
 </style>

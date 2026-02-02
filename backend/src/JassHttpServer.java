@@ -23,6 +23,7 @@ public class JassHttpServer {
 
             server.createContext("/player", new PlayerHandler());
             server.createContext("/teams", new TeamHandler());
+            server.createContext("/teamWait", new TeamWaitHandler());
             server.createContext("/hand", new HandHandler());
             server.createContext("/gameChoice", new GameChoiceHandler());
 
@@ -43,6 +44,42 @@ public class JassHttpServer {
         exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
     }
 
+    static class TeamWaitHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            addCorsHeaders(exchange);
+            if (exchange.getRequestMethod().equals("GET")) {
+                handleGet(exchange);
+            } else {// todo: implement 400 returns
+            }
+        }
+
+        private void handleGet(HttpExchange exchange) throws IOException {
+            int count = Integer.parseInt(exchange.getRequestURI().getPath().split("/teamWait/")[1]);
+            System.out.println("Waiting for new player after count: " + count);
+
+            Thread t = new Thread(() -> {
+                try {
+                    while (count >= Main.getPlayers().size()) {
+                        Thread.sleep(100);
+                    }
+
+                    String response = JsonManager.teamsToJson(Main.getTeams());
+
+                    exchange.sendResponseHeaders(200, response.getBytes().length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(response.getBytes());
+                    os.close();
+                }
+                catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+
+            t.start();
+        }
+
+    }
 
     static class PlayerHandler implements HttpHandler {
         @Override
