@@ -184,10 +184,11 @@ public class JassHttpServer {
 
         private void handleGet(HttpExchange exchange) throws IOException {
             String uri = exchange.getRequestURI().toString();
-            String[] args = uri.split("?")[1].split(",");
+            System.out.println(uri);
+            String[] args = uri.split("?")[1].split("&");
             String name = args[0].split("=")[1];
+            System.out.println(name);
             int lastIndex = Integer.parseInt(args[1].split("=")[1]);
-
             Thread t = new Thread(() -> {
                 try {
                     while (manager.getNextToChoose() == lastIndex) {
@@ -204,7 +205,6 @@ public class JassHttpServer {
                 catch (IOException e) {
                     e.printStackTrace();
                 }
-
             });
             t.start();
 

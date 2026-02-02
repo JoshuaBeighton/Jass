@@ -60,7 +60,6 @@ public class JsonManager {
     public static IGame jsonToIGame(String json) {
         JSONObject jo = new JSONObject(json);
         String name = jo.getString("name");
-        int modifier = jo.getInt("modifier");
         switch (name) {
             case "pass":
                 return null;
@@ -71,6 +70,7 @@ public class JsonManager {
             case "middle":
                 return new Middle();
             case "trumps":
+                int modifier = jo.getInt("modifier");
                 return new Trumps(Suit.fromIndex(modifier));
             default:
                 break;
@@ -79,12 +79,14 @@ public class JsonManager {
     }
 
     public static String gameChoiceToJson(String player, int index, List<Player> players, IGame g) {
-        if (players.get(index).getPlayerName().equals(player)) {
-            return "YOURTURN";
-        }
         JSONObject jo = new JSONObject();
-        jo.put("game", g.getName());
-        jo.put("type", g.getType());
+        if (g == null) {
+            jo.put("chooser", players.get(index).getPlayerName());
+        } else {
+            jo.put("game", g.getName());
+            jo.put("type", g.getType());
+        }
+
         return jo.toString();
     }
 }

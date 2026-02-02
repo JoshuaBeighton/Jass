@@ -75,6 +75,7 @@ public class Main {
         players.add(p);
         p.getTeam().players.add(p);
         if (players.size() == 4) {
+            reorderPlayers();
             fillDeck();
             Collections.shuffle(undealt);
             dealCards();
@@ -82,6 +83,27 @@ public class Main {
             cardsDealt = true;
             System.out.println("Dealt Cards");
         }
+    }
+
+    private static void reorderPlayers() {
+        List<Player> temp = new ArrayList<Player>();
+        int t0Pointer = 0;
+        int t1Pointer = 0;
+        for (int i = 0; i < 2; i++) {
+            while (players.get(t0Pointer).getTeam().equals(teams.get(0))) {
+                t0Pointer++;
+            }
+            temp.add(players.get(t0Pointer));
+
+            while (players.get(t1Pointer).getTeam().equals(teams.get(1))) {
+                t1Pointer++;
+            }
+            temp.add(players.get(t1Pointer));
+
+            t0Pointer++;
+            t1Pointer++;
+        }
+        players = temp;
     }
 
     /*

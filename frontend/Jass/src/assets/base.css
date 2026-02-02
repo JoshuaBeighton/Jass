@@ -20,7 +20,8 @@
   --vt-c-text-dark-1: var(--vt-c-white);
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
 
-  --c-accent: rgba(20,240,50,1);
+  --c-accent: rgba(50, 240, 70, 1);
+  --c-accent-muted: rgba(100, 255, 100, 0.7);
 }
 
 /* semantic color variables for this project */

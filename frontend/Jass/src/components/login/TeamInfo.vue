@@ -22,6 +22,9 @@ async function fetchTeams() {
   } catch (err) {
     console.error('Error fetching teams:', err)
   } finally {
+    if (counter >= 4) {
+      emit('update:ready', true)
+    }
     // Immediately poll again
     fetchTeams()
   }
@@ -33,6 +36,7 @@ onMounted(() => {
 
 const emit = defineEmits<{
   (e: 'update:selected', value: number): void
+  (e: 'update:ready', value: boolean): void
 }>()
 
 function isTeam1() {
@@ -96,6 +100,10 @@ function setTeam2() {
 
 .team h3 {
   margin-top: 0;
+}
+
+.team:hover {
+  border-color: var(--c-accent-muted);
 }
 
 .selected {
