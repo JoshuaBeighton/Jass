@@ -1,0 +1,89 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+
+const team1 = ref<any>(null)
+const team2 = ref<any>(null)
+const selectedClass = ref('selected')
+const selected = ref(-1)
+
+onMounted(async () => {
+  const host = window.location.hostname
+  const response = await fetch(`http://${host}:9000/teams`)
+  const data = await response.json()
+
+  
+  team1.value = data[0].players;
+  team2.value = data[1].players;
+})
+
+const emit = defineEmits<{
+  (e: 'update:selected', value: number): void
+}>()
+
+function isTeam1(){
+    return selected.value == 0;
+}
+
+function isTeam2(){
+    return selected.value == 1;
+}
+
+function setTeam1() {
+  if (team1.value.length() < 2){
+    selected.value = 0
+  emit('update:selected', selected.value) 
+  }
+}
+
+function setTeam2() {
+  selected.value = 1
+  emit('update:selected', selected.value)
+}
+
+</script>
+
+<template>
+  <div class="teams">
+    <div class="team" @click="setTeam1" :class="{ selected: isTeam1() }">
+      <h3>Team 1</h3>
+      <ul>
+        <li v-for="player in team1" :key="player.name">
+          {{ player.name }}
+        </li>
+      </ul>
+    </div>
+
+    <div class="team" @click="setTeam2" :class="{ selected: isTeam2() }">
+      <h3>Team 2</h3>
+      <ul>
+        <li v-for="player in team2" :key="player.name">
+          {{ player.name }}
+        </li>
+      </ul>
+    </div>
+  </div>
+</template>
+
+<style>
+.teams {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: 2rem;
+}
+
+.team {
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.team h3 {
+  margin-top: 0;
+}
+
+.selected {
+
+    border-color: var(--c-accent);
+}
+</style>

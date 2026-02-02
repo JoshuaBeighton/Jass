@@ -80,64 +80,30 @@ public class Main {
             dealCards();
             sortCards();
             cardsDealt = true;
+            System.out.println("Dealt Cards");
         }
     }
 
-    /*     private static void netInit() {
-        int portNo = 8000;
-        try {
-            ServerSocket server = new ServerSocket(5000);
-            for (int i = 0; i < 4; i++) {
-                System.out.println("Waiting on port 5000!");
-
-                Socket socket = server.accept();
-                InputStream reader = socket.getInputStream();
-                boolean success = false;
-                while (!success) {
-                    // The buffer to read to.
-                    byte[] buffer = new byte[5];
-
-                    // Store the amount of bytes acutally read in to the buffer.
-                    int b = 0;
-
-                    // Wait for input.
-                    while (b == 0) {
-                        b = reader.read(buffer);
-                    }
-                    String input = new String(buffer).trim();
-                    if (input.equals("PORT?")) {
-                        String toWrite = String.valueOf(portNo) + "\n";
-                        OutputStream out = socket.getOutputStream();
-                        out.write(toWrite.getBytes());
-                        addPlayer(portNo, i == 3);
-                        portNo++;
-                        success = true;
-                    } else {
-                        String toWrite = "Expected \"PORT?\"\n";
-                        OutputStream out = socket.getOutputStream();
-                        out.write(toWrite.getBytes());
-                    }
-                }
-                socket.close();
-            }
-            server.close();
-
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void addPlayer(int portNo, boolean blocking) throws IOException {
-        ServerSocket server = new ServerSocket(portNo);
-        Player p = new Player(server, teams, blocking);
-        players.add(p);
-    }
-
-    private static void sendCards() {
-        for (Player player : players) {
-            player.sendHand();
-        }
-    }
-*/
+    /*
+     * private static void netInit() { int portNo = 8000; try { ServerSocket server = new ServerSocket(5000); for (int i =
+     * 0; i < 4; i++) { System.out.println("Waiting on port 5000!");
+     * 
+     * Socket socket = server.accept(); InputStream reader = socket.getInputStream(); boolean success = false; while
+     * (!success) { // The buffer to read to. byte[] buffer = new byte[5];
+     * 
+     * // Store the amount of bytes acutally read in to the buffer. int b = 0;
+     * 
+     * // Wait for input. while (b == 0) { b = reader.read(buffer); } String input = new String(buffer).trim(); if
+     * (input.equals("PORT?")) { String toWrite = String.valueOf(portNo) + "\n"; OutputStream out =
+     * socket.getOutputStream(); out.write(toWrite.getBytes()); addPlayer(portNo, i == 3); portNo++; success = true; } else
+     * { String toWrite = "Expected \"PORT?\"\n"; OutputStream out = socket.getOutputStream();
+     * out.write(toWrite.getBytes()); } } socket.close(); } server.close();
+     * 
+     * } catch (IOException e) { e.printStackTrace(); } }
+     * 
+     * private static void addPlayer(int portNo, boolean blocking) throws IOException { ServerSocket server = new
+     * ServerSocket(portNo); Player p = new Player(server, teams, blocking); players.add(p); }
+     * 
+     * private static void sendCards() { for (Player player : players) { player.sendHand(); } }
+     */
 }

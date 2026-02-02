@@ -36,15 +36,26 @@ public class JassHttpServer {
         }
     }
 
+    private static void addCorsHeaders(HttpExchange exchange) {
+        System.out.println("Doing Something!");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "http://localhost:5173");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+    }
+
+
     static class PlayerHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            System.out.println(exchange.getRequestMethod());
+            addCorsHeaders(exchange);
             if (exchange.getRequestMethod().equals("GET")) {
                 handleGet(exchange);
             } else
                 if (exchange.getRequestMethod().equals("POST")) {
                     handlePost(exchange);
                 } else {// todo: implement 400 returns
+                    exchange.sendResponseHeaders(200, 0);
                 }
         }
 
@@ -61,15 +72,20 @@ public class JassHttpServer {
             String requestString = new String(is.readAllBytes());
             Player request = JsonManager.JsonToPlayer(requestString);
             Main.addPlayer(request);
-            exchange.sendResponseHeaders(200, 0);
-            exchange.getResponseBody().close();
+            String response = "Success";
+            exchange.sendResponseHeaders(200, response.length());
+            OutputStream os = exchange.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
         }
     }
 
     static class TeamHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            addCorsHeaders(exchange);
             if (exchange.getRequestMethod().equals("GET")) {
+                System.out.println("Received GET request for teams!");
                 handleGet(exchange);
             } else {// todo: implement 400 returns
             }
@@ -87,6 +103,7 @@ public class JassHttpServer {
     static class HandHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            addCorsHeaders(exchange);
             if (exchange.getRequestMethod().equals("GET")) {
                 handleGet(exchange);
             } else {// todo: implement 400 returns
@@ -118,6 +135,7 @@ public class JassHttpServer {
     static class GameChoiceHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            addCorsHeaders(exchange);
             if (exchange.getRequestMethod().equals("GET")) {
                 handleGet(exchange);
             } else

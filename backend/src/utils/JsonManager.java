@@ -22,13 +22,21 @@ public class JsonManager {
         return result.toString();
     }
 
+    private static JSONArray playersToJsonArray(List<Player> players) {
+        JSONArray result = new JSONArray();
+        players.forEach((p) -> {
+            result.put(p.toMap());
+        });
+        return result;
+    }
+
     public static String teamsToJson(List<Team> teams) {
         JSONArray result = new JSONArray();
         teams.forEach((t) -> {
             JSONObject teamObj = new JSONObject();
             teamObj.put("index", t.getIndex());
             teamObj.put("score", t.getScore());
-            teamObj.put("players", playersToJson(t.players));
+            teamObj.put("players", playersToJsonArray(t.players));
             result.put(teamObj);
         });
         return result.toString().replace("\\", "");
@@ -37,7 +45,7 @@ public class JsonManager {
     public static Player JsonToPlayer(String json) {
         JSONObject jo = new JSONObject(json);
         String name = jo.getString("name");
-        int idx = jo.getInt("team");
+        int idx = jo.getInt("idx");
         return new Player(name, Main.getTeam(idx));
     }
 
@@ -49,7 +57,7 @@ public class JsonManager {
         return result.toString();
     }
 
-    public static IGame jsonToIGame(String json){
+    public static IGame jsonToIGame(String json) {
         JSONObject jo = new JSONObject(json);
         String name = jo.getString("name");
         int modifier = jo.getInt("modifier");
@@ -68,13 +76,13 @@ public class JsonManager {
                 break;
         }
         return null;
-    }   
+    }
 
-    public static String gameChoiceToJson(String player, int index, List<Player> players, IGame g){
-        if (players.get(index).getPlayerName().equals(player)){
+    public static String gameChoiceToJson(String player, int index, List<Player> players, IGame g) {
+        if (players.get(index).getPlayerName().equals(player)) {
             return "YOURTURN";
         }
-        JSONObject jo  = new JSONObject();
+        JSONObject jo = new JSONObject();
         jo.put("game", g.getName());
         jo.put("type", g.getType());
         return jo.toString();
