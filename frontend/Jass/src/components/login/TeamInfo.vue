@@ -26,7 +26,9 @@ async function fetchTeams() {
       emit('update:ready', true)
     }
     // Immediately poll again
-    fetchTeams()
+    else {
+      fetchTeams()
+    }
   }
 }
 

@@ -16,7 +16,7 @@ public class GameManager {
     private List<Player> players;
     private Scanner s;
     private IGame currentGame;
-    private int nextToChoose;
+    private int nextToChoose = 0;
 
 
     public GameManager(List<Player> players) {
@@ -79,6 +79,10 @@ public class GameManager {
 
     public int getNextToChoose() {
         return nextToChoose;
+    }
+
+    public void incrementChooser() {
+        nextToChoose++;
     }
 
     public IGame getGame() {

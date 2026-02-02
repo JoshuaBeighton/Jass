@@ -184,17 +184,29 @@ public class JassHttpServer {
 
         private void handleGet(HttpExchange exchange) throws IOException {
             String uri = exchange.getRequestURI().toString();
-            System.out.println(uri);
-            String[] args = uri.split("?")[1].split("&");
+            String[] args = uri.split("\\?")[1].split("\\&");
             String name = args[0].split("=")[1];
-            System.out.println(name);
             int lastIndex = Integer.parseInt(args[1].split("=")[1]);
+            System.out.println(lastIndex);
             Thread t = new Thread(() -> {
                 try {
+                    Thread.sleep(1000);
+                    if (lastIndex >= 0 && Main.getPlayers().get(manager.getNextToChoose()).getPlayerName().equals(name)) {
+                        exchange.getResponseHeaders().add("Content-Type", "application/json");
+                        String response = JsonManager.gameChoiceToJson(name, manager.getNextToChoose(), Main.getPlayers(), manager.getGame());
+
+                        exchange.sendResponseHeaders(200, response.length());
+                        OutputStream os = exchange.getResponseBody();
+                        os.write(response.getBytes());
+                        os.close();
+                        return;
+                    }
                     while (manager.getNextToChoose() == lastIndex) {
 
                     }
-
+                    System.out.println("Manager Choice" + manager.getNextToChoose());
+                    System.out.println("Player" + lastIndex);
+                    exchange.getResponseHeaders().add("Content-Type", "application/json");
                     String response = JsonManager.gameChoiceToJson(name, manager.getNextToChoose(), Main.getPlayers(), manager.getGame());
 
                     exchange.sendResponseHeaders(200, response.length());
@@ -202,12 +214,11 @@ public class JassHttpServer {
                     os.write(response.getBytes());
                     os.close();
                 }
-                catch (IOException e) {
+                catch (Exception e) {
                     e.printStackTrace();
                 }
             });
             t.start();
-
         }
 
         private void handlePost(HttpExchange exchange) throws IOException {
@@ -216,9 +227,14 @@ public class JassHttpServer {
             IGame request = JsonManager.jsonToIGame(requestString);
             if (request != null) {
                 manager.setGame(request);
+            } else {
+                manager.incrementChooser();
             }
-            exchange.sendResponseHeaders(200, 0);
-            exchange.getResponseBody().close();
+            String response = "success";
+            exchange.sendResponseHeaders(200, response.length());
+            OutputStream os = exchange.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
         }
     }
 }
