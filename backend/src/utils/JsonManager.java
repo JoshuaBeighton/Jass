@@ -61,15 +61,15 @@ public class JsonManager {
         JSONObject jo = new JSONObject(json);
         String name = jo.getString("name");
         switch (name) {
-            case "pass":
+            case "Pass":
                 return null;
-            case "topDown":
+            case "TopDown":
                 return new TopDown();
-            case "bottomUp":
+            case "BottomUp":
                 return new BottomUp();
-            case "middle":
+            case "Middle":
                 return new Middle();
-            case "trumps":
+            case "Trumps":
                 int modifier = jo.getInt("modifier");
                 return new Trumps(Suit.fromIndex(modifier));
             default:
@@ -82,11 +82,34 @@ public class JsonManager {
         JSONObject jo = new JSONObject();
         if (g == null) {
             jo.put("chooser", players.get(index).getPlayerName());
+            jo.put("available", availableGamesToJson(players.get(index).getTeam(), false));
+
         } else {
             jo.put("game", g.getName());
             jo.put("type", g.getType());
         }
 
         return jo.toString();
+    }
+
+    private static JSONArray availableGamesToJson(Team t, boolean forced){
+        JSONArray available = new JSONArray();
+        int id = 0;
+        for (String game : t.getGamesAvailable()) {
+            JSONObject obj = new JSONObject();
+            obj.put("id", id++);
+            obj.put("text", game);
+            obj.put("key", game.replace(" ", ""));
+            available.put(obj);
+        }
+
+        if (!forced){
+            JSONObject obj = new JSONObject();
+            obj.put("id", id++);
+            obj.put("text", "Pass");
+            obj.put("key", "Pass");
+            available.put(obj);
+        }
+        return available;
     }
 }

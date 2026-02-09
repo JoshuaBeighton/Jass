@@ -13,7 +13,7 @@ public class TopDown implements IGame {
     }
 
     public String getName() {
-        return "Top-Down";
+        return "Top Down";
     }
 
     public int wins(List<Card> trick) {

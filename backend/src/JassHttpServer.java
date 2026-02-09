@@ -93,7 +93,6 @@ public class JassHttpServer {
     static class PlayerHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            System.out.println(exchange.getRequestMethod());
             addCorsHeaders(exchange);
             if (exchange.getRequestMethod().equals("GET")) {
                 handleGet(exchange);
@@ -133,7 +132,6 @@ public class JassHttpServer {
         public void handle(HttpExchange exchange) throws IOException {
             addCorsHeaders(exchange);
             if (exchange.getRequestMethod().equals("GET")) {
-                System.out.println("Received GET request for teams!");
                 handleGet(exchange);
             } 
             else if(exchange.getRequestMethod().equals("OPTIONS")) {// todo: implement 400 returns
@@ -170,7 +168,6 @@ public class JassHttpServer {
 
         public void handleGet(HttpExchange exchange) throws IOException {
             String uri = exchange.getRequestURI().getPath().split("/hand/")[1];
-            System.out.println(exchange.getRequestURI());
 
             for (Player p : Main.getPlayers()) {
                 if (uri.toLowerCase().equals(p.getPlayerName().toLowerCase())) {
@@ -212,7 +209,6 @@ public class JassHttpServer {
             String[] args = uri.split("\\?")[1].split("\\&");
             String name = args[0].split("=")[1];
             int lastIndex = Integer.parseInt(args[1].split("=")[1]);
-            System.out.println(lastIndex);
             Thread t = new Thread(() -> {
                 try {
                     if (Main.getPlayers().get(manager.getNextToChoose()).getPlayerName().equals(name)) {

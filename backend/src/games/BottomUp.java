@@ -13,7 +13,7 @@ public class BottomUp implements IGame {
     }
 
     public String getName() {
-        return "Bottom-Up";
+        return "Bottom Up";
     }
 
     public int wins(List<Card> trick) {

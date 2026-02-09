@@ -71,9 +71,7 @@ public class Main {
     }
 
     public static void addPlayer(Player p) {
-        System.out.println("Adding player!");
         players.add(p);
-        System.out.println("Added " + p.getPlayerName());
         p.getTeam().players.add(p);
         if (players.size() == 4) {
             reorderPlayers();
@@ -81,18 +79,13 @@ public class Main {
             Collections.shuffle(undealt);
             dealCards();
             sortCards();
-            cardsDealt = true;
-            System.out.println("Dealt Cards");
+            cardsDealt = true; 
         }
     }
 
     private static void reorderPlayers() {
-        System.out.println("Old Player Order: (" + String.valueOf(players.size()) + ")");
 
         try {
-            for (int i = 0; i < players.size(); i++) {
-                System.out.printf("%d:%s\n", i, players.get(i).getPlayerName());
-            }
             List<Player> temp = new ArrayList<Player>();
             int t0Pointer = 0;
             int t1Pointer = 0;
@@ -113,11 +106,6 @@ public class Main {
             players = temp;
         } catch (Exception e) {
             e.printStackTrace();
-        }
-
-        System.out.println("New Player Order: (" + String.valueOf(players.size()) + ")");
-        for (int i = 0; i < players.size(); i++) {
-            System.out.printf("%d:%s\n", i, players.get(i).getPlayerName());
         }
     }
 }

@@ -8,11 +8,20 @@ public class Team {
     private int currentScore;
     private static int nextIdx = 0;
     private int index;
+    private List<String> gamesAvailable;
+
+    public List<String> getGamesAvailable() {
+        return gamesAvailable;
+    }
 
     public Team() {
         players = new ArrayList<Player>();
         currentScore = 0;
         index = nextIdx++;
+        gamesAvailable = new ArrayList<String>();
+        gamesAvailable.add("Top Down");
+        gamesAvailable.add("Bottom Up");
+        gamesAvailable.add("Middle");
     }
 
     public void addScore(int val) {

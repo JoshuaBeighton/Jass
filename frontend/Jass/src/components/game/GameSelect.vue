@@ -40,6 +40,7 @@ async function fetchNextPlayer() {
       if (nextChooser.value == props.name) {
         console.log("It's me!")
         isMe.value = true
+        games.value = data.available
       }
     } else {
       emits('update:selected', data.game)
@@ -73,7 +74,6 @@ onMounted(() => {
   fetchNextPlayer()
 })
 </script>
-
 <template>
   <div class="gameSelect">
     <p v-if="!isMe">Waiting on {{ nextChooser }}</p>
