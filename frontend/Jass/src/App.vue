@@ -32,7 +32,7 @@ const deck = ref(false)
   <LoginCard @update:name="setName" @update:ready="removeLogin" v-if="login"></LoginCard>
   <Mat v-if="mat"></Mat>
   <GameSelect v-if="select" :name="name" @update:selected="gameChosen"></GameSelect>
-  <Deck v-if="deck"></Deck>
+  <Deck v-if="deck" :name="name"></Deck>
 </template>
 
 <style></style>

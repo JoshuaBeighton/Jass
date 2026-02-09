@@ -5,17 +5,20 @@ import {ref } from 'vue'
 const cardClass = ref('card')
 const redClass = ref('red')
 const blackClass = ref('black')
-const cardText = ref('9♦')
 
 function isRed(){
-    return cardText.value.endsWith('♦') || cardText.value.endsWith('♥')
+    return props.cardText.endsWith('♦') || props.cardText.endsWith('♥')
 }
+
+const props = defineProps<{
+    cardText: string;
+}>();
 
 </script>
 
 <template>
 <div :class="cardClass">
-    <p v-bind:class="{ red: isRed(), black: !isRed() }">{{ cardText }}</p>
+    <p v-bind:class="{ red: isRed(), black: !isRed() }">{{ props.cardText }}</p>
 </div>
 
 </template>

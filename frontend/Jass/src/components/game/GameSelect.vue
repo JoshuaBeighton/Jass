@@ -34,6 +34,9 @@ async function fetchNextPlayer() {
     if (data.chooser != undefined) {
       nextChooser.value = data.chooser
       counter++
+      if (counter >= 4){
+        counter = 0
+      }
       if (nextChooser.value == props.name) {
         console.log("It's me!")
         isMe.value = true
@@ -61,6 +64,9 @@ async function sendGame(game: string) {
       name: game,
     }),
   })
+  if (game == "Pass"){
+    fetchNextPlayer();
+  }
 }
 
 onMounted(() => {

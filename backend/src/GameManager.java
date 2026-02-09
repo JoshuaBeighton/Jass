@@ -10,6 +10,9 @@ import src.games.Trumps;
 import src.objs.Card;
 import src.objs.Player;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 public class GameManager {
     private final int LAST_BONUS = 5;
 
@@ -17,12 +20,11 @@ public class GameManager {
     private Scanner s;
     private IGame currentGame;
     private int nextToChoose = 0;
-
+    private final Lock lock = new ReentrantLock(true);
 
     public GameManager(List<Player> players) {
         this.players = players;
     }
-
 
     public void playGame() throws IOException {
         s = new Scanner(System.in);
@@ -78,11 +80,25 @@ public class GameManager {
     }
 
     public int getNextToChoose() {
-        return nextToChoose;
+        int temp = 0;
+        lock.lock();
+        try {
+            temp = nextToChoose;
+        } catch (Exception e) {
+        } finally {
+            lock.unlock();
+        }
+        return temp;
     }
 
     public void incrementChooser() {
-        nextToChoose++;
+        lock.lock();
+        try {
+            nextToChoose++;
+        } catch (Exception e) {
+        } finally {
+            lock.unlock();
+        }
     }
 
     public IGame getGame() {

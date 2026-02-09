@@ -31,17 +31,28 @@ public class JassHttpServer {
             server.start();
 
             System.out.println("Server is running on port 9000");
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             System.out.println("Error starting the server: " + e.getMessage());
         }
     }
 
     private static void addCorsHeaders(HttpExchange exchange) {
-        System.out.println("Doing Something!");
         exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "http://localhost:5173");
         exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
         exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+    }
+
+    private static void respondToOPTIONS(HttpExchange exchange) {
+        try {
+            OutputStream os = exchange.getResponseBody();
+            String response = "";
+            exchange.sendResponseHeaders(200, response.getBytes().length);
+            os.write(response.getBytes());
+            os.close();
+        } catch (Exception e) {
+
+        }
+
     }
 
     static class TeamWaitHandler implements HttpHandler {
@@ -50,14 +61,13 @@ public class JassHttpServer {
             addCorsHeaders(exchange);
             if (exchange.getRequestMethod().equals("GET")) {
                 handleGet(exchange);
-            } else {// todo: implement 400 returns
+            } else if (exchange.getRequestMethod().equals("OPTIONS")) {// todo: implement 400 returns
+                respondToOPTIONS(exchange);
             }
         }
 
         private void handleGet(HttpExchange exchange) throws IOException {
             int count = Integer.parseInt(exchange.getRequestURI().getPath().split("/teamWait/")[1]);
-            System.out.println("Waiting for new player after count: " + count);
-
             Thread t = new Thread(() -> {
                 try {
                     while (count >= Main.getPlayers().size()) {
@@ -70,8 +80,7 @@ public class JassHttpServer {
                     OutputStream os = exchange.getResponseBody();
                     os.write(response.getBytes());
                     os.close();
-                }
-                catch (IOException | InterruptedException e) {
+                } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
             });
@@ -88,12 +97,14 @@ public class JassHttpServer {
             addCorsHeaders(exchange);
             if (exchange.getRequestMethod().equals("GET")) {
                 handleGet(exchange);
-            } else
-                if (exchange.getRequestMethod().equals("POST")) {
-                    handlePost(exchange);
-                } else {// todo: implement 400 returns
-                    exchange.sendResponseHeaders(200, 0);
-                }
+            } else if (exchange.getRequestMethod().equals("POST")) {
+                handlePost(exchange);
+
+            } else if (exchange.getRequestMethod().equals("OPTIONS")) {// todo: implement 400 returns
+                respondToOPTIONS(exchange);
+            } else {// todo: implement 400 returns
+                exchange.sendResponseHeaders(200, 0);
+            }
         }
 
         private void handleGet(HttpExchange exchange) throws IOException {
@@ -124,7 +135,12 @@ public class JassHttpServer {
             if (exchange.getRequestMethod().equals("GET")) {
                 System.out.println("Received GET request for teams!");
                 handleGet(exchange);
-            } else {// todo: implement 400 returns
+            } 
+            else if(exchange.getRequestMethod().equals("OPTIONS")) {// todo: implement 400 returns
+                respondToOPTIONS(exchange);
+            }
+            else {// todo: implement 400 returns
+                exchange.sendResponseHeaders(200, 0);
             }
         }
 
@@ -143,13 +159,18 @@ public class JassHttpServer {
             addCorsHeaders(exchange);
             if (exchange.getRequestMethod().equals("GET")) {
                 handleGet(exchange);
-            } else {// todo: implement 400 returns
+            } 
+            else if(exchange.getRequestMethod().equals("OPTIONS")) {// todo: implement 400 returns
+                respondToOPTIONS(exchange);
+            }
+            else {// todo: implement 400 returns
+                exchange.sendResponseHeaders(200, 0);
             }
         }
 
         public void handleGet(HttpExchange exchange) throws IOException {
             String uri = exchange.getRequestURI().getPath().split("/hand/")[1];
-            System.out.println(uri);
+            System.out.println(exchange.getRequestURI());
 
             for (Player p : Main.getPlayers()) {
                 if (uri.toLowerCase().equals(p.getPlayerName().toLowerCase())) {
@@ -175,11 +196,15 @@ public class JassHttpServer {
             addCorsHeaders(exchange);
             if (exchange.getRequestMethod().equals("GET")) {
                 handleGet(exchange);
-            } else
-                if (exchange.getRequestMethod().equals("POST")) {
-                    handlePost(exchange);
-                } else {// todo: implement 400 returns
-                }
+            } else if (exchange.getRequestMethod().equals("POST")) {
+                handlePost(exchange);
+            } 
+            else if(exchange.getRequestMethod().equals("OPTIONS")) {// todo: implement 400 returns
+                respondToOPTIONS(exchange);
+            }
+            else {// todo: implement 400 returns
+                exchange.sendResponseHeaders(200, 0);
+            }
         }
 
         private void handleGet(HttpExchange exchange) throws IOException {
@@ -190,10 +215,10 @@ public class JassHttpServer {
             System.out.println(lastIndex);
             Thread t = new Thread(() -> {
                 try {
-                    Thread.sleep(1000);
-                    if (lastIndex >= 0 && Main.getPlayers().get(manager.getNextToChoose()).getPlayerName().equals(name)) {
+                    if (Main.getPlayers().get(manager.getNextToChoose()).getPlayerName().equals(name)) {
                         exchange.getResponseHeaders().add("Content-Type", "application/json");
-                        String response = JsonManager.gameChoiceToJson(name, manager.getNextToChoose(), Main.getPlayers(), manager.getGame());
+                        String response = JsonManager.gameChoiceToJson(name, manager.getNextToChoose(),
+                                Main.getPlayers(), manager.getGame());
 
                         exchange.sendResponseHeaders(200, response.length());
                         OutputStream os = exchange.getResponseBody();
@@ -202,19 +227,19 @@ public class JassHttpServer {
                         return;
                     }
                     while (manager.getNextToChoose() == lastIndex) {
-
+                        
                     }
-                    System.out.println("Manager Choice" + manager.getNextToChoose());
-                    System.out.println("Player" + lastIndex);
+                    //System.out.println("Manager Choice" + manager.getNextToChoose());
+                    //System.out.println("Player" + lastIndex);
                     exchange.getResponseHeaders().add("Content-Type", "application/json");
-                    String response = JsonManager.gameChoiceToJson(name, manager.getNextToChoose(), Main.getPlayers(), manager.getGame());
+                    String response = JsonManager.gameChoiceToJson(name, manager.getNextToChoose(), Main.getPlayers(),
+                            manager.getGame());
 
                     exchange.sendResponseHeaders(200, response.length());
                     OutputStream os = exchange.getResponseBody();
                     os.write(response.getBytes());
                     os.close();
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             });
@@ -227,9 +252,8 @@ public class JassHttpServer {
             IGame request = JsonManager.jsonToIGame(requestString);
             if (request != null) {
                 manager.setGame(request);
-            } else {
-                manager.incrementChooser();
             }
+            manager.incrementChooser();
             String response = "success";
             exchange.sendResponseHeaders(200, response.length());
             OutputStream os = exchange.getResponseBody();
@@ -238,4 +262,3 @@ public class JassHttpServer {
         }
     }
 }
-

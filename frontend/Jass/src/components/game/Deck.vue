@@ -1,47 +1,61 @@
 <script setup lang="ts">
 
-import {ref } from 'vue'
+import {onMounted, ref } from 'vue'
+import Card from './Card.vue';
 
-const cardClass = ref('card')
-const redClass = ref('red')
-const blackClass = ref('black')
-const cardText = ref('9♦')
+const props = defineProps<{
+    name: string
+}>();
 
-function isRed(){
-    return cardText.value.endsWith('♦') || cardText.value.endsWith('♥')
+const cards = ref([])
+async function fetchHand() {
+  const host = window.location.hostname
+
+  try {
+    const res = await fetch(`http://${host}:9000/hand/${props.name}`)
+    if (!res.ok) throw new Error('Network response was not OK')
+    const data = await res.json()
+    cards.value = data
+  } catch (err) {
+    console.error('Error fetching hand:', err)
+  }
 }
+
+function concatCard(card: any){
+    return card.number + suitToUnicode(card.suit)
+}
+
+function suitToUnicode(inp : string){
+    switch (inp){
+        case "DIAMONDS":
+            return "♦"
+        case "HEARTS":
+            return "♥"
+        case "SPADES":
+            return "♠"
+        case "CLUBS":
+            return "♣"
+        default:
+            return "?"
+    }
+}
+
+onMounted(() => {
+  fetchHand();
+})
 
 </script>
 
 <template>
-<div :class="cardClass">
-    <p v-bind:class="{ red: isRed(), black: !isRed() }">{{ cardText }}</p>
+
+<div class="cards"> 
+    <Card v-for="card in cards" :card-text="concatCard(card)"></Card>
 </div>
 
 </template>
 
 <style>
-.card{
-    width: 100px;
-    height:150px;
-    background-color: azure;
-    padding: 5px;
-    margin: 5px;
-    display: flexbox;
-    justify-content: center;
-    align-items: center;
-}
-
-.red{
-    color: red;
-}
-
-.black{
-    color: black;
-}
-
-.red, .black{
-    text-align: center;
-    font-size: 30pt;
+.cards{
+    display: flex;
 }
 </style>

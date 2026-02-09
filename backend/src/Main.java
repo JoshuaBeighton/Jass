@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
 import src.objs.Card;
 import src.objs.Player;
 import src.objs.Suit;
@@ -72,7 +71,9 @@ public class Main {
     }
 
     public static void addPlayer(Player p) {
+        System.out.println("Adding player!");
         players.add(p);
+        System.out.println("Added " + p.getPlayerName());
         p.getTeam().players.add(p);
         if (players.size() == 4) {
             reorderPlayers();
@@ -86,46 +87,37 @@ public class Main {
     }
 
     private static void reorderPlayers() {
-        List<Player> temp = new ArrayList<Player>();
-        int t0Pointer = 0;
-        int t1Pointer = 0;
-        for (int i = 0; i < 2; i++) {
-            while (players.get(t0Pointer).getTeam().equals(teams.get(0))) {
-                t0Pointer++;
-            }
-            temp.add(players.get(t0Pointer));
+        System.out.println("Old Player Order: (" + String.valueOf(players.size()) + ")");
 
-            while (players.get(t1Pointer).getTeam().equals(teams.get(1))) {
+        try {
+            for (int i = 0; i < players.size(); i++) {
+                System.out.printf("%d:%s\n", i, players.get(i).getPlayerName());
+            }
+            List<Player> temp = new ArrayList<Player>();
+            int t0Pointer = 0;
+            int t1Pointer = 0;
+            for (int i = 0; i < 2; i++) {
+                while (players.get(t0Pointer).getTeam().equals(teams.get(0))) {
+                    t0Pointer++;
+                }
+                temp.add(players.get(t0Pointer));
+
+                while (players.get(t1Pointer).getTeam().equals(teams.get(1))) {
+                    t1Pointer++;
+                }
+                temp.add(players.get(t1Pointer));
+
+                t0Pointer++;
                 t1Pointer++;
             }
-            temp.add(players.get(t1Pointer));
-
-            t0Pointer++;
-            t1Pointer++;
+            players = temp;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        players = temp;
-    }
 
-    /*
-     * private static void netInit() { int portNo = 8000; try { ServerSocket server = new ServerSocket(5000); for (int i =
-     * 0; i < 4; i++) { System.out.println("Waiting on port 5000!");
-     * 
-     * Socket socket = server.accept(); InputStream reader = socket.getInputStream(); boolean success = false; while
-     * (!success) { // The buffer to read to. byte[] buffer = new byte[5];
-     * 
-     * // Store the amount of bytes acutally read in to the buffer. int b = 0;
-     * 
-     * // Wait for input. while (b == 0) { b = reader.read(buffer); } String input = new String(buffer).trim(); if
-     * (input.equals("PORT?")) { String toWrite = String.valueOf(portNo) + "\n"; OutputStream out =
-     * socket.getOutputStream(); out.write(toWrite.getBytes()); addPlayer(portNo, i == 3); portNo++; success = true; } else
-     * { String toWrite = "Expected \"PORT?\"\n"; OutputStream out = socket.getOutputStream();
-     * out.write(toWrite.getBytes()); } } socket.close(); } server.close();
-     * 
-     * } catch (IOException e) { e.printStackTrace(); } }
-     * 
-     * private static void addPlayer(int portNo, boolean blocking) throws IOException { ServerSocket server = new
-     * ServerSocket(portNo); Player p = new Player(server, teams, blocking); players.add(p); }
-     * 
-     * private static void sendCards() { for (Player player : players) { player.sendHand(); } }
-     */
+        System.out.println("New Player Order: (" + String.valueOf(players.size()) + ")");
+        for (int i = 0; i < players.size(); i++) {
+            System.out.printf("%d:%s\n", i, players.get(i).getPlayerName());
+        }
+    }
 }
