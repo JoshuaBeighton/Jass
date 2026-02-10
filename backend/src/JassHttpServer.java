@@ -214,7 +214,7 @@ public class JassHttpServer {
                     if (Main.getPlayers().get(manager.getNextToChoose()).getPlayerName().equals(name)) {
                         exchange.getResponseHeaders().add("Content-Type", "application/json");
                         String response = JsonManager.gameChoiceToJson(name, manager.getNextToChoose(),
-                                Main.getPlayers(), manager.getGame());
+                                Main.getPlayers(), manager.getGame(), manager.isForced());
 
                         exchange.sendResponseHeaders(200, response.length());
                         OutputStream os = exchange.getResponseBody();
@@ -229,7 +229,7 @@ public class JassHttpServer {
                     //System.out.println("Player" + lastIndex);
                     exchange.getResponseHeaders().add("Content-Type", "application/json");
                     String response = JsonManager.gameChoiceToJson(name, manager.getNextToChoose(), Main.getPlayers(),
-                            manager.getGame());
+                            manager.getGame(), manager.isForced());
 
                     exchange.sendResponseHeaders(200, response.length());
                     OutputStream os = exchange.getResponseBody();
@@ -248,6 +248,7 @@ public class JassHttpServer {
             IGame request = JsonManager.jsonToIGame(requestString);
             if (request != null) {
                 manager.setGame(request);
+                System.out.println("Game Chosen: " + request.getName());
             }
             manager.incrementChooser();
             String response = "success";

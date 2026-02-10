@@ -17,10 +17,13 @@ function setName(nameInput: string) {
 }
 
 function gameChosen(gameSelected: string) {
-  console.log(gameSelected)
+  currentGame.value = gameSelected
+  select.value = false
+  mat.value = true
 }
 
 const name = ref('')
+const currentGame = ref('')
 
 const login = ref(true)
 const select = ref(false)
@@ -30,9 +33,9 @@ const deck = ref(false)
 
 <template>
   <LoginCard @update:name="setName" @update:ready="removeLogin" v-if="login"></LoginCard>
-  <Mat v-if="mat"></Mat>
-  <GameSelect v-if="select" :name="name" @update:selected="gameChosen"></GameSelect>
+  <Mat :game="currentGame" v-if="mat"></Mat>
   <Deck v-if="deck" :name="name"></Deck>
+  <GameSelect v-if="select" :name="name" @update:selected="gameChosen"></GameSelect>
 </template>
 
 <style></style>

@@ -20,6 +20,7 @@ public class GameManager {
     private Scanner s;
     private IGame currentGame;
     private int nextToChoose = 0;
+    private int choicesUntilForced = 4;
     private final Lock lock = new ReentrantLock(true);
 
     public GameManager(List<Player> players) {
@@ -29,7 +30,7 @@ public class GameManager {
     public void playGame() throws IOException {
         s = new Scanner(System.in);
         int lastWinner = chooseGame(0);
-        ;
+        
         while (players.get(0).getCards().size() > 0) {
             lastWinner = playTrick(lastWinner);
         }
@@ -91,10 +92,30 @@ public class GameManager {
         return temp;
     }
 
+    public boolean isForced() {
+        boolean forced = false;
+        lock.lock();
+        try {
+            if (choicesUntilForced <= 0){
+                forced = true;
+                choicesUntilForced = 4;
+                System.out.println("FORCED");
+            }
+        } catch (Exception e) {
+        } finally {
+            lock.unlock();
+        }
+        return forced;
+    }
+
     public void incrementChooser() {
         lock.lock();
         try {
             nextToChoose++;
+            if (nextToChoose >= 4){
+                nextToChoose = 0;
+            }
+            choicesUntilForced--;
         } catch (Exception e) {
         } finally {
             lock.unlock();

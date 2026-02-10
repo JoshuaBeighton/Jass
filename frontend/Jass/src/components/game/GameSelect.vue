@@ -34,13 +34,15 @@ async function fetchNextPlayer() {
     if (data.chooser != undefined) {
       nextChooser.value = data.chooser
       counter++
-      if (counter >= 4){
+      if (counter >= 4) {
         counter = 0
       }
       if (nextChooser.value == props.name) {
         console.log("It's me!")
         isMe.value = true
         games.value = data.available
+      } else {
+        isMe.value = false
       }
     } else {
       emits('update:selected', data.game)
@@ -65,8 +67,10 @@ async function sendGame(game: string) {
       name: game,
     }),
   })
-  if (game == "Pass"){
-    fetchNextPlayer();
+  if (game == 'Pass') {
+    fetchNextPlayer()
+  } else {
+    emits('update:selected', game)
   }
 }
 
@@ -74,20 +78,37 @@ onMounted(() => {
   fetchNextPlayer()
 })
 </script>
+
 <template>
-  <div class="gameSelect">
-    <p v-if="!isMe">Waiting on {{ nextChooser }}</p>
-    <div v-if="isMe" class="buttons">
-      <button v-for="game in games" @click="() => sendGame(game.key)">{{ game.text }}</button>
+  <div class="parent">
+    <hr class="smallHr" />
+    <div class="gameSelect">
+      <p v-if="!isMe">Waiting on {{ nextChooser }}</p>
+
+      <div v-if="isMe" class="buttons">
+        <button v-for="game in games" @click="() => sendGame(game.key)">{{ game.text }}</button>
+      </div>
     </div>
   </div>
 </template>
 
 <style>
+.smallHr {
+  width: 80%;
+}
+
 .buttons {
   display: flex;
-  flex-direction: column;
   width: fit-content;
+  gap: 2px;
+}
+
+.parent {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  justify-content: center;
+  align-items: center;
 }
 
 button {

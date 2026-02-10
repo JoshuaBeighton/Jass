@@ -78,11 +78,11 @@ public class JsonManager {
         return null;
     }
 
-    public static String gameChoiceToJson(String player, int index, List<Player> players, IGame g) {
+    public static String gameChoiceToJson(String player, int index, List<Player> players, IGame g, boolean forced) {
         JSONObject jo = new JSONObject();
         if (g == null) {
             jo.put("chooser", players.get(index).getPlayerName());
-            jo.put("available", availableGamesToJson(players.get(index).getTeam(), false));
+            jo.put("available", availableGamesToJson(players.get(index).getTeam(), forced));
 
         } else {
             jo.put("game", g.getName());
