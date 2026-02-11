@@ -51,10 +51,7 @@ function isPlayer(index: number) {
   console.log('Up[ next: ' + nextPlayer.value)
   console.log('Me: ' + meIdx.value)
   console.log('Idx: ' + index)
-  let realIdx = index - meIdx.value
-  if (realIdx < 0) {
-    realIdx += 4
-  }
+  let realIdx = (index + meIdx.value) % 4
   return realIdx == nextPlayer.value
 }
 
@@ -84,6 +81,7 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
 }
+
 .mat {
   position: relative;
   background-color: darkgreen;
