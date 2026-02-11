@@ -22,6 +22,7 @@ public class JassHttpServer {
             HttpServer server = HttpServer.create(new InetSocketAddress(9000), 0);
 
             server.createContext("/player", new PlayerHandler());
+            server.createContext("/nextPlayer", new NextPlayerHandler());
             server.createContext("/teams", new TeamHandler());
             server.createContext("/teamWait", new TeamWaitHandler());
             server.createContext("/hand", new HandHandler());
@@ -31,7 +32,8 @@ public class JassHttpServer {
             server.start();
 
             System.out.println("Server is running on port 9000");
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             System.out.println("Error starting the server: " + e.getMessage());
         }
     }
@@ -49,7 +51,8 @@ public class JassHttpServer {
             exchange.sendResponseHeaders(200, response.getBytes().length);
             os.write(response.getBytes());
             os.close();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
 
         }
 
@@ -61,9 +64,10 @@ public class JassHttpServer {
             addCorsHeaders(exchange);
             if (exchange.getRequestMethod().equals("GET")) {
                 handleGet(exchange);
-            } else if (exchange.getRequestMethod().equals("OPTIONS")) {// todo: implement 400 returns
-                respondToOPTIONS(exchange);
-            }
+            } else
+                if (exchange.getRequestMethod().equals("OPTIONS")) {// todo: implement 400 returns
+                    respondToOPTIONS(exchange);
+                }
         }
 
         private void handleGet(HttpExchange exchange) throws IOException {
@@ -80,7 +84,8 @@ public class JassHttpServer {
                     OutputStream os = exchange.getResponseBody();
                     os.write(response.getBytes());
                     os.close();
-                } catch (IOException | InterruptedException e) {
+                }
+                catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
             });
@@ -96,14 +101,16 @@ public class JassHttpServer {
             addCorsHeaders(exchange);
             if (exchange.getRequestMethod().equals("GET")) {
                 handleGet(exchange);
-            } else if (exchange.getRequestMethod().equals("POST")) {
-                handlePost(exchange);
+            } else
+                if (exchange.getRequestMethod().equals("POST")) {
+                    handlePost(exchange);
 
-            } else if (exchange.getRequestMethod().equals("OPTIONS")) {// todo: implement 400 returns
-                respondToOPTIONS(exchange);
-            } else {// todo: implement 400 returns
-                exchange.sendResponseHeaders(200, 0);
-            }
+                } else
+                    if (exchange.getRequestMethod().equals("OPTIONS")) {// todo: implement 400 returns
+                        respondToOPTIONS(exchange);
+                    } else {// todo: implement 400 returns
+                        exchange.sendResponseHeaders(200, 0);
+                    }
         }
 
         private void handleGet(HttpExchange exchange) throws IOException {
@@ -133,13 +140,12 @@ public class JassHttpServer {
             addCorsHeaders(exchange);
             if (exchange.getRequestMethod().equals("GET")) {
                 handleGet(exchange);
-            } 
-            else if(exchange.getRequestMethod().equals("OPTIONS")) {// todo: implement 400 returns
-                respondToOPTIONS(exchange);
-            }
-            else {// todo: implement 400 returns
-                exchange.sendResponseHeaders(200, 0);
-            }
+            } else
+                if (exchange.getRequestMethod().equals("OPTIONS")) {// todo: implement 400 returns
+                    respondToOPTIONS(exchange);
+                } else {// todo: implement 400 returns
+                    exchange.sendResponseHeaders(200, 0);
+                }
         }
 
         private void handleGet(HttpExchange exchange) throws IOException {
@@ -157,13 +163,12 @@ public class JassHttpServer {
             addCorsHeaders(exchange);
             if (exchange.getRequestMethod().equals("GET")) {
                 handleGet(exchange);
-            } 
-            else if(exchange.getRequestMethod().equals("OPTIONS")) {// todo: implement 400 returns
-                respondToOPTIONS(exchange);
-            }
-            else {// todo: implement 400 returns
-                exchange.sendResponseHeaders(200, 0);
-            }
+            } else
+                if (exchange.getRequestMethod().equals("OPTIONS")) {// todo: implement 400 returns
+                    respondToOPTIONS(exchange);
+                } else {// todo: implement 400 returns
+                    exchange.sendResponseHeaders(200, 0);
+                }
         }
 
         public void handleGet(HttpExchange exchange) throws IOException {
@@ -187,21 +192,45 @@ public class JassHttpServer {
         }
     }
 
+    static class NextPlayerHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            addCorsHeaders(exchange);
+            if (exchange.getRequestMethod().equals("GET")) {
+                handleGet(exchange);
+            } else
+                if (exchange.getRequestMethod().equals("OPTIONS")) {// todo: implement 400 returns
+                    respondToOPTIONS(exchange);
+                } else {// todo: implement 400 returns
+                    exchange.sendResponseHeaders(200, 0);
+                }
+        }
+
+        public void handleGet(HttpExchange exchange) throws IOException {
+            String response = String.valueOf(manager.getNextPlayer());
+            exchange.sendResponseHeaders(200, response.length());
+            OutputStream os = exchange.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+            return;
+        }
+    }
+
     static class GameChoiceHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             addCorsHeaders(exchange);
             if (exchange.getRequestMethod().equals("GET")) {
                 handleGet(exchange);
-            } else if (exchange.getRequestMethod().equals("POST")) {
-                handlePost(exchange);
-            } 
-            else if(exchange.getRequestMethod().equals("OPTIONS")) {// todo: implement 400 returns
-                respondToOPTIONS(exchange);
-            }
-            else {// todo: implement 400 returns
-                exchange.sendResponseHeaders(200, 0);
-            }
+            } else
+                if (exchange.getRequestMethod().equals("POST")) {
+                    handlePost(exchange);
+                } else
+                    if (exchange.getRequestMethod().equals("OPTIONS")) {// todo: implement 400 returns
+                        respondToOPTIONS(exchange);
+                    } else {// todo: implement 400 returns
+                        exchange.sendResponseHeaders(200, 0);
+                    }
         }
 
         private void handleGet(HttpExchange exchange) throws IOException {
@@ -223,10 +252,10 @@ public class JassHttpServer {
                         return;
                     }
                     while (manager.getNextToChoose() == lastIndex) {
-                        
+
                     }
-                    //System.out.println("Manager Choice" + manager.getNextToChoose());
-                    //System.out.println("Player" + lastIndex);
+                    // System.out.println("Manager Choice" + manager.getNextToChoose());
+                    // System.out.println("Player" + lastIndex);
                     exchange.getResponseHeaders().add("Content-Type", "application/json");
                     String response = JsonManager.gameChoiceToJson(name, manager.getNextToChoose(), Main.getPlayers(),
                             manager.getGame(), manager.isForced());
@@ -235,7 +264,8 @@ public class JassHttpServer {
                     OutputStream os = exchange.getResponseBody();
                     os.write(response.getBytes());
                     os.close();
-                } catch (Exception e) {
+                }
+                catch (Exception e) {
                     e.printStackTrace();
                 }
             });

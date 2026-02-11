@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const cardClass = ref('card')
-const redClass = ref('red')
-const blackClass = ref('black')
-
 function isRed() {
   return props.cardText.endsWith('♦') || props.cardText.endsWith('♥')
 }
@@ -31,7 +27,7 @@ function toSym(num: String) {
 </script>
 
 <template>
-  <div :class="cardClass">
+  <div class="card">
     <p v-bind:class="{ red: isRed(), black: !isRed() }">{{ toSym(props.cardText) }}</p>
   </div>
 </template>
