@@ -79,7 +79,7 @@ public class Main {
             Collections.shuffle(undealt);
             dealCards();
             sortCards();
-            cardsDealt = true; 
+            cardsDealt = true;
         }
     }
 
@@ -104,7 +104,11 @@ public class Main {
                 t1Pointer++;
             }
             players = temp;
-        } catch (Exception e) {
+            for (int i = 0; i < players.size(); i++) {
+                System.out.println(players.get(i).getPlayerName());
+            }
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
     }

@@ -21,11 +21,9 @@ const count = ref(-1)
 function concatCard(card: any) {
   if (card == null || card.number == undefined) {
     return 'undefined'
-  }
-  else {
+  } else {
     return card.number + suitToUnicode(card.suit)
   }
-
 }
 
 function suitToUnicode(inp: string) {
@@ -79,15 +77,9 @@ async function getNextCard() {
     const data = await res.json()
     nextPlayer.value = data.next
     firstPlayer.value = data.start
-    console.log(typeof data.currentTrick)
     played.value = data.currentTrick
-    if (nextPlayer.value == props.name) {
-      isMe.value = true
-      emits('update:isme', true)
-    } else {
-      isMe.value = false
-      emits('update:isme', false)
-    }
+    isMe.value = nextPlayer.value == props.name
+    emits('update:isme', isMe.value)
     count.value++
     getNextCard()
   } catch (err) {
@@ -105,9 +97,12 @@ onMounted(() => {
 })
 
 function matToCardIndex(inp: number) {
-  const indexInPlayers = ( meIdx.value - inp)
-  const indexOfStartPlayer = players.value.indexOf(firstPlayer.value)
-  return (indexInPlayers + indexOfStartPlayer) % 4
+  const f = players.value.indexOf(firstPlayer.value)
+  const l = played.value.length
+  const m = meIdx.value
+  console.log(f - m)
+  const indexInTrick = (f - m + l) % 4
+  return indexInTrick
 }
 </script>
 
@@ -117,24 +112,36 @@ function matToCardIndex(inp: number) {
     <div class="mat">
       <div class="bottom">
         <p v-bind:class="{ upNext: isPlayer(0) }">{{ players[0] }}</p>
-        <Card v-if="concatCard(played[matToCardIndex(0)]) != 'undefined'"
-          :card-text="concatCard(played[matToCardIndex(0)])" :can-play="false"></Card>
+        <Card
+          v-if="concatCard(played[matToCardIndex(0)]) != 'undefined'"
+          :card-text="concatCard(played[matToCardIndex(0)])"
+          :can-play="false"
+        ></Card>
       </div>
       <div class="right">
         <p v-bind:class="{ upNext: isPlayer(1) }">{{ players[1] }}</p>
-        <Card v-if="concatCard(played[matToCardIndex(1)]) != 'undefined'"
-          :card-text="concatCard(played[matToCardIndex(1)])" :can-play="false"></Card>
+        <Card
+          v-if="concatCard(played[matToCardIndex(1)]) != 'undefined'"
+          :card-text="concatCard(played[matToCardIndex(1)])"
+          :can-play="false"
+        ></Card>
       </div>
       <div class="top">
         <p v-bind:class="{ upNext: isPlayer(2) }">{{ players[2] }}</p>
-        <Card v-if="concatCard(played[matToCardIndex(2)]) != 'undefined'"
-          :card-text="concatCard(played[matToCardIndex(2)])" :can-play="false"></Card>
+        <Card
+          v-if="concatCard(played[matToCardIndex(2)]) != 'undefined'"
+          :card-text="concatCard(played[matToCardIndex(2)])"
+          :can-play="false"
+        ></Card>
       </div>
       <div class="left">
-      <p v-bind:class="{ upNext: isPlayer(3) }">{{ players[3] }}</p>
-      <Card v-if="concatCard(played[matToCardIndex(3)]) != 'undefined'"
-        :card-text="concatCard(played[matToCardIndex(3)])" :can-play="false"></Card>
-        </div>
+        <p v-bind:class="{ upNext: isPlayer(3) }">{{ players[3] }}</p>
+        <Card
+          v-if="concatCard(played[matToCardIndex(3)]) != 'undefined'"
+          :card-text="concatCard(played[matToCardIndex(3)])"
+          :can-play="false"
+        ></Card>
+      </div>
     </div>
   </div>
 </template>
@@ -190,7 +197,10 @@ function matToCardIndex(inp: number) {
   transform: translateY(-50%);
 }
 
-.left, .bottom, .right, .top {
+.left,
+.bottom,
+.right,
+.top {
   position: absolute;
   display: flex;
   flex-direction: column;
