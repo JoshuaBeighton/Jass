@@ -64,7 +64,7 @@ async function sendCard() {
   height: 150px;
   background-color: azure;
   padding: 5px;
-  margin: 5px;
+  margin: 20px;
   display: flexbox;
   justify-content: center;
   align-items: center;

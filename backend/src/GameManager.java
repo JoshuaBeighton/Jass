@@ -120,7 +120,7 @@ public class GameManager {
                     if (nextPlayer > 3) {
                         nextPlayer = 0;
                     }
-                    currentTrick.add(players.get(nextPlayer).getCards().get(i));
+                    currentTrick.add(candidate);
                     trickLock.unlock();
                 }
             }
@@ -130,7 +130,7 @@ public class GameManager {
 
 
             } else {
-                System.out.println("Couldn't find card");
+                System.out.println("Couldn't find card " + s);
             }
 
         }
