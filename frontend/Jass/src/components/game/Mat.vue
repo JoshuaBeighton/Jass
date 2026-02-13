@@ -48,9 +48,6 @@ async function getNextPlayer() {
 }
 
 function isPlayer(index: number) {
-  console.log('Up[ next: ' + nextPlayer.value)
-  console.log('Me: ' + meIdx.value)
-  console.log('Idx: ' + index)
   let realIdx = (index + meIdx.value) % 4
   return realIdx == nextPlayer.value
 }

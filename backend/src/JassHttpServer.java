@@ -17,7 +17,7 @@ public class JassHttpServer {
     private static GameManager manager;
 
     public static void init() {
-        manager = new GameManager(Main.getPlayers());
+        manager = new GameManager();
         try {
             HttpServer server = HttpServer.create(new InetSocketAddress(9000), 0);
 
@@ -27,6 +27,7 @@ public class JassHttpServer {
             server.createContext("/teamWait", new TeamWaitHandler());
             server.createContext("/hand", new HandHandler());
             server.createContext("/gameChoice", new GameChoiceHandler());
+            server.createContext("/cardWait", new CardWaitHandler());
 
             server.setExecutor(null);
             server.start();
@@ -287,5 +288,43 @@ public class JassHttpServer {
             os.write(response.getBytes());
             os.close();
         }
+    }
+
+    static class CardWaitHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            addCorsHeaders(exchange);
+            if (exchange.getRequestMethod().equals("GET")) {
+                handleGet(exchange);
+            } else
+                if (exchange.getRequestMethod().equals("OPTIONS")) {// todo: implement 400 returns
+                    respondToOPTIONS(exchange);
+                }
+        }
+
+        private void handleGet(HttpExchange exchange) throws IOException {
+            int count = Integer.parseInt(exchange.getRequestURI().getPath().split("/cardWait/")[1]);
+
+            Thread t = new Thread(() -> {
+                try {
+                    while (count >= manager.getCurrentTrick().size()) {
+                        Thread.sleep(100);
+                    }
+
+                    String response = JsonManager.currentTrickToJSON(manager.getCurrentTrick(), Main.getPlayers().get(manager.getNextPlayer()));
+
+                    exchange.sendResponseHeaders(200, response.getBytes().length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(response.getBytes());
+                    os.close();
+                }
+                catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+
+            t.start();
+        }
+
     }
 }

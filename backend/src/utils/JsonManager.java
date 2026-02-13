@@ -50,10 +50,21 @@ public class JsonManager {
     }
 
     public static String cardsToJson(List<Card> cards) {
+        return cardsToJsonArray(cards).toString();
+    }
+
+    public static JSONArray cardsToJsonArray(List<Card> cards) {
         JSONArray result = new JSONArray();
         cards.forEach((c) -> {
             result.put(c.toMap());
         });
+        return result;
+    }
+
+    public static String currentTrickToJSON(List<Card> cards, Player p) {
+        JSONObject result = new JSONObject();
+        result.put("currentTrick", cardsToJson(cards));
+        result.put("next", p.getPlayerName());
         return result.toString();
     }
 

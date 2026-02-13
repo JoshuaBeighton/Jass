@@ -1,9 +1,11 @@
 package src;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 import src.games.IGame;
+import src.objs.Card;
 import src.objs.Player;
 
 import java.util.concurrent.locks.Lock;
@@ -12,33 +14,45 @@ import java.util.concurrent.locks.ReentrantLock;
 public class GameManager {
     private final int LAST_BONUS = 5;
 
-    private List<Player> players;
     private IGame currentGame;
     private int nextToChoose = 0;
     private int choicesUntilForced = 4;
     private int nextPlayer = -1;
+    private List<Card> currentTrick;
 
-    private final Lock lock = new ReentrantLock(true);
+    private final Lock nextToChooseLock = new ReentrantLock(true);
+    private final Lock trickLock = new ReentrantLock(true);
 
-    public GameManager(List<Player> players) {
-        this.players = players;
+    public GameManager() {
     }
 
     public int getNextToChoose() {
         int temp = 0;
-        lock.lock();
+        nextToChooseLock.lock();
         try {
             temp = nextToChoose;
         } catch (Exception e) {
         } finally {
-            lock.unlock();
+            nextToChooseLock.unlock();
+        }
+        return temp;
+    }
+
+    public List<Card> getCurrentTrick() {
+        List<Card> temp = null;
+        trickLock.lock();
+        try {
+            temp = currentTrick;
+        } catch (Exception e) {
+        } finally {
+            trickLock.unlock();
         }
         return temp;
     }
 
     public boolean isForced() {
         boolean forced = false;
-        lock.lock();
+        nextToChooseLock.lock();
         try {
             if (choicesUntilForced <= 0){
                 forced = true;
@@ -47,13 +61,13 @@ public class GameManager {
             }
         } catch (Exception e) {
         } finally {
-            lock.unlock();
+            nextToChooseLock.unlock();
         }
         return forced;
     }
 
     public void incrementChooser() {
-        lock.lock();
+        nextToChooseLock.lock();
         try {
             nextToChoose++;
             if (nextToChoose >= 4){
@@ -62,7 +76,7 @@ public class GameManager {
             choicesUntilForced--;
         } catch (Exception e) {
         } finally {
-            lock.unlock();
+            nextToChooseLock.unlock();
         }
     }
 
@@ -74,6 +88,7 @@ public class GameManager {
         currentGame = g;
         nextPlayer = nextToChoose;
         nextToChoose = -1;
+        currentTrick = new ArrayList<Card>();
     }
 
     public int getNextPlayer(){
