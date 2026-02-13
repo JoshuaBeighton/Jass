@@ -7,6 +7,7 @@ function isRed() {
 
 const props = defineProps<{
   cardText: string
+  canPlay: boolean
 }>()
 
 function toSym(num: String) {
@@ -24,10 +25,35 @@ function toSym(num: String) {
       return num.toString()
   }
 }
+
+function replaceCardSuits(input: string): string {
+  const suitMap: { [key: string]: string } = {
+    '♠': 'S',
+    '♥': 'H',
+    '♦': 'D',
+    '♣': 'C',
+  }
+
+  return input.replace(/[\u2660\u2665\u2666\u2663]/g, (match) => suitMap[match] || match)
+}
+
+async function sendCard() {
+  if (props.canPlay) {
+    console.log('test')
+    const host = window.location.hostname
+    await fetch(`http://${host}:9000/nextCard`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(replaceCardSuits(props.cardText)),
+    })
+  }
+}
 </script>
 
 <template>
-  <div class="card">
+  <div class="card" @click="sendCard">
     <p v-bind:class="{ red: isRed(), black: !isRed() }">{{ toSym(props.cardText) }}</p>
   </div>
 </template>

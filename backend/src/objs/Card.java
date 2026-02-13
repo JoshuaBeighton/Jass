@@ -34,7 +34,7 @@ public class Card {
     }
 
     public boolean equals(Card c2) {
-        return (suit == c2.suit) && (val == c2.val);
+        return (suit.index() == c2.suit.index()) && (val == c2.val);
     }
 
     @Override

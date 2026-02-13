@@ -1,11 +1,11 @@
 <script setup lang="ts">
-
-import {onMounted, ref } from 'vue'
-import Card from './Card.vue';
+import { onMounted, ref } from 'vue'
+import Card from './Card.vue'
 
 const props = defineProps<{
-    name: string
-}>();
+  name: string
+  canPlay: boolean
+}>()
 
 const cards = ref([])
 async function fetchHand() {
@@ -21,41 +21,38 @@ async function fetchHand() {
   }
 }
 
-function concatCard(card: any){
-    return card.number + suitToUnicode(card.suit)
+function concatCard(card: any) {
+  return card.number + suitToUnicode(card.suit)
 }
 
-function suitToUnicode(inp : string){
-    switch (inp){
-        case "DIAMONDS":
-            return "♦"
-        case "HEARTS":
-            return "♥"
-        case "SPADES":
-            return "♠"
-        case "CLUBS":
-            return "♣"
-        default:
-            return "?"
-    }
+function suitToUnicode(inp: string) {
+  switch (inp) {
+    case 'DIAMONDS':
+      return '♦'
+    case 'HEARTS':
+      return '♥'
+    case 'SPADES':
+      return '♠'
+    case 'CLUBS':
+      return '♣'
+    default:
+      return '?'
+  }
 }
 
 onMounted(() => {
-  fetchHand();
+  fetchHand()
 })
-
 </script>
 
 <template>
-
-<div class="cards"> 
-    <Card v-for="card in cards" :card-text="concatCard(card)"></Card>
-</div>
-
+  <div class="cards">
+    <Card v-for="card in cards" :card-text="concatCard(card)" :can-play="props.canPlay"></Card>
+  </div>
 </template>
 
 <style>
-.cards{
-    display: flex;
+.cards {
+  display: flex;
 }
 </style>

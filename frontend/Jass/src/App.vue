@@ -24,6 +24,7 @@ function gameChosen(gameSelected: string) {
 
 const name = ref('')
 const currentGame = ref('')
+const isMe = ref(false)
 
 const login = ref(true)
 const select = ref(false)
@@ -33,8 +34,17 @@ const deck = ref(false)
 
 <template>
   <LoginCard @update:name="setName" @update:ready="removeLogin" v-if="login"></LoginCard>
-  <Mat :game="currentGame" :name="name" v-if="mat"></Mat>
-  <Deck v-if="deck" :name="name"></Deck>
+  <Mat
+    :game="currentGame"
+    :name="name"
+    v-if="mat"
+    @update:isme="
+      (val) => {
+        isMe = val
+      }
+    "
+  ></Mat>
+  <Deck v-if="deck" :name="name" :can-play="isMe"></Deck>
   <GameSelect v-if="select" :name="name" @update:selected="gameChosen"></GameSelect>
 </template>
 

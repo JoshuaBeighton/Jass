@@ -26,11 +26,10 @@ async function fetchNextPlayer() {
   const host = window.location.hostname
 
   try {
+    let keepSending = true
     const res = await fetch(`http://${host}:9000/gameChoice?name=${props.name}&lastidx=${counter}`)
     if (!res.ok) throw new Error('Network response was not OK')
     const data = await res.json()
-    console.log(data)
-    console.log(props.name)
     if (data.chooser != undefined) {
       nextChooser.value = data.chooser
       counter++
@@ -45,9 +44,10 @@ async function fetchNextPlayer() {
         isMe.value = false
       }
     } else {
+      keepSending = false
       emits('update:selected', data.game)
     }
-    if (!isMe.value) {
+    if (!isMe.value && keepSending) {
       fetchNextPlayer()
     }
   } catch (err) {

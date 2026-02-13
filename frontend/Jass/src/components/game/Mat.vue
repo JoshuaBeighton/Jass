@@ -1,14 +1,45 @@
 <script setup lang="ts">
-import type { NumericLiteral } from 'typescript'
 import { ref, onMounted } from 'vue'
+import Card from './Card.vue'
 
 const props = defineProps<{ game: string; name: string }>()
 
 const players = ref([props.name, 'loading', 'loading', 'loading'])
 
-const nextPlayer = ref(-1)
+const nextPlayer = ref('')
+
+const played = ref([null, null, null, null])
+
+const firstPlayer = ref('')
 
 const meIdx = ref(-1)
+
+const isMe = ref(false)
+
+const count = ref(-1)
+
+function concatCard(card: any) {
+  return card == null ? 'undefined' : card.number + suitToUnicode(card.suit)
+}
+
+function suitToUnicode(inp: string) {
+  switch (inp) {
+    case 'DIAMONDS':
+      return '♦'
+    case 'HEARTS':
+      return '♥'
+    case 'SPADES':
+      return '♠'
+    case 'CLUBS':
+      return '♣'
+    default:
+      return '?'
+  }
+}
+
+const emits = defineEmits<{
+  (e: 'update:isme', value: boolean): void
+}>()
 
 async function getPlayers() {
   const host = window.location.hostname
@@ -32,30 +63,44 @@ async function getPlayers() {
   }
 }
 
-async function getNextPlayer() {
+async function getNextCard() {
   const host = window.location.hostname
 
   try {
-    const res = await fetch(`http://${host}:9000/nextPlayer/`)
+    const res = await fetch(`http://${host}:9000/cardWait/${count.value}`)
     if (!res.ok) throw new Error('Network response was not OK')
 
     const data = await res.json()
-    console.log(data)
-    nextPlayer.value = data
+    nextPlayer.value = data.next
+    firstPlayer.value = data.start
+    played.value = data.currentTrick
+    console.log(played.value)
+    if (nextPlayer.value == props.name) {
+      isMe.value = true
+      emits('update:isme', true)
+    } else {
+      isMe.value = false
+      emits('update:isme', false)
+    }
+    count.value++
+    getNextCard()
   } catch (err) {
     console.error('Error fetching players:', err)
   }
 }
 
 function isPlayer(index: number) {
-  let realIdx = (index + meIdx.value) % 4
-  return realIdx == nextPlayer.value
+  return players.value[index] == nextPlayer.value
 }
 
 onMounted(() => {
   getPlayers()
-  getNextPlayer()
+  getNextCard()
 })
+
+function matToCardIndex(inp: number) {
+  return (inp + meIdx.value - players.value.findIndex((n) => n == firstPlayer.value)) % 4
+}
 </script>
 
 <template>
@@ -63,9 +108,36 @@ onMounted(() => {
   <div class="parent">
     <div class="mat">
       <p v-bind:class="{ upNext: isPlayer(0) }" class="bottom">{{ players[0] }}</p>
+      <Card
+        v-if="concatCard(played[matToCardIndex(0)]) != 'undefined'"
+        :card-text="concatCard(played[matToCardIndex(0)])"
+        :can-play="false"
+        class="bottom"
+      ></Card>
+
       <p v-bind:class="{ upNext: isPlayer(1) }" class="right">{{ players[1] }}</p>
+      <Card
+        v-if="concatCard(played[matToCardIndex(1)]) != 'undefined'"
+        :card-text="concatCard(played[matToCardIndex(1)])"
+        :can-play="false"
+        class="right"
+      ></Card>
+
       <p v-bind:class="{ upNext: isPlayer(2) }" class="top">{{ players[2] }}</p>
+      <Card
+        v-if="concatCard(played[matToCardIndex(2)]) != 'undefined'"
+        :card-text="concatCard(played[matToCardIndex(2)])"
+        :can-play="false"
+        class="top"
+      ></Card>
+
       <p v-bind:class="{ upNext: isPlayer(3) }" class="left">{{ players[3] }}</p>
+      <Card
+        v-if="concatCard(played[matToCardIndex(3)]) != 'undefined'"
+        :card-text="concatCard(played[matToCardIndex(3)])"
+        :can-play="false"
+        class="left"
+      ></Card>
     </div>
   </div>
 </template>

@@ -28,6 +28,7 @@ public class JassHttpServer {
             server.createContext("/hand", new HandHandler());
             server.createContext("/gameChoice", new GameChoiceHandler());
             server.createContext("/cardWait", new CardWaitHandler());
+            server.createContext("/nextCard", new NextCardHandler());
 
             server.setExecutor(null);
             server.start();
@@ -255,8 +256,6 @@ public class JassHttpServer {
                     while (manager.getNextToChoose() == lastIndex) {
 
                     }
-                    // System.out.println("Manager Choice" + manager.getNextToChoose());
-                    // System.out.println("Player" + lastIndex);
                     exchange.getResponseHeaders().add("Content-Type", "application/json");
                     String response = JsonManager.gameChoiceToJson(name, manager.getNextToChoose(), Main.getPlayers(),
                             manager.getGame(), manager.isForced());
@@ -311,7 +310,7 @@ public class JassHttpServer {
                         Thread.sleep(100);
                     }
 
-                    String response = JsonManager.currentTrickToJSON(manager.getCurrentTrick(), Main.getPlayers().get(manager.getNextPlayer()));
+                    String response = JsonManager.currentTrickToJSON(manager.getCurrentTrick(), Main.getPlayers().get(manager.getNextPlayer()), Main.getPlayers().get(manager.getNextToChoose()));
 
                     exchange.sendResponseHeaders(200, response.getBytes().length);
                     OutputStream os = exchange.getResponseBody();
@@ -326,5 +325,39 @@ public class JassHttpServer {
             t.start();
         }
 
+    }
+
+    static class NextCardHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            addCorsHeaders(exchange);
+            if (exchange.getRequestMethod().equals("POST")) {
+                handlePost(exchange);
+            } else
+                if (exchange.getRequestMethod().equals("OPTIONS")) {// todo: implement 400 returns
+                    respondToOPTIONS(exchange);
+                } else {// todo: implement 400 returns
+                    exchange.sendResponseHeaders(200, 0);
+                }
+        }
+
+        private void handlePost(HttpExchange exchange) throws IOException {
+
+            InputStream is = exchange.getRequestBody();
+            String requestString = new String(is.readAllBytes()).replace("\"", "");
+            try {
+                manager.playCard(requestString, Main.getPlayers());
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+            String response = "success";
+            exchange.sendResponseHeaders(200, response.length());
+            OutputStream os = exchange.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        }
     }
 }

@@ -61,10 +61,11 @@ public class JsonManager {
         return result;
     }
 
-    public static String currentTrickToJSON(List<Card> cards, Player p) {
+    public static String currentTrickToJSON(List<Card> cards, Player p, Player start) {
         JSONObject result = new JSONObject();
         result.put("currentTrick", cardsToJson(cards));
         result.put("next", p.getPlayerName());
+        result.put("start", p.getPlayerName());
         return result.toString();
     }
 
@@ -103,7 +104,7 @@ public class JsonManager {
         return jo.toString();
     }
 
-    private static JSONArray availableGamesToJson(Team t, boolean forced){
+    private static JSONArray availableGamesToJson(Team t, boolean forced) {
         JSONArray available = new JSONArray();
         int id = 0;
         for (String game : t.getGamesAvailable()) {
@@ -114,7 +115,7 @@ public class JsonManager {
             available.put(obj);
         }
 
-        if (!forced){
+        if (!forced) {
             JSONObject obj = new JSONObject();
             obj.put("id", id++);
             obj.put("text", "Pass");
