@@ -39,7 +39,6 @@ function replaceCardSuits(input: string): string {
 
 async function sendCard() {
   if (props.canPlay) {
-    console.log('test')
     const host = window.location.hostname
     await fetch(`http://${host}:9000/nextCard`, {
       method: 'POST',

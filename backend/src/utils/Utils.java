@@ -19,7 +19,6 @@ public class Utils {
     }
 
     public static Suit getSuitFromChar(char c) throws InvalidNameException {
-        System.out.println(c);
         if (c >= 'A' && c <= 'Z') {
             c -= 'A';
             c += 'a';

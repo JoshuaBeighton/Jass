@@ -96,6 +96,7 @@ public class GameManager {
         try {
             currentGame = g;
             nextPlayer = nextToChoose;
+            nextToChoose = (nextToChoose -1) %4;
             currentTrick = new ArrayList<Card>();
         }
         catch (Exception e) {
@@ -127,7 +128,6 @@ public class GameManager {
             if (idx > 0) {
                 players.get(nextPlayer).getCards().remove(idx);
                 System.out.println("Cards Played: " + currentTrick.size());
-
 
             } else {
                 System.out.println("Couldn't find card " + s);

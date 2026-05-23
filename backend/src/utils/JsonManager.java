@@ -66,6 +66,7 @@ public class JsonManager {
         result.put("currentTrick", cardsToJsonArray(cards));
         result.put("next", p.getPlayerName());
         result.put("start", start.getPlayerName());
+        System.out.println("Next: " + p.getPlayerName() + ", Start: " + start.getPlayerName());
         return result.toString();
     }
 
