@@ -29,6 +29,7 @@ public class JassHttpServer {
             server.createContext("/gameChoice", new GameChoiceHandler());
             server.createContext("/cardWait", new CardWaitHandler());
             server.createContext("/nextCard", new NextCardHandler());
+            server.createContext("/resetTrick", new ResetTrickHandler());
 
             server.setExecutor(null);
             server.start();
@@ -356,6 +357,37 @@ public class JassHttpServer {
 
             String response = success ? "success" : "failure";
             int code = success ? 200 : 401;
+            exchange.sendResponseHeaders(code, response.length());
+            OutputStream os = exchange.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        }
+    }
+
+    static class ResetTrickHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            addCorsHeaders(exchange);
+            if (exchange.getRequestMethod().equals("POST")) {
+                handlePost(exchange);
+            } else
+                if (exchange.getRequestMethod().equals("OPTIONS")) {// todo: implement 400 returns
+                    respondToOPTIONS(exchange);
+                } else {// todo: implement 400 returns
+                    exchange.sendResponseHeaders(200, 0);
+                }
+        }
+
+        private void handlePost(HttpExchange exchange) throws IOException {
+            InputStream is = exchange.getRequestBody();
+            try {
+                manager.resetTrick();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+            String response = "success";
+            int code = 200;
             exchange.sendResponseHeaders(code, response.length());
             OutputStream os = exchange.getResponseBody();
             os.write(response.getBytes());

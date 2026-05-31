@@ -31,10 +31,8 @@ public class GameManager {
         nextToChooseLock.lock();
         try {
             temp = nextToChoose;
-        }
-        catch (Exception e) {
-        }
-        finally {
+        } catch (Exception e) {
+        } finally {
             nextToChooseLock.unlock();
         }
         return temp;
@@ -45,10 +43,8 @@ public class GameManager {
         trickLock.lock();
         try {
             temp = currentTrick;
-        }
-        catch (Exception e) {
-        }
-        finally {
+        } catch (Exception e) {
+        } finally {
             trickLock.unlock();
         }
         return temp;
@@ -63,10 +59,8 @@ public class GameManager {
                 choicesUntilForced = 4;
                 System.out.println("FORCED");
             }
-        }
-        catch (Exception e) {
-        }
-        finally {
+        } catch (Exception e) {
+        } finally {
             nextToChooseLock.unlock();
         }
         return forced;
@@ -80,10 +74,8 @@ public class GameManager {
                 nextToChoose = 0;
             }
             choicesUntilForced--;
-        }
-        catch (Exception e) {
-        }
-        finally {
+        } catch (Exception e) {
+        } finally {
             nextToChooseLock.unlock();
         }
     }
@@ -96,10 +88,9 @@ public class GameManager {
         try {
             currentGame = g;
             nextPlayer = nextToChoose;
-            nextToChoose = (nextToChoose -1) %4;
+            nextToChoose = (nextToChoose - 1) % 4;
             currentTrick = new ArrayList<Card>();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -110,6 +101,8 @@ public class GameManager {
     }
 
     public boolean playCard(String s, List<Player> players) {
+        System.out.println("Before Playing");
+        players.get(nextPlayer).printHand();
         int idx = -1;
         try {
             Card candidate = Card.parseCard(s);
@@ -118,41 +111,48 @@ public class GameManager {
                     // Found the correct card in their hand.
                     idx = i;
 
-                    if (players.get(nextPlayer).canPlayCard(candidate, currentTrick, players.get(nextPlayer).getCards(), -1) == false){
+                    if (players.get(nextPlayer).canPlayCard(candidate, currentTrick, players.get(nextPlayer).getCards(),
+                            -1) == false) {
                         System.out.println("Cannot play that card.");
                         return false;
                     }
                     trickLock.lock();
-                    nextPlayer++;
-                    if (nextPlayer > 3) {
-                        nextPlayer = 0;
-                    }
                     currentTrick.add(candidate);
-                    if (currentTrick.size() >= 4){
-                        // Get the index of the card that won the trick, add it to the start player (which will be the next player as it's wrapped around)
-                        int winner = (currentGame.wins(currentTrick) + nextPlayer ) % 4;
-                        Main.getPlayers().get(winner).getTeam().addScore(currentGame.score(currentTrick));;
-                        currentTrick.clear();
-                        nextPlayer = winner;
-                    }
                     trickLock.unlock();
                 }
             }
             if (idx > 0) {
                 players.get(nextPlayer).getCards().remove(idx);
                 System.out.println("Cards Played: " + currentTrick.size());
-                
 
             } else {
-                System.out.printf("Couldn't find card %s in player %s\nHand:", s, Main.getPlayers().get(nextPlayer).getPlayerName());
+                System.out.printf("Couldn't find card %s in player %s\nHand:", s,
+                        Main.getPlayers().get(nextPlayer).getPlayerName());
                 Main.getPlayers().get(nextPlayer).printHand();
             }
 
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
+        System.out.println("After Playing");
+        players.get(nextPlayer).printHand();
+        nextPlayer = (nextPlayer + 1) % 4;
         return true;
+    }
+
+    public void resetTrick() {
+        if (currentTrick.size() >= 4) {
+            System.out.println("Clearing");
+            // Get the index of the card that won the trick, add it to the start player
+            // (which will be the next player as it's wrapped around)
+            int winner = (currentGame.wins(currentTrick) + nextPlayer) % 4;
+            Main.getPlayers().get(winner).getTeam().addScore(currentGame.score(currentTrick));
+            currentTrick.clear();
+            nextPlayer = winner;
+        }
+        else{
+            System.out.println("Already cleared");
+        }
     }
 }

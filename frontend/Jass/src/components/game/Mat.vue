@@ -48,7 +48,7 @@ async function getPlayers() {
 
 async function getNextCard() {
     const host = window.location.hostname
-    for (let x = 0; x < 4; x++) {
+    for (let x = 0; x <= 4; x++) {
         try {
             const res = await fetch(`http://${host}:9000/cardWait/${count.value % 4}`)
             if (!res.ok) throw new Error('Network response was not OK')
@@ -92,12 +92,17 @@ function isPlayer(index: number) {
     return players.value[index] == nextPlayer.value
 }
 
-function clearDeck(){
-    count.value=-1;
+async function clearDeck() {
+    const host = window.location.hostname
+    count.value = -1;
     leftCard.value = undefined;
     topCard.value = undefined;
     rightCard.value = undefined;
     bottomCard.value = undefined;
+    const settings = {method:"POST"}
+    const res = await fetch(`http://${host}:9000/resetTrick`, settings)
+    if (!res.ok) throw new Error('Network response was not OK')
+
     getNextCard();
 }
 
