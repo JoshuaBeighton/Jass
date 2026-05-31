@@ -80,6 +80,10 @@ public class Main {
             dealCards();
             sortCards();
             cardsDealt = true;
+            for (Player pl : players) {
+                System.out.println(pl.getPlayerName());
+                pl.printHand();
+            }
         }
     }
 

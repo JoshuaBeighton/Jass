@@ -109,34 +109,50 @@ public class GameManager {
         return nextPlayer;
     }
 
-    public void playCard(String s, List<Player> players) {
+    public boolean playCard(String s, List<Player> players) {
         int idx = -1;
         try {
             Card candidate = Card.parseCard(s);
             for (int i = 0; i < players.get(nextPlayer).getCards().size(); i++) {
                 if (players.get(nextPlayer).getCards().get(i).equals(candidate)) {
+                    // Found the correct card in their hand.
                     idx = i;
+
+                    if (players.get(nextPlayer).canPlayCard(candidate, currentTrick, players.get(nextPlayer).getCards(), -1) == false){
+                        System.out.println("Cannot play that card.");
+                        return false;
+                    }
                     trickLock.lock();
                     nextPlayer++;
                     if (nextPlayer > 3) {
                         nextPlayer = 0;
                     }
                     currentTrick.add(candidate);
+                    if (currentTrick.size() >= 4){
+                        // Get the index of the card that won the trick, add it to the start player (which will be the next player as it's wrapped around)
+                        int winner = (currentGame.wins(currentTrick) + nextPlayer ) % 4;
+                        Main.getPlayers().get(winner).getTeam().addScore(currentGame.score(currentTrick));;
+                        currentTrick.clear();
+                        nextPlayer = winner;
+                    }
                     trickLock.unlock();
                 }
             }
             if (idx > 0) {
                 players.get(nextPlayer).getCards().remove(idx);
                 System.out.println("Cards Played: " + currentTrick.size());
+                
 
             } else {
-                System.out.println("Couldn't find card " + s);
+                System.out.printf("Couldn't find card %s in player %s\nHand:", s, Main.getPlayers().get(nextPlayer).getPlayerName());
+                Main.getPlayers().get(nextPlayer).printHand();
             }
 
         }
         catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
-
+        return true;
     }
 }

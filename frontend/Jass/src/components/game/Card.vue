@@ -10,6 +10,8 @@ const props = defineProps<{
   canPlay: boolean
 }>()
 
+const played = ref(false);
+
 function toSym(num: String) {
   const firstTwo = num.substring(0, 2)
   switch (firstTwo) {
@@ -40,19 +42,22 @@ function replaceCardSuits(input: string): string {
 async function sendCard() {
   if (props.canPlay) {
     const host = window.location.hostname
-    await fetch(`http://${host}:9000/nextCard`, {
+    let res = await fetch(`http://${host}:9000/nextCard`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(replaceCardSuits(props.cardText)),
     })
+    if (res.status == 200){
+      played.value = true;
+    }
   }
 }
 </script>
 
 <template>
-  <div class="card" @click="sendCard">
+  <div v-if="!played" class="card" @click="sendCard">
     <p v-bind:class="{ red: isRed(), black: !isRed() }">{{ toSym(props.cardText) }}</p>
   </div>
 </template>

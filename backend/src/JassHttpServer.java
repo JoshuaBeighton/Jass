@@ -345,16 +345,18 @@ public class JassHttpServer {
 
             InputStream is = exchange.getRequestBody();
             String requestString = new String(is.readAllBytes()).replace("\"", "");
+            boolean success =false;
             try {
-                manager.playCard(requestString, Main.getPlayers());
+                success = manager.playCard(requestString, Main.getPlayers());
             }
             catch (Exception e) {
                 e.printStackTrace();
             }
 
 
-            String response = "success";
-            exchange.sendResponseHeaders(200, response.length());
+            String response = success ? "success" : "failure";
+            int code = success ? 200 : 401;
+            exchange.sendResponseHeaders(code, response.length());
             OutputStream os = exchange.getResponseBody();
             os.write(response.getBytes());
             os.close();

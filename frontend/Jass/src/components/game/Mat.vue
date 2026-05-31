@@ -48,9 +48,9 @@ async function getPlayers() {
 
 async function getNextCard() {
     const host = window.location.hostname
-    while (true) {
+    for (let x = 0; x < 4; x++) {
         try {
-            const res = await fetch(`http://${host}:9000/cardWait/${count.value}`)
+            const res = await fetch(`http://${host}:9000/cardWait/${count.value % 4}`)
             if (!res.ok) throw new Error('Network response was not OK')
 
             const data = await res.json()
@@ -59,7 +59,7 @@ async function getNextCard() {
             updateCard(data.currentTrick)
             isMe.value = nextPlayer.value == props.name
             emits('update:isme', isMe.value)
-            count.value++
+            count.value = data.currentTrick.length
         } catch (err) {
             console.error('Error fetching players:', err)
         }
@@ -68,27 +68,37 @@ async function getNextCard() {
 
 function updateCard(cards: [any]) {
     const startIndex = players.value.indexOf(firstPlayer.value)
-    let mostRecent = cards[cards.length - 1];
-    let mostRecentIdx = cards.length - 1;
-    let n = (startIndex + mostRecentIdx) % 4; 
-    console.log(n);
-    switch(n){
-        case 0:
-            bottomCard.value = mostRecent;
-            break;
-        case 1:
-            rightCard.value = mostRecent;
-            break;
-        case 2:
-            topCard.value = mostRecent;
-            break;
-        case 3:
-            leftCard.value = mostRecent;
+    for (let i = 0; i < cards.length; i++) {
+        let currentCard = cards[i];
+        let n = (startIndex + i) % 4;
+        console.log(n);
+        switch (n) {
+            case 0:
+                bottomCard.value = currentCard;
+                break;
+            case 1:
+                rightCard.value = currentCard;
+                break;
+            case 2:
+                topCard.value = currentCard;
+                break;
+            case 3:
+                leftCard.value = currentCard;
+        }
     }
 }
 
 function isPlayer(index: number) {
     return players.value[index] == nextPlayer.value
+}
+
+function clearDeck(){
+    count.value=-1;
+    leftCard.value = undefined;
+    topCard.value = undefined;
+    rightCard.value = undefined;
+    bottomCard.value = undefined;
+    getNextCard();
 }
 
 onMounted(() => {
@@ -107,6 +117,7 @@ onMounted(() => {
             <Player class="top" :card="topCard" :name="players[2]" :up-next="isPlayer(2)"></Player>
             <Player class="left" :card="leftCard" :name="players[3]" :up-next="isPlayer(3)"></Player>
         </div>
+        <button v-if="count == 4" v-on:click="clearDeck">Continue</button>
     </div>
 </template>
 

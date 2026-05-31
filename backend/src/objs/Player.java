@@ -132,6 +132,14 @@ public class Player {
         this.cards = cards;
     }
 
+    /**
+     * Return whether a certain player is allowed to play a given card.
+     * @param c The card they want to play.
+     * @param played The cards played so far.
+     * @param available The other cards the player has.
+     * @param trump The trump suit, or -1 if not a trumps game mode.
+     * @return Whether the player is allowed to play a given card.
+     */
     public boolean canPlayCard(Card c, List<Card> played, List<Card> available, int trump) {
         boolean hasCard = false;
         for (Card card : cards) {
