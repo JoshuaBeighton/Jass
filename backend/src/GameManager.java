@@ -101,8 +101,6 @@ public class GameManager {
     }
 
     public boolean playCard(String s, List<Player> players) {
-        System.out.println("Before Playing");
-        players.get(nextPlayer).printHand();
         int idx = -1;
         try {
             Card candidate = Card.parseCard(s);
@@ -135,8 +133,6 @@ public class GameManager {
             e.printStackTrace();
             return false;
         }
-        System.out.println("After Playing");
-        players.get(nextPlayer).printHand();
         nextPlayer = (nextPlayer + 1) % 4;
         return true;
     }

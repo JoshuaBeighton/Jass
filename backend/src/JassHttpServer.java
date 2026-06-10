@@ -386,7 +386,7 @@ public class JassHttpServer {
             catch (Exception e) {
                 e.printStackTrace();
             }
-            String response = "success";
+            String response = JsonManager.scoreToJson();
             int code = 200;
             exchange.sendResponseHeaders(code, response.length());
             OutputStream os = exchange.getResponseBody();

@@ -125,4 +125,16 @@ public class JsonManager {
         }
         return available;
     }
+
+    public static String scoreToJson(){
+        JSONArray scores = new JSONArray();
+        for (Team t : Main.getTeams()){
+            JSONObject obj = new JSONObject();
+            obj.put("p1", t.players.get(0).getPlayerName());
+            obj.put("p2", t.players.get(1).getPlayerName());
+            obj.put("score", t.getScore());
+            scores.put(obj);
+        }
+        return scores.toString();
+    }
 }

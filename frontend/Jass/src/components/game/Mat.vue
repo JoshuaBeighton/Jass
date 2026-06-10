@@ -1,12 +1,28 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import Player from './Player.vue';
+import TrickScore from './TrickScore.vue';
 
 const props = defineProps<{ game: string; name: string }>()
 
 const players = ref([props.name, 'loading', 'loading', 'loading'])
 
 const nextPlayer = ref('')
+
+const scores = ref(
+    [
+        {
+            p1: "loading",
+            p2: "loading",
+            score: 0
+        },
+        {
+            p1: "loading",
+            p2: "loading",
+            score: 0
+        }
+    ]
+)
 
 const leftCard = ref(undefined)
 const topCard = ref(undefined)
@@ -41,6 +57,16 @@ async function getPlayers() {
         for (let i = 0; i < 4; i++) {
             players.value[i] = data[(i + meIdx.value) % 4].name
         }
+        scores.value = [{
+            p1: String(players.value[0]),
+            p2: String(players.value[2]),
+            score: 0
+        },
+        {
+            p1: String(players.value[1]),
+            p2: String(players.value[3]),
+            score: 0
+        }];
     } catch (err) {
         console.error('Error fetching players:', err)
     }
@@ -99,10 +125,11 @@ async function clearDeck() {
     topCard.value = undefined;
     rightCard.value = undefined;
     bottomCard.value = undefined;
-    const settings = {method:"POST"}
+    const settings = { method: "POST" }
     const res = await fetch(`http://${host}:9000/resetTrick`, settings)
     if (!res.ok) throw new Error('Network response was not OK')
-
+    const data = await res.json()
+    scores.value = data
     getNextCard();
 }
 
@@ -124,6 +151,7 @@ onMounted(() => {
         </div>
         <button v-if="count == 4" v-on:click="clearDeck">Continue</button>
     </div>
+    <TrickScore :scores="scores" />
 </template>
 
 <style>
