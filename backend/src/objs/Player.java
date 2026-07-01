@@ -136,11 +136,10 @@ public class Player {
      * Return whether a certain player is allowed to play a given card.
      * @param c The card they want to play.
      * @param played The cards played so far.
-     * @param available The other cards the player has.
      * @param trump The trump suit, or -1 if not a trumps game mode.
      * @return Whether the player is allowed to play a given card.
      */
-    public boolean canPlayCard(Card c, List<Card> played, List<Card> available, int trump) {
+    public boolean canPlayCard(Card c, List<Card> played, int trump) {
         boolean hasCard = false;
         for (Card card : cards) {
             if (c.equals(card))
@@ -150,9 +149,11 @@ public class Player {
             return false;
         }
 
-        if (played.size() > 0 && c.getSuit() != played.get(0).getSuit() && trump != -1
-                && Suit.fromIndex(trump) != c.getSuit()) {
-            for (Card card : available) {
+        // If a card has been played, the first card in the trick doesn't match the suit of the played card, and the played card
+        // isn't a trump.
+        if (played.size() > 0 && c.getSuit() != played.get(0).getSuit() && (trump == -1 || Suit.fromIndex(trump) != c.getSuit())) {
+            // Check if the player has an option to follow suit.
+            for (Card card : cards) {
                 if (card.getSuit() == played.get(0).getSuit()) {
                     return false;
                 }
@@ -191,7 +192,7 @@ public class Player {
             try {
                 Card temp = Card.parseCard(input);
 
-                if (canPlayCard(temp, played, cards, code)) {
+                if (canPlayCard(temp, played, code)) {
                     c = temp;
                     removeCard(c);
                 } else {

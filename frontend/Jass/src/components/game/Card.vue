@@ -10,7 +10,7 @@ const props = defineProps<{
   canPlay: boolean
 }>()
 
-const played = ref(false);
+const played = ref(false)
 
 function toSym(num: String) {
   const firstTwo = num.substring(0, 2)
@@ -49,8 +49,10 @@ async function sendCard() {
       },
       body: JSON.stringify(replaceCardSuits(props.cardText)),
     })
-    if (res.status == 200){
-      played.value = true;
+    if (res.status == 200) {
+      played.value = true
+    } else {
+      alert("You Can't Play That Card!")
     }
   }
 }

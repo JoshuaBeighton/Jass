@@ -31,8 +31,10 @@ public class GameManager {
         nextToChooseLock.lock();
         try {
             temp = nextToChoose;
-        } catch (Exception e) {
-        } finally {
+        }
+        catch (Exception e) {
+        }
+        finally {
             nextToChooseLock.unlock();
         }
         return temp;
@@ -43,8 +45,10 @@ public class GameManager {
         trickLock.lock();
         try {
             temp = currentTrick;
-        } catch (Exception e) {
-        } finally {
+        }
+        catch (Exception e) {
+        }
+        finally {
             trickLock.unlock();
         }
         return temp;
@@ -59,8 +63,10 @@ public class GameManager {
                 choicesUntilForced = 4;
                 System.out.println("FORCED");
             }
-        } catch (Exception e) {
-        } finally {
+        }
+        catch (Exception e) {
+        }
+        finally {
             nextToChooseLock.unlock();
         }
         return forced;
@@ -74,8 +80,10 @@ public class GameManager {
                 nextToChoose = 0;
             }
             choicesUntilForced--;
-        } catch (Exception e) {
-        } finally {
+        }
+        catch (Exception e) {
+        }
+        finally {
             nextToChooseLock.unlock();
         }
     }
@@ -90,7 +98,8 @@ public class GameManager {
             nextPlayer = nextToChoose;
             nextToChoose = (nextToChoose - 1) % 4;
             currentTrick = new ArrayList<Card>();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -101,35 +110,22 @@ public class GameManager {
     }
 
     public boolean playCard(String s, List<Player> players) {
-        int idx = -1;
         try {
             Card candidate = Card.parseCard(s);
-            for (int i = 0; i < players.get(nextPlayer).getCards().size(); i++) {
-                if (players.get(nextPlayer).getCards().get(i).equals(candidate)) {
-                    // Found the correct card in their hand.
-                    idx = i;
+            Player currentPlayer = players.get(nextPlayer);
 
-                    if (players.get(nextPlayer).canPlayCard(candidate, currentTrick, players.get(nextPlayer).getCards(),
-                            -1) == false) {
-                        System.out.println("Cannot play that card.");
-                        return false;
-                    }
-                    trickLock.lock();
-                    currentTrick.add(candidate);
-                    trickLock.unlock();
-                }
+            if (!currentPlayer.canPlayCard(candidate, currentTrick, -1)) {
+                System.out.println("Cannot play that card.");
+                return false;
             }
-            if (idx > 0) {
-                players.get(nextPlayer).getCards().remove(idx);
-                System.out.println("Cards Played: " + currentTrick.size());
+            trickLock.lock();
+            currentTrick.add(candidate);
+            trickLock.unlock();
 
-            } else {
-                System.out.printf("Couldn't find card %s in player %s\nHand:", s,
-                        Main.getPlayers().get(nextPlayer).getPlayerName());
-                Main.getPlayers().get(nextPlayer).printHand();
-            }
+            currentPlayer.removeCard(candidate);
 
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
             return false;
         }
@@ -146,8 +142,7 @@ public class GameManager {
             Main.getPlayers().get(winner).getTeam().addScore(currentGame.score(currentTrick));
             currentTrick.clear();
             nextPlayer = winner;
-        }
-        else{
+        } else {
             System.out.println("Already cleared");
         }
     }
