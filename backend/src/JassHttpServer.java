@@ -311,7 +311,12 @@ public class JassHttpServer {
                         Thread.sleep(100);
                     }
 
-                    String response = JsonManager.currentTrickToJSON(manager.getCurrentTrick(), Main.getPlayers().get(manager.getNextPlayer()), Main.getPlayers().get(manager.getNextToChoose()));
+                    String response = JsonManager.currentTrickToJSON(manager.getCurrentTrick(),
+                            Main.getPlayers().get(manager.getNextPlayer()),
+                            Main.getPlayers().get(
+                                    Math.floorMod(
+                                            manager.getNextPlayer() - manager.getCurrentTrick().size(),
+                                            4)));
 
                     exchange.sendResponseHeaders(200, response.getBytes().length);
                     OutputStream os = exchange.getResponseBody();
@@ -346,7 +351,7 @@ public class JassHttpServer {
 
             InputStream is = exchange.getRequestBody();
             String requestString = new String(is.readAllBytes()).replace("\"", "");
-            boolean success =false;
+            boolean success = false;
             try {
                 success = manager.playCard(requestString, Main.getPlayers());
             }
@@ -357,7 +362,7 @@ public class JassHttpServer {
 
             String response = success ? "success" : "failure";
             int code = success ? 200 : 401;
-            if (!success){
+            if (!success) {
                 System.out.println("Failed");
             }
             exchange.sendResponseHeaders(code, response.length());
