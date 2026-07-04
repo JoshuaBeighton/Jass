@@ -60,7 +60,9 @@ async function sendCard() {
 
 <template>
   <div v-if="!played" class="card" @click="sendCard">
-    <p v-bind:class="{ red: isRed(), black: !isRed() }">{{ toSym(props.cardText) }}</p>
+    <img :class="{ red: isRed(), black: !isRed() }" :src="`/images/cards/${replaceCardSuits(props.cardText).toLowerCase()}.png`"
+      :alt="toSym(props.cardText)" />
+
   </div>
 </template>
 
@@ -68,9 +70,6 @@ async function sendCard() {
 .card {
   width: 100px;
   height: 150px;
-  background-color: azure;
-  padding: 5px;
-  margin: 20px;
   display: flexbox;
   justify-content: center;
   align-items: center;
@@ -88,5 +87,10 @@ async function sendCard() {
 .black {
   text-align: center;
   font-size: 30pt;
+}
+
+img{
+  padding: 0;
+  height: 100%;
 }
 </style>

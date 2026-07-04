@@ -43,16 +43,47 @@ function suitToUnicode(inp: string) {
 onMounted(() => {
   fetchHand()
 })
+function cardStyle(i: number) {
+  const total = cards.value.length
+  const spread = 50
+  const angleSpread = 10
+
+  const center = (total - 1) / 2
+  const offset = i - center
+
+  return {
+    transform: `translateX(${offset * spread}px) rotate(${offset * angleSpread}deg)`,
+    transformOrigin: 'bottom center',
+    zIndex: i
+  }
+}
 </script>
 
 <template>
   <div class="cards">
-    <Card v-for="card in cards" :card-text="concatCard(card)" :can-play="props.canPlay"></Card>
+    <Card
+      v-for="(card, i) in cards"
+      :key="i"
+      :card-text="concatCard(card)"
+      :can-play="props.canPlay"
+      :style="cardStyle(i)"
+    />
   </div>
 </template>
 
 <style>
 .cards {
+  position: relative;
+  margin: 10px;
+  top: 10px;
+  height: 200px;
+  width: 100%;
   display: flex;
+  justify-content: center;
+}
+
+.cards > * {
+  position: absolute;
+
 }
 </style>
