@@ -43,6 +43,14 @@ const deck = ref(false)
         isMe = val
       }
     "
+    @update:finished="
+      (val) => {
+        if (val) {
+          mat = false
+          select = true
+        }
+      }
+    "
   ></Mat>
   <Deck v-if="deck" :name="name" :can-play="isMe"></Deck>
   <GameSelect v-if="select" :name="name" @update:selected="gameChosen"></GameSelect>

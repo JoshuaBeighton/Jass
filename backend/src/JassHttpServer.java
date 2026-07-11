@@ -77,12 +77,12 @@ public class JassHttpServer {
             int count = Integer.parseInt(exchange.getRequestURI().getPath().split("/teamWait/")[1]);
             Thread t = new Thread(() -> {
                 try {
-                    while (count >= Main.getPlayers().size()) {
+                    while (count >= manager.getPlayers().size()) {
                         Thread.sleep(100);
                     }
 
-                    String response = JsonManager.teamsToJson(Main.getTeams());
-
+                    String response = JsonManager.teamsToJson(manager.getTeams());
+                    System.out.println(response);
                     exchange.sendResponseHeaders(200, response.getBytes().length);
                     OutputStream os = exchange.getResponseBody();
                     os.write(response.getBytes());
@@ -117,7 +117,7 @@ public class JassHttpServer {
         }
 
         private void handleGet(HttpExchange exchange) throws IOException {
-            String response = JsonManager.playersToJson(Main.getPlayers());
+            String response = JsonManager.playersToJson(manager.getPlayers());
             exchange.sendResponseHeaders(200, response.length());
             OutputStream os = exchange.getResponseBody();
             os.write(response.getBytes());
@@ -127,8 +127,8 @@ public class JassHttpServer {
         private void handlePost(HttpExchange exchange) throws IOException {
             InputStream is = exchange.getRequestBody();
             String requestString = new String(is.readAllBytes());
-            Player request = JsonManager.JsonToPlayer(requestString);
-            Main.addPlayer(request);
+            Player request = JsonManager.JsonToPlayer(requestString, manager.getTeams());
+            manager.addPlayer(request);
             String response = "Success";
             exchange.sendResponseHeaders(200, response.length());
             OutputStream os = exchange.getResponseBody();
@@ -152,7 +152,11 @@ public class JassHttpServer {
         }
 
         private void handleGet(HttpExchange exchange) throws IOException {
-            String response = JsonManager.teamsToJson(Main.getTeams());
+            System.out.println("players:");
+            for (Player p : manager.getPlayers()) {
+                System.out.println(p.getPlayerName());
+            }
+            String response = JsonManager.teamsToJson(manager.getTeams());
             exchange.sendResponseHeaders(200, response.length());
             OutputStream os = exchange.getResponseBody();
             os.write(response.getBytes());
@@ -177,7 +181,7 @@ public class JassHttpServer {
         public void handleGet(HttpExchange exchange) throws IOException {
             String uri = exchange.getRequestURI().getPath().split("/hand/")[1];
 
-            for (Player p : Main.getPlayers()) {
+            for (Player p : manager.getPlayers()) {
                 if (uri.toLowerCase().equals(p.getPlayerName().toLowerCase())) {
                     String response = JsonManager.cardsToJson(p.getCards());
                     exchange.sendResponseHeaders(200, response.length());
@@ -243,10 +247,10 @@ public class JassHttpServer {
             int lastIndex = Integer.parseInt(args[1].split("=")[1]);
             Thread t = new Thread(() -> {
                 try {
-                    if (Main.getPlayers().get(manager.getNextToChoose()).getPlayerName().equals(name)) {
+                    if (manager.getPlayers().get(manager.getNextToChoose()).getPlayerName().equals(name)) {
                         exchange.getResponseHeaders().add("Content-Type", "application/json");
                         String response = JsonManager.gameChoiceToJson(name, manager.getNextToChoose(),
-                                Main.getPlayers(), manager.getGame(), manager.isForced());
+                                manager.getPlayers(), manager.getGame(), manager.isForced());
 
                         exchange.sendResponseHeaders(200, response.length());
                         OutputStream os = exchange.getResponseBody();
@@ -258,7 +262,7 @@ public class JassHttpServer {
 
                     }
                     exchange.getResponseHeaders().add("Content-Type", "application/json");
-                    String response = JsonManager.gameChoiceToJson(name, manager.getNextToChoose(), Main.getPlayers(),
+                    String response = JsonManager.gameChoiceToJson(name, manager.getNextToChoose(), manager.getPlayers(),
                             manager.getGame(), manager.isForced());
 
                     exchange.sendResponseHeaders(200, response.length());
@@ -312,8 +316,8 @@ public class JassHttpServer {
                     }
 
                     String response = JsonManager.currentTrickToJSON(manager.getCurrentTrick(),
-                            Main.getPlayers().get(manager.getNextPlayer()),
-                            Main.getPlayers().get(
+                            manager.getPlayers().get(manager.getNextPlayer()),
+                            manager.getPlayers().get(
                                     Math.floorMod(
                                             manager.getNextPlayer() - manager.getCurrentTrick().size(),
                                             4)));
@@ -353,7 +357,7 @@ public class JassHttpServer {
             String requestString = new String(is.readAllBytes()).replace("\"", "");
             boolean success = false;
             try {
-                success = manager.playCard(requestString, Main.getPlayers());
+                success = manager.playCard(requestString);
             }
             catch (Exception e) {
                 e.printStackTrace();
@@ -387,14 +391,13 @@ public class JassHttpServer {
         }
 
         private void handlePost(HttpExchange exchange) throws IOException {
-            InputStream is = exchange.getRequestBody();
             try {
                 manager.resetTrick();
             }
             catch (Exception e) {
                 e.printStackTrace();
             }
-            String response = JsonManager.scoreToJson();
+            String response = JsonManager.scoreToJson(manager.getTeams());
             int code = 200;
             exchange.sendResponseHeaders(code, response.length());
             OutputStream os = exchange.getResponseBody();

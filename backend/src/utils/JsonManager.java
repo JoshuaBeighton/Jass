@@ -42,11 +42,20 @@ public class JsonManager {
         return result.toString().replace("\\", "");
     }
 
-    public static Player JsonToPlayer(String json) {
+    public static Player JsonToPlayer(String json, List<Team> teams) {
         JSONObject jo = new JSONObject(json);
         String name = jo.getString("name");
         int idx = jo.getInt("idx");
-        return new Player(name, Main.getTeam(idx));
+        System.out.println("Wants team: " + String.valueOf(idx));
+        for (Team t : teams) {
+            if (t.getIndex() == idx) {
+                return new Player(name, t);
+            }
+        }
+        Team team = new Team();
+        teams.add(team);
+
+        return new Player(name, team);
     }
 
     public static String cardsToJson(List<Card> cards) {
@@ -126,9 +135,9 @@ public class JsonManager {
         return available;
     }
 
-    public static String scoreToJson(){
+    public static String scoreToJson(List<Team> teams) {
         JSONArray scores = new JSONArray();
-        for (Team t : Main.getTeams()){
+        for (Team t : teams) {
             JSONObject obj = new JSONObject();
             obj.put("p1", t.players.get(0).getPlayerName());
             obj.put("p2", t.players.get(1).getPlayerName());
