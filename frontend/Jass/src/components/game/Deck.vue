@@ -54,9 +54,13 @@ function cardStyle(i: number) {
   return {
     transform: `translateX(${offset * spread}px) rotate(${offset * angleSpread}deg)`,
     transformOrigin: 'bottom center',
-    zIndex: i
+    zIndex: i,
   }
 }
+
+defineExpose({
+  fetchHand,
+})
 </script>
 
 <template>
@@ -84,6 +88,5 @@ function cardStyle(i: number) {
 
 .cards > * {
   position: absolute;
-
 }
 </style>

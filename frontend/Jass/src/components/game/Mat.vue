@@ -123,20 +123,22 @@ function isPlayer(index: number) {
 
 async function clearDeck() {
   console.log('Tricks Played:' + tricksPlayed.value)
+
+  const host = window.location.hostname
+  count.value = -1
+  leftCard.value = undefined
+  topCard.value = undefined
+  rightCard.value = undefined
+  bottomCard.value = undefined
+  const settings = { method: 'POST' }
+  const res = await fetch(`http://${host}:9000/resetTrick`, settings)
+  if (!res.ok) throw new Error('Network response was not OK')
+  const data = await res.json()
+  scores.value = data
   if (tricksPlayed.value == 9) {
+    alert('Game Over!')
     emits('update:finished', true)
   } else {
-    const host = window.location.hostname
-    count.value = -1
-    leftCard.value = undefined
-    topCard.value = undefined
-    rightCard.value = undefined
-    bottomCard.value = undefined
-    const settings = { method: 'POST' }
-    const res = await fetch(`http://${host}:9000/resetTrick`, settings)
-    if (!res.ok) throw new Error('Network response was not OK')
-    const data = await res.json()
-    scores.value = data
     getNextCard()
   }
 }

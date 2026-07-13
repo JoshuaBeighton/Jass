@@ -6,7 +6,6 @@ import LoginCard from './components/login/LoginCard.vue'
 import { ref } from 'vue'
 
 function removeLogin() {
-  console.log('boo')
   login.value = false
   select.value = true
   deck.value = true
@@ -25,11 +24,20 @@ function gameChosen(gameSelected: string) {
 const name = ref('')
 const currentGame = ref('')
 const isMe = ref(false)
+const deckRef = ref<InstanceType<typeof Deck>>()
 
 const login = ref(true)
 const select = ref(false)
 const mat = ref(false)
 const deck = ref(false)
+
+function gameFinished(finished: boolean) {
+  if (!finished) return
+
+  mat.value = false
+  select.value = true
+  deckRef.value?.fetchHand()
+}
 </script>
 
 <template>
@@ -43,16 +51,9 @@ const deck = ref(false)
         isMe = val
       }
     "
-    @update:finished="
-      (val) => {
-        if (val) {
-          mat = false
-          select = true
-        }
-      }
-    "
+    @update:finished="gameFinished"
   ></Mat>
-  <Deck v-if="deck" :name="name" :can-play="isMe"></Deck>
+  <Deck v-if="deck" :name="name" :can-play="isMe" ref="deckRef"></Deck>
   <GameSelect v-if="select" :name="name" @update:selected="gameChosen"></GameSelect>
 </template>
 

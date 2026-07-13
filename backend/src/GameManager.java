@@ -26,6 +26,7 @@ public class GameManager {
 
     private final Lock nextToChooseLock = new ReentrantLock(true);
     private final Lock trickLock = new ReentrantLock(true);
+    private int trickCount = 0;
 
     private List<Card> undealt;
     private List<Player> players;
@@ -239,15 +240,30 @@ public class GameManager {
             players.get(winner).getTeam().addScore(currentGame.score(currentTrick));
             currentTrick.clear();
             nextPlayer = winner;
+            trickCount++;
+            System.out.println("Trick Count: " + trickCount);
+            if (trickCount >= 9) {
+                players.get(winner).getTeam().addScore(LAST_BONUS);
+                System.out.println("Game Over! Team 0: " + teams.get(0).getScore() + " Team 1: " + teams.get(1).getScore());
+                resetGame();
+            }
         } else {
             System.out.println("Already cleared");
         }
     }
 
     public void resetGame() {
+        System.out.println("Resetting Game");
         fillDeck();
         Collections.shuffle(undealt);
         dealCards();
         sortCards();
+        currentGame = null;
+        nextToChoose = 0;
+        choicesUntilForced = 4;
+        nextPlayer = -1;
+        currentTrick = null;
+
+
     }
 }
