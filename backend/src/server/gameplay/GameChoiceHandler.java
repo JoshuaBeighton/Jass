@@ -46,6 +46,7 @@ public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
                             manager.getPlayers(), manager.getGame(), manager.isForced());
 
                     exchange.sendResponseHeaders(200, response.length());
+                    exchange.getResponseHeaders().add("Content-Type", "application/json");
                     OutputStream os = exchange.getResponseBody();
                     os.write(response.getBytes());
                     os.close();
@@ -71,6 +72,7 @@ public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
     }
 
     private void handlePost(HttpExchange exchange) throws IOException {
+        System.out.println("Choosing game post received!");
         InputStream is = exchange.getRequestBody();
         String requestString = new String(is.readAllBytes());
         IGame request = JsonManager.jsonToIGame(requestString);

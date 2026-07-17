@@ -7,6 +7,7 @@ const props = defineProps<{
   canPlay: boolean
 }>()
 
+const round = ref(0)
 const cards = ref([])
 async function fetchHand() {
   const host = window.location.hostname
@@ -16,6 +17,8 @@ async function fetchHand() {
     if (!res.ok) throw new Error('Network response was not OK')
     const data = await res.json()
     cards.value = data
+    round.value++
+    console.log(cards.value)
   } catch (err) {
     console.error('Error fetching hand:', err)
   }
@@ -67,7 +70,7 @@ defineExpose({
   <div class="cards">
     <Card
       v-for="(card, i) in cards"
-      :key="i"
+      :key="String(i) + ':' + String(round)"
       :card-text="concatCard(card)"
       :can-play="props.canPlay"
       :style="cardStyle(i)"

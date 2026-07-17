@@ -49,6 +49,7 @@ public class PlayerHandler extends JassHttpHandler implements HttpHandler {
         manager.addPlayer(request);
         String response = "Success";
         exchange.sendResponseHeaders(200, response.length());
+        exchange.getResponseHeaders().add("Content-Type", "application/json");
         OutputStream os = exchange.getResponseBody();
         os.write(response.getBytes());
         os.close();

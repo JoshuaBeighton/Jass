@@ -43,6 +43,7 @@ public class CardWaitHandler extends JassHttpHandler implements HttpHandler {
                                         4)));
 
                 exchange.sendResponseHeaders(200, response.getBytes().length);
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
                 OutputStream os = exchange.getResponseBody();
                 os.write(response.getBytes());
                 os.close();

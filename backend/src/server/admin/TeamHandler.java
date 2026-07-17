@@ -37,6 +37,7 @@ public class TeamHandler extends JassHttpHandler implements HttpHandler {
         }
         String response = JsonManager.teamsToJson(manager.getTeams());
         exchange.sendResponseHeaders(200, response.length());
+        exchange.getResponseHeaders().add("Content-Type", "application/json");
         OutputStream os = exchange.getResponseBody();
         os.write(response.getBytes());
         os.close();

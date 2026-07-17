@@ -51,8 +51,15 @@ public class GameManager {
     }
 
     private void dealCards() {
+        // Ensure each player starts with an empty hand.
+        for (Player p : players) {
+            p.getCards().clear();
+        }
+        
         int playerIndex = 0;
+        
         while (!undealt.isEmpty()) {
+            // Mimic traditional Jass dealing, where 3 cards are dealt to a player at once.
             players.get(playerIndex).getCards().addAll(undealt.subList(0, 3));
             undealt.removeAll(undealt.subList(0, 3));
             playerIndex++;
@@ -210,6 +217,7 @@ public class GameManager {
 
     public boolean playCard(String s) {
         try {
+            System.out.println("Cards played: " + currentTrick.size());
             Card candidate = Card.parseCard(s);
             Player currentPlayer = players.get(nextPlayer);
 
@@ -258,12 +266,11 @@ public class GameManager {
         Collections.shuffle(undealt);
         dealCards();
         sortCards();
+        trickCount = 0;
         currentGame = null;
         nextToChoose = 0;
         choicesUntilForced = 4;
         nextPlayer = -1;
-        currentTrick = null;
-
-
+        currentTrick.clear();
     }
 }
