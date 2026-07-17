@@ -136,7 +136,6 @@ async function clearDeck() {
   const data = await res.json()
   scores.value = data
   if (tricksPlayed.value == 9) {
-    alert('Game Over!')
     emits('update:finished', true)
   } else {
     getNextCard()
@@ -150,7 +149,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <h1>{{ props.game }}</h1>
+  <div class="header">
+    <h1>{{ props.game }}</h1>
+    <h1>{{ props.name }}</h1>
+  </div>
+
   <div class="parent">
     <div class="mat">
       <Player class="bottom" :card="bottomCard" :name="players[0]" :up-next="isPlayer(0)"></Player>
@@ -216,5 +219,12 @@ onMounted(() => {
 
 .upNext {
   color: red;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
 }
 </style>

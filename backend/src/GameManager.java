@@ -16,6 +16,9 @@ import src.objs.Suit;
 import src.objs.Team;
 
 public class GameManager {
+    public static final String[] GAMES = { "Top Down", "Bottom Up", "Middle" };
+
+
     private final int LAST_BONUS = 5;
 
     private IGame currentGame;
@@ -261,6 +264,7 @@ public class GameManager {
     }
 
     public void resetGame() {
+        players.get(nextToChoose).getTeam().setScore(currentGame.getName(), players.get(nextToChoose).getTeam().getScore());
         System.out.println("Resetting Game");
         fillDeck();
         Collections.shuffle(undealt);
@@ -272,5 +276,7 @@ public class GameManager {
         choicesUntilForced = 4;
         nextPlayer = -1;
         currentTrick.clear();
+        teams.get(0).resetScore();
+        teams.get(1).resetScore();
     }
 }

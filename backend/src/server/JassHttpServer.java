@@ -26,6 +26,7 @@ public class JassHttpServer {
             server.createContext("/cardWait", new CardWaitHandler(manager));
             server.createContext("/nextCard", new NextCardHandler(manager));
             server.createContext("/resetTrick", new ResetTrickHandler(manager));
+            server.createContext("/scores", new ScoresHandler(manager));
 
             server.setExecutor(null);
             server.start();

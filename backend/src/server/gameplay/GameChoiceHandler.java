@@ -41,7 +41,6 @@ public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
         Thread t = new Thread(() -> {
             try {
                 if (manager.getPlayers().get(manager.getNextToChoose()).getPlayerName().equals(name)) {
-                    exchange.getResponseHeaders().add("Content-Type", "application/json");
                     String response = JsonManager.gameChoiceToJson(name, manager.getNextToChoose(),
                             manager.getPlayers(), manager.getGame(), manager.isForced());
 

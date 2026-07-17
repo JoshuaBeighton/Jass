@@ -2,6 +2,7 @@ package src.utils;
 
 import java.util.List;
 
+import src.GameManager;
 import src.games.BottomUp;
 import src.games.IGame;
 import src.games.Middle;
@@ -144,5 +145,27 @@ public class JsonManager {
             scores.put(obj);
         }
         return scores.toString();
+    }
+
+    public static String scoresToJson(List<Team> teams) {
+        JSONObject result = new JSONObject();
+        
+        JSONArray scores = new JSONArray();
+        for (String game : GameManager.GAMES) {
+            JSONObject obj = new JSONObject();
+            obj.put("game", game);
+            obj.put("0", teams.get(0).getScore(game));
+            obj.put("1", teams.get(1).getScore(game));
+            scores.put(obj);
+        }
+        JSONArray teamsJSON = new JSONArray();
+        teams.forEach((t) -> {
+            teamsJSON.put(t.players.get(0).getPlayerName() + " & " + t.players.get(1).getPlayerName());
+        });
+
+        result.put("teams", teamsJSON);
+        result.put("scores", scores);
+        
+        return result.toString();
     }
 }

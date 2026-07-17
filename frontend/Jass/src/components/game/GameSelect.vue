@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import Scoreboard from './Scoreboard.vue'
 
 const isMe = ref(false)
 const nextChooser = ref('')
@@ -89,6 +90,7 @@ onMounted(() => {
         <button v-for="game in games" @click="() => sendGame(game.key)">{{ game.text }}</button>
       </div>
     </div>
+    <Scoreboard />
   </div>
 </template>
 
