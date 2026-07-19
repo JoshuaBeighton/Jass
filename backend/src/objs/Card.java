@@ -4,7 +4,6 @@ import javax.naming.InvalidNameException;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Observable;
 
 import src.utils.Utils;
 

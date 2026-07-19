@@ -29,4 +29,19 @@ public enum Suit {
                 throw new IndexOutOfBoundsException();
         }
     }
+
+    public static Suit fromChar(char c) throws IndexOutOfBoundsException{
+        switch (c) {
+            case 'H': case 'h':
+                return HEARTS;
+            case 'C': case 'c':
+                return CLUBS;
+            case 'D': case 'd':
+                return DIAMONDS;
+            case 'S': case 's':
+                return SPADES;
+            default:
+                throw new IndexOutOfBoundsException();
+        }
+    }
 }

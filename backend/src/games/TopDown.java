@@ -2,6 +2,7 @@ package src.games;
 
 import java.util.List;
 
+import src.games.orderings.TopDownOrdering;
 import src.objs.Card;
 import src.objs.Suit;
 
@@ -19,8 +20,9 @@ public class TopDown implements IGame {
     public int wins(List<Card> trick) {
         Suit masterSuit = trick.get(0).getSuit();
         int winner = 0;
+        TopDownOrdering ordering = new TopDownOrdering();
         for (int i = 0; i < trick.size(); i++) {
-            if (trick.get(i).getSuit() == masterSuit && trick.get(i).getVal() > trick.get(winner).getVal()) {
+            if (trick.get(i).getSuit() == masterSuit && ordering.compare(trick.get(i), trick.get(winner)) > 0) {
                 winner = i;
             }
         }
@@ -29,5 +31,9 @@ public class TopDown implements IGame {
 
     public int score(List<Card> cards) {
         return Scoring.TDScore(cards);
+    }
+
+    public int getSuit() {
+        return -1;
     }
 }
