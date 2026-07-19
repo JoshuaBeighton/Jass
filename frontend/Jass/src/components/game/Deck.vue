@@ -81,7 +81,7 @@ defineExpose({
 <style>
 .cards {
   position: relative;
-  margin: 10px;
+  margin: 10px 0px;
   top: 10px;
   height: 200px;
   width: 100%;

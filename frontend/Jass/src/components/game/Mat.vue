@@ -161,7 +161,7 @@ onMounted(() => {
       <Player class="top" :card="topCard" :name="players[2]" :up-next="isPlayer(2)"></Player>
       <Player class="left" :card="leftCard" :name="players[3]" :up-next="isPlayer(3)"></Player>
     </div>
-    <button v-if="count == 4" v-on:click="clearDeck">Continue</button>
+    <button class="continue-button" v-if="count == 4" v-on:click="clearDeck">Continue</button>
   </div>
   <TrickScore :scores="scores" />
 </template>
@@ -224,7 +224,25 @@ onMounted(() => {
 .header {
   display: flex;
   flex-direction: row;
+  flex: 1;
   justify-content: space-between;
   width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.header h1 {
+  margin: 6px;
+  padding: 0;
+}
+
+.continue-button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+  width: 150px;
+  height: 60px;
 }
 </style>
