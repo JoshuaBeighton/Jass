@@ -16,7 +16,9 @@ import src.objs.Suit;
 import src.objs.Team;
 
 public class GameManager {
-    public static final String[] GAMES = { "Top Down", "Bottom Up", "Middle" };
+    public static final String[] GAMES = {
+            "Top Down", "Bottom Up", "Middle", "Trumps"
+    };
 
 
     private final int LAST_BONUS = 5;
@@ -58,9 +60,9 @@ public class GameManager {
         for (Player p : players) {
             p.getCards().clear();
         }
-        
+
         int playerIndex = 0;
-        
+
         while (!undealt.isEmpty()) {
             // Mimic traditional Jass dealing, where 3 cards are dealt to a player at once.
             players.get(playerIndex).getCards().addAll(undealt.subList(0, 3));
@@ -224,7 +226,7 @@ public class GameManager {
             Card candidate = Card.parseCard(s);
             Player currentPlayer = players.get(nextPlayer);
 
-            if (!currentPlayer.canPlayCard(candidate, currentTrick, -1)) {
+            if (!currentPlayer.canPlayCard(candidate, currentTrick, currentGame.getSuit())) {
                 System.out.println("Cannot play that card.");
                 return false;
             }

@@ -15,6 +15,7 @@ import src.games.IGame;
 import src.games.Middle;
 import src.games.TopDown;
 import src.games.Trumps;
+import src.games.orderings.TrumpOrdering;
 import src.utils.Utils;
 
 public class Player {
@@ -149,9 +150,24 @@ public class Player {
             return false;
         }
 
+        // Deal with trumps. If the card is a trump of a value above any played trump, it can be played. If the card is not a
+        // trump, but the player has a trump,
+        // they cannot play it.
+        if (trump != -1 && c.getSuit() == Suit.fromIndex(trump)) {
+            boolean beats = true;
+            TrumpOrdering ordering = new TrumpOrdering();
+            for (Card card : played) {
+                if (card.getSuit() == Suit.fromIndex(trump) && ordering.compare(card, c) > 0) {
+                    beats = false;
+                }
+            }
+            if (beats) {
+                return true;
+            }
+        }
         // If a card has been played, the first card in the trick doesn't match the suit of the played card, and the played card
         // isn't a trump.
-        if (played.size() > 0 && c.getSuit() != played.get(0).getSuit() && (trump == -1 || Suit.fromIndex(trump) != c.getSuit())) {
+        if (played.size() > 0 && c.getSuit() != played.get(0).getSuit()) {
             // Check if the player has an option to follow suit.
             for (Card card : cards) {
                 if (card.getSuit() == played.get(0).getSuit()) {

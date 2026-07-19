@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import Scoreboard from './Scoreboard.vue'
 
 const isMe = ref(false)
+const trumps = ref(false)
 const nextChooser = ref('')
 
 let id = 0
@@ -12,6 +13,7 @@ const games = ref([
   { id: id++, text: 'Top Down', key: 'topDown' },
   { id: id++, text: 'Bottom Up', key: 'bottomUp' },
   { id: id++, text: 'Middle', key: 'middle' },
+  { id: id++, text: 'Trumps', key: 'trumps' },
   { id: id++, text: 'Pass', key: 'pass' },
 ])
 
@@ -56,17 +58,31 @@ async function fetchNextPlayer() {
   }
 }
 
+function showMainButtons() {
+  return !trumps.value
+}
+
 async function sendGame(game: string) {
+  if (game.toLowerCase() == 'trumps') {
+    trumps.value = true
+    return
+  }
+
   const host = window.location.hostname
+
+  let body: any = {}
+  body['name'] = game
+  if (game.startsWith('trumps-')) {
+    body['name'] = game.split('-')[0]
+    body['suit'] = game.split('-')[1]
+  }
 
   await fetch(`http://${host}:9000/gameChoice`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      name: game,
-    }),
+    body: JSON.stringify(body),
   })
   if (game == 'Pass') {
     fetchNextPlayer()
@@ -87,7 +103,16 @@ onMounted(() => {
       <p v-if="!isMe">Waiting on {{ nextChooser }}</p>
 
       <div v-if="isMe" class="buttons">
-        <button v-for="game in games" @click="() => sendGame(game.key)">{{ game.text }}</button>
+        <button v-if="showMainButtons()" v-for="game in games" @click="() => sendGame(game.key)">
+          {{ game.text }}
+        </button>
+        <button
+          v-if="trumps"
+          v-for="suit in ['Clubs', 'Diamonds', 'Hearts', 'Spades']"
+          @click="() => sendGame('trumps-' + suit.toLowerCase())"
+        >
+          {{ suit }}
+        </button>
       </div>
     </div>
     <Scoreboard />

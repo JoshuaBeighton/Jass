@@ -12,4 +12,6 @@ public interface IGame {
     public int wins(List<Card> trick);
 
     public int score(List<Card> cards);
+
+    public int getSuit();
 }

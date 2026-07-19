@@ -82,18 +82,18 @@ public class JsonManager {
     public static IGame jsonToIGame(String json) {
         JSONObject jo = new JSONObject(json);
         String name = jo.getString("name");
-        switch (name) {
-            case "Pass":
+        switch (name.toLowerCase()) {
+            case "pass":
                 return null;
-            case "TopDown":
+            case "topdown":
                 return new TopDown();
-            case "BottomUp":
+            case "bottomup":
                 return new BottomUp();
-            case "Middle":
+            case "middle":
                 return new Middle();
-            case "Trumps":
-                int modifier = jo.getInt("modifier");
-                return new Trumps(Suit.fromIndex(modifier));
+            case "trumps":
+                String suit = jo.getString("suit");
+                return new Trumps(Suit.fromChar(suit.charAt(0)));
             default:
                 break;
         }
@@ -149,7 +149,7 @@ public class JsonManager {
 
     public static String scoresToJson(List<Team> teams) {
         JSONObject result = new JSONObject();
-        
+
         JSONArray scores = new JSONArray();
         for (String game : GameManager.GAMES) {
             JSONObject obj = new JSONObject();
@@ -165,7 +165,7 @@ public class JsonManager {
 
         result.put("teams", teamsJSON);
         result.put("scores", scores);
-        
+
         return result.toString();
     }
 }
