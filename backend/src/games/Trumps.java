@@ -30,7 +30,7 @@ public class Trumps implements IGame {
         }
     }
 
-    public int wins(List<Card> trick) {
+    public int wins(List<Card> trick, int trickNo) {
         Suit masterSuit = trick.get(0).getSuit();
         int winner = 0;
         boolean trumped = false;

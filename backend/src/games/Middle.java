@@ -19,7 +19,7 @@ public class Middle implements IGame {
         return "Middle";
     }
 
-    public int wins(List<Card> trick) {
+    public int wins(List<Card> trick, int trickNo) {
         Suit masterSuit = trick.get(0).getSuit();
         int winner = 0;
         Comparator<Card> ordering = new MiddleOrdering(center);
