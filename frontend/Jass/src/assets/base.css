@@ -35,6 +35,8 @@
 
   --color-heading: var(--vt-c-text-light-2);
   --color-text: var(--vt-c-text-light-1);
+  --color-accent: var(--c-accent);
+  --color-accent-muted: var(--c-accent-muted);
 
   --section-gap: 160px;
 }
@@ -43,7 +45,7 @@
   :root {
     --color-background: var(--vt-c-black);
     --color-background-soft: var(--vt-c-black-soft);
-    --color-background-mute: var(--vt-c-black-mute);
+    --color-background-mute: rgba(50, 50, 50, 0.9);
 
     --color-border: var(--vt-c-divider-dark-2);
     --color-border-hover: var(--vt-c-divider-dark-1);
@@ -53,6 +55,8 @@
 
     --color-red-suit: #dc2626;
     --color-black-suit: #fafafa;
+    --color-accent: #178722;
+    --color-accent-muted: rgba(15, 64, 20, 0.7);
   }
 }
 

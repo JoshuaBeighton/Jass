@@ -1,53 +1,24 @@
 <script setup lang="ts">
+import type Card from '@/interfaces/CardInterface'
+import { concatCard, isRed, replaceCardSuits, toSym } from '@/utils/SuitManipulation'
 import { ref } from 'vue'
 
-function isRed() {
-  return props.cardText.endsWith('♦') || props.cardText.endsWith('♥')
-}
-
 const props = defineProps<{
-  cardText: string
+  card?: Card | undefined
   canPlay: boolean
 }>()
 
 const played = ref(false)
 
-function toSym(num: String) {
-  const firstTwo = num.substring(0, 2)
-  switch (firstTwo) {
-    case '14':
-      return 'A' + num.charAt(num.length - 1)
-    case '13':
-      return 'K' + num.charAt(num.length - 1)
-    case '12':
-      return 'Q' + num.charAt(num.length - 1)
-    case '11':
-      return 'J' + num.charAt(num.length - 1)
-    default:
-      return num.toString()
-  }
-}
-
-function replaceCardSuits(input: string): string {
-  const suitMap: { [key: string]: string } = {
-    '♠': 'S',
-    '♥': 'H',
-    '♦': 'D',
-    '♣': 'C',
-  }
-
-  return input.replace(/[\u2660\u2665\u2666\u2663]/g, (match) => suitMap[match] || match)
-}
-
 async function sendCard() {
-  if (props.canPlay) {
+  if (props.canPlay && props.card) {
     const host = window.location.hostname
     let res = await fetch(`http://${host}:9000/nextCard`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(replaceCardSuits(props.cardText)),
+      body: JSON.stringify(replaceCardSuits(concatCard(props.card))),
     })
     if (res.status == 200) {
       played.value = true
@@ -59,37 +30,33 @@ async function sendCard() {
 </script>
 
 <template>
-  <div v-if="!played" class="card" @click="sendCard">
-    <img :class="{ red: isRed(), black: !isRed() }" :src="`/images/cards/${replaceCardSuits(props.cardText).toLowerCase()}.png`"
-      :alt="toSym(props.cardText)" />
-
+  <div v-if="card && !played" class="card" @click="sendCard">
+    <img
+      :class="{ red: isRed(concatCard(props.card)), black: !isRed(concatCard(props.card)) }"
+      :src="`/images/cards/${replaceCardSuits(concatCard(props.card)).toLowerCase()}.png`"
+      :alt="toSym(concatCard(props.card))"
+    />
   </div>
 </template>
 
-<style>
+<style scoped>
 .card {
   width: 100px;
   height: 150px;
-  display: flexbox;
+  display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .red {
-  color: red;
+  color: var(--color-red-suit, red);
 }
 
 .black {
-  color: black;
+  color: var(--color-black-suit, black);
 }
 
-.red,
-.black {
-  text-align: center;
-  font-size: 30pt;
-}
-
-img{
+img {
   padding: 0;
   height: 100%;
 }

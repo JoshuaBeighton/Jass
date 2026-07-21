@@ -8,6 +8,8 @@ const idx = ref<number | undefined>()
 const selected = ref(false)
 
 async function login() {
+  // Prevent login if name or idx is not set
+  if (!name.value || idx.value === undefined) return
   const host = window.location.hostname
   selected.value = true
   await fetch(`http://${host}:9000/player`, {

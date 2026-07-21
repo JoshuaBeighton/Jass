@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import Scoreboard from './Scoreboard.vue'
+import type GameMode from '@/interfaces/GameMode.ts'
 
 const isMe = ref(false)
 const trumps = ref(false)
@@ -22,7 +23,7 @@ const props = defineProps<{
 }>()
 
 const emits = defineEmits<{
-  (e: 'update:selected', value: string): void
+  (e: 'update:selected', value: GameMode): void
 }>()
 
 async function fetchNextPlayer() {
@@ -48,7 +49,13 @@ async function fetchNextPlayer() {
       }
     } else {
       keepSending = false
-      emits('update:selected', data.game)
+      const gameMode: GameMode = {
+        game: data.game,
+        suit: data.suit,
+        start: data.start,
+        caller: data.caller,
+      }
+      emits('update:selected', gameMode)
     }
     if (!isMe.value && keepSending) {
       fetchNextPlayer()
@@ -77,7 +84,7 @@ async function sendGame(game: string) {
     body['suit'] = game.split('-')[1]
   }
 
-  await fetch(`http://${host}:9000/gameChoice`, {
+  const res = await fetch(`http://${host}:9000/gameChoice`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -87,7 +94,14 @@ async function sendGame(game: string) {
   if (game == 'Pass') {
     fetchNextPlayer()
   } else {
-    emits('update:selected', game)
+    const data = await res.json()
+    const gameMode: GameMode = {
+      game: data.game,
+      suit: data.suit,
+      start: data.start,
+      caller: data.caller,
+    }
+    emits('update:selected', gameMode)
   }
 }
 

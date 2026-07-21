@@ -41,7 +41,7 @@ public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
         Thread t = new Thread(() -> {
             try {
                 if (manager.getPlayers().get(manager.getNextToChoose()).getPlayerName().equals(name)) {
-                    String response = JsonManager.gameChoiceToJson(name, manager.getNextToChoose(),
+                    String response = JsonManager.gameChoiceToJson(manager.getNextToChoose(),
                             manager.getPlayers(), manager.getGame(), manager.isForced());
 
                     exchange.sendResponseHeaders(200, response.length());
@@ -55,7 +55,7 @@ public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
 
                 }
                 exchange.getResponseHeaders().add("Content-Type", "application/json");
-                String response = JsonManager.gameChoiceToJson(name, manager.getNextToChoose(), manager.getPlayers(),
+                String response = JsonManager.gameChoiceToJson(manager.getNextToChoose() == -1 ? manager.getNextPlayer() : manager.getNextToChoose(), manager.getPlayers(),
                         manager.getGame(), manager.isForced());
 
                 exchange.sendResponseHeaders(200, response.length());
@@ -80,7 +80,7 @@ public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
             System.out.println("Game Chosen: " + request.getName());
         }
         manager.incrementChooser();
-        String response = "success";
+        String response = JsonManager.gameChoiceToJson(manager.getNextToChoose() == -1 ? manager.getNextPlayer() : manager.getNextToChoose(), manager.getPlayers(), manager.getGame(), manager.isForced());
         exchange.sendResponseHeaders(200, response.length());
         OutputStream os = exchange.getResponseBody();
         os.write(response.getBytes());

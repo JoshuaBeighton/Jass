@@ -1,31 +1,24 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import Player from './Player.vue'
+import Card from './Card.vue'
 import TrickScore from './TrickScore.vue'
+import type GameMode from '@/interfaces/GameMode.ts'
+import type CardInterface from '@/interfaces/CardInterface.ts'
 
-const props = defineProps<{ game: string; name: string }>()
+const props = defineProps<{ game: GameMode; name: string }>()
 
 const players = ref([props.name, 'loading', 'loading', 'loading'])
-
 const nextPlayer = ref('')
 
 const scores = ref([
-  {
-    p1: 'loading',
-    p2: 'loading',
-    score: 0,
-  },
-  {
-    p1: 'loading',
-    p2: 'loading',
-    score: 0,
-  },
+  { p1: 'loading', p2: 'loading', score: 0 },
+  { p1: 'loading', p2: 'loading', score: 0 },
 ])
 
-const leftCard = ref(undefined)
-const topCard = ref(undefined)
-const rightCard = ref(undefined)
-const bottomCard = ref(undefined)
+const leftCard = ref<undefined | CardInterface>(undefined)
+const topCard = ref<undefined | CardInterface>(undefined)
+const rightCard = ref<undefined | CardInterface>(undefined)
+const bottomCard = ref<undefined | CardInterface>(undefined)
 
 const firstPlayer = ref('')
 
@@ -95,7 +88,7 @@ async function getNextCard() {
   tricksPlayed.value++
 }
 
-function updateCard(cards: [any]) {
+function updateCard(cards: [CardInterface]) {
   const startIndex = players.value.indexOf(firstPlayer.value)
   for (let i = 0; i < cards.length; i++) {
     let currentCard = cards[i]
@@ -150,99 +143,218 @@ onMounted(() => {
 
 <template>
   <div class="header">
-    <h1>{{ props.game }}</h1>
+    <h1>Jass</h1>
     <h1>{{ props.name }}</h1>
   </div>
 
   <div class="parent">
-    <div class="mat">
-      <Player class="bottom" :card="bottomCard" :name="players[0]" :up-next="isPlayer(0)"></Player>
-      <Player class="right" :card="rightCard" :name="players[1]" :up-next="isPlayer(1)"></Player>
-      <Player class="top" :card="topCard" :name="players[2]" :up-next="isPlayer(2)"></Player>
-      <Player class="left" :card="leftCard" :name="players[3]" :up-next="isPlayer(3)"></Player>
+    <div class="row">
+      <div class="mat">
+        <div class="player-info p-bottom" :class="{ upNext: isPlayer(0) }">
+          <span class="player-name">{{ players[0] }}</span>
+        </div>
+        <div class="player-info p-right" :class="{ upNext: isPlayer(1) }">
+          <span class="player-name">{{ players[1] }}</span>
+        </div>
+        <div class="player-info p-top" :class="{ upNext: isPlayer(2) }">
+          <span class="player-name">{{ players[2] }}</span>
+        </div>
+        <div class="player-info p-left" :class="{ upNext: isPlayer(3) }">
+          <span class="player-name">{{ players[3] }}</span>
+        </div>
+
+        <div class="trick-area">
+          <div class="card-slot card-bottom">
+            <Card :card="bottomCard" :can-play="false" />
+          </div>
+          <div class="card-slot card-right">
+            <Card :card="rightCard" :can-play="false" />
+          </div>
+          <div class="card-slot card-top">
+            <Card :card="topCard" :can-play="false" />
+          </div>
+          <div class="card-slot card-left">
+            <Card :card="leftCard" :can-play="false" />
+          </div>
+        </div>
+      </div>
+      <TrickScore :scores="scores" :game="props.game" />
     </div>
     <button class="continue-button" v-if="count == 4" v-on:click="clearDeck">Continue</button>
   </div>
-  <TrickScore :scores="scores" />
 </template>
-
-<style>
+<style scoped>
 .parent {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 16px;
   justify-content: center;
   align-items: center;
+  margin: 10px;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  justify-content: center;
+  align-items: stretch;
+  padding: 20px;
+  background-color: var(--color-background-mute);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  width: fit-content;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .mat {
   position: relative;
-  background-color: darkgreen;
-  border-radius: 15px;
-  width: 500px;
-  height: 500px;
-  border: 2px solid green;
+  background-color: #1b5e20;
+  border-radius: 20px;
+  width: 550px;
+  height: 550px;
+  box-shadow:
+    inset 0 0 30px rgba(0, 0, 0, 0.5),
+    0 8px 16px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
 }
 
-.mat p {
+.player-info {
   position: absolute;
-  margin: 0;
+  padding: 6px 14px;
+  background: var(--color-background-soft);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+  transition: all 0.2s ease;
 }
 
-/* Bottom center */
-.bottom {
-  bottom: 10px;
+.player-info.upNext {
+  background: var(--color-accent);
+  color: var(--color-heading);
+  border-color: var(--color-heading);
+  box-shadow: 0 0 12px var(--color-heading);
+}
+
+.p-bottom {
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.p-bottom.upNext {
+  transform: translateX(-50%) scale(1.08);
+}
+
+.p-top {
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.p-top.upNext {
+  transform: translateX(-50%) scale(1.08);
+}
+
+.p-left {
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.p-left.upNext {
+  transform: translateY(-50%) scale(1.08);
+}
+
+.p-right {
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.p-right.upNext {
+  transform: translateY(-50%) scale(1.08);
+}
+
+.trick-area {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 320px;
+  height: 320px;
+  transform: translate(-50%, -50%);
+}
+
+.card-slot {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-bottom {
+  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
 }
 
-/* Top center */
-.top {
-  top: 10px;
+.card-top {
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
 }
 
-/* Left center */
-.left {
-  left: 10px;
+.card-left {
+  left: 0;
   top: 50%;
   transform: translateY(-50%);
 }
 
-/* Right center */
-.right {
-  right: 10px;
+.card-right {
+  right: 0;
   top: 50%;
   transform: translateY(-50%);
-}
-
-.upNext {
-  color: red;
 }
 
 .header {
   display: flex;
   flex-direction: row;
-  flex: 1;
   justify-content: space-between;
+  align-items: center;
   width: 100%;
-  margin: 0;
-  padding: 0;
+  padding: 0 8px;
+  color: var(--color-heading);
 }
 
 .header h1 {
-  margin: 6px;
-  padding: 0;
+  margin: 6px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-heading);
 }
 
 .continue-button {
-  padding: 10px 20px;
+  padding: 12px 24px;
   font-size: 1rem;
-  border-radius: 5px;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: var(--color-accent);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
   cursor: pointer;
-  margin-top: 10px;
-  width: 150px;
-  height: 60px;
+  margin-top: 8px;
+  transition:
+    opacity 0.2s ease,
+    transform 0.1s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.continue-button:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.continue-button:active {
+  transform: translateY(0);
 }
 </style>

@@ -4,6 +4,7 @@ import GameSelect from './components/game/GameSelect.vue'
 import Mat from './components/game/Mat.vue'
 import LoginCard from './components/login/LoginCard.vue'
 import { ref } from 'vue'
+import type GameMode from './interfaces/GameMode.ts'
 
 function removeLogin() {
   login.value = false
@@ -15,14 +16,23 @@ function setName(nameInput: string) {
   name.value = nameInput
 }
 
-function gameChosen(gameSelected: string) {
+function gameChosen(gameSelected: GameMode) {
+  console.log('Game chosen:', gameSelected)
   currentGame.value = gameSelected
   select.value = false
   mat.value = true
 }
 
 const name = ref('')
-const currentGame = ref('')
+
+const defaultGame: GameMode = {
+  game: '',
+  suit: undefined,
+  start: undefined,
+  caller: '',
+}
+
+const currentGame = ref(defaultGame)
 const isMe = ref(false)
 const deckRef = ref<InstanceType<typeof Deck>>()
 

@@ -109,7 +109,7 @@ th {
 .col-team {
   width: 30%;
   text-align: center;
-  color: var(--color-accent);
+  color: var(--color-text);
 }
 
 tr {
