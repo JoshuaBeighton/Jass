@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import Scoreboard from './Scoreboard.vue'
+import type GameMode from '@/interfaces/GameMode.ts'
 
 const isMe = ref(false)
 const trumps = ref(false)
@@ -22,7 +23,7 @@ const props = defineProps<{
 }>()
 
 const emits = defineEmits<{
-  (e: 'update:selected', value: string): void
+  (e: 'update:selected', value: GameMode): void
 }>()
 
 async function fetchNextPlayer() {
@@ -48,7 +49,13 @@ async function fetchNextPlayer() {
       }
     } else {
       keepSending = false
-      emits('update:selected', data.game)
+      const gameMode: GameMode = {
+        game: data.game,
+        suit: data.suit,
+        start: data.start,
+        caller: data.caller,
+      }
+      emits('update:selected', gameMode)
     }
     if (!isMe.value && keepSending) {
       fetchNextPlayer()
@@ -77,7 +84,7 @@ async function sendGame(game: string) {
     body['suit'] = game.split('-')[1]
   }
 
-  await fetch(`http://${host}:9000/gameChoice`, {
+  const res = await fetch(`http://${host}:9000/gameChoice`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -87,7 +94,14 @@ async function sendGame(game: string) {
   if (game == 'Pass') {
     fetchNextPlayer()
   } else {
-    emits('update:selected', game)
+    const data = await res.json()
+    const gameMode: GameMode = {
+      game: data.game,
+      suit: data.suit,
+      start: data.start,
+      caller: data.caller,
+    }
+    emits('update:selected', gameMode)
   }
 }
 
@@ -100,45 +114,122 @@ onMounted(() => {
   <div class="parent">
     <hr class="smallHr" />
     <div class="gameSelect">
-      <p v-if="!isMe">Waiting on {{ nextChooser }}</p>
+      <h2 v-if="!isMe" class="waitingText">
+        Waiting on <span class="highlightName">{{ nextChooser }}</span>
+      </h2>
+      <div class="selectArea" v-if="isMe">
+        <h2>{{ trumps ? 'Choose a Suit' : 'Choose a Game' }}</h2>
+        <div class="buttons">
+          <button
+            v-if="showMainButtons()"
+            v-for="game in games"
+            :key="game.id"
+            @click="() => sendGame(game.key)"
+          >
+            {{ game.text }}
+          </button>
 
-      <div v-if="isMe" class="buttons">
-        <button v-if="showMainButtons()" v-for="game in games" @click="() => sendGame(game.key)">
-          {{ game.text }}
-        </button>
-        <button
-          v-if="trumps"
-          v-for="suit in ['Clubs', 'Diamonds', 'Hearts', 'Spades']"
-          @click="() => sendGame('trumps-' + suit.toLowerCase())"
-        >
-          {{ suit }}
-        </button>
+          <button
+            v-if="trumps"
+            v-for="suit in ['Clubs', 'Diamonds', 'Hearts', 'Spades']"
+            :key="suit"
+            :class="['suit-btn', suit.toLowerCase()]"
+            @click="() => sendGame('trumps-' + suit.toLowerCase())"
+          >
+            {{ suit }}
+          </button>
+        </div>
       </div>
     </div>
     <Scoreboard />
   </div>
 </template>
 
-<style>
-.smallHr {
-  width: 80%;
-}
-
-.buttons {
+<style scoped>
+.selectArea {
   display: flex;
-  width: fit-content;
-  gap: 2px;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
 }
 
 .parent {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 24px;
   justify-content: center;
   align-items: center;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.gameSelect {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.waitingText {
+  color: var(--color-text);
+}
+
+.highlightName {
+  color: var(--color-primary);
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  gap: 8px;
+  justify-content: center;
 }
 
 button {
-  width: 100%;
+  flex: 1 1 120px;
+  min-width: 100px;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  color: var(--color-text);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+button:hover {
+  background-color: var(--color-background-mute);
+  border-color: var(--color-border-hover);
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+.suit-btn {
+  background-color: var(--color-background);
+  border-color: var(--color-border);
+}
+
+.suit-btn.hearts,
+.suit-btn.diamonds {
+  color: var(--color-red-suit);
+}
+
+.suit-btn.hearts:hover,
+.suit-btn.diamonds:hover,
+.suit-btn.clubs:hover,
+.suit-btn.spades:hover {
+  background-color: var(--color-background-mute);
+}
+
+.suit-btn.clubs,
+.suit-btn.spades {
+  color: var(--color-text);
 }
 </style>

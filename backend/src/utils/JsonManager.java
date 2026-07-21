@@ -100,7 +100,7 @@ public class JsonManager {
         return null;
     }
 
-    public static String gameChoiceToJson(String player, int index, List<Player> players, IGame g, boolean forced) {
+    public static String gameChoiceToJson(int index, List<Player> players, IGame g, boolean forced) {
         JSONObject jo = new JSONObject();
         if (g == null) {
             jo.put("chooser", players.get(index).getPlayerName());
@@ -108,7 +108,10 @@ public class JsonManager {
 
         } else {
             jo.put("game", g.getName());
-            jo.put("type", g.getType());
+            jo.put("caller", players.get(index).getPlayerName());
+            if (g instanceof Trumps) {
+                jo.put("suit", Suit.toString(Suit.fromIndex(g.getType())));
+            }
         }
 
         return jo.toString();

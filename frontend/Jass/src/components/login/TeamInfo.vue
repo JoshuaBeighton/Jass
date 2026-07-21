@@ -66,8 +66,18 @@ function setTeam2() {
 
 <template>
   <div class="teams">
-    <div class="team" @click="setTeam1" :class="{ selected: isTeam1() }">
-      <h3>Team 1</h3>
+    <div
+      class="team"
+      @click="setTeam1"
+      :class="{ selected: isTeam1() }"
+      tabindex="0"
+      @keydown.enter="setTeam1()"
+      @keydown.space.prevent="setTeam1()"
+    >
+      <h3>
+        Team 1
+        <span class="count" :class="{ full: team1.length >= 2 }">{{ team1.length }}/2</span>
+      </h3>
       <ul>
         <li v-for="player in team1" :key="player.name">
           {{ player.name }}
@@ -75,8 +85,18 @@ function setTeam2() {
       </ul>
     </div>
 
-    <div class="team" @click="setTeam2" :class="{ selected: isTeam2() }">
-      <h3>Team 2</h3>
+    <div
+      class="team"
+      @click="setTeam2"
+      :class="{ selected: isTeam2() }"
+      tabindex="0"
+      @keydown.enter="setTeam2()"
+      @keydown.space.prevent="setTeam2()"
+    >
+      <h3>
+        Team 2
+        <span class="count" :class="{ full: team2.length >= 2 }">{{ team2.length }}/2</span>
+      </h3>
       <ul>
         <li v-for="player in team2" :key="player.name">
           {{ player.name }}
@@ -89,26 +109,78 @@ function setTeam2() {
 <style>
 .teams {
   display: flex;
-  flex-direction: row;
+  gap: 1rem;
   width: 100%;
-  gap: 2rem;
 }
 
 .team {
-  padding: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  flex: 1;
+  background-color: var(--color-background-mute);
+  display: flex;
+  flex-direction: column;
+  min-width: 8rem;
+  min-height: 5rem;
+  width: 100%;
+  padding: 0.2rem 0.5rem;
+
+  border: 1px solid #666;
+  border-radius: 8px;
+
+  cursor: pointer;
+  user-select: none;
+
+  transition:
+    border-color 150ms,
+    background-color 150ms,
+    transform 150ms;
+}
+
+.count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c-accent) 15%, transparent);
+  color: var(--c-accent);
+  transition:
+    background-color 150ms,
+    color 150ms;
+}
+
+.count.full {
+  background: var(--c-accent);
+  color: white;
 }
 
 .team h3 {
-  margin-top: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+  text-align: center;
+  white-space: nowrap;
+  justify-content: space-between;
+  white-space: nowrap;
+}
+
+.team ul {
+  margin: 0;
+  padding-left: 1.25rem;
 }
 
 .team:hover {
   border-color: var(--c-accent-muted);
+  transform: translateY(-2px);
+}
+
+.team:focus-visible {
+  outline: none;
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--c-accent) 30%, transparent);
 }
 
 .selected {
   border-color: var(--c-accent);
+  background: rgb(from var(--c-accent) r g b / 10%);
 }
 </style>

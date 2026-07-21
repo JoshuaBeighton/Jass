@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import Card from './Card.vue'
+import { concatCard } from '@/utils/SuitManipulation.ts'
+import type CardInterface from '@/interfaces/CardInterface.ts'
 
 const props = defineProps<{
   name: string
@@ -8,7 +10,7 @@ const props = defineProps<{
 }>()
 
 const round = ref(0)
-const cards = ref([])
+const cards = ref<CardInterface[]>([])
 async function fetchHand() {
   const host = window.location.hostname
 
@@ -21,25 +23,6 @@ async function fetchHand() {
     console.log(cards.value)
   } catch (err) {
     console.error('Error fetching hand:', err)
-  }
-}
-
-function concatCard(card: any) {
-  return card.number + suitToUnicode(card.suit)
-}
-
-function suitToUnicode(inp: string) {
-  switch (inp) {
-    case 'DIAMONDS':
-      return '♦'
-    case 'HEARTS':
-      return '♥'
-    case 'SPADES':
-      return '♠'
-    case 'CLUBS':
-      return '♣'
-    default:
-      return '?'
   }
 }
 
@@ -71,7 +54,7 @@ defineExpose({
     <Card
       v-for="(card, i) in cards"
       :key="String(i) + ':' + String(round)"
-      :card-text="concatCard(card)"
+      :card="card"
       :can-play="props.canPlay"
       :style="cardStyle(i)"
     />
@@ -81,7 +64,7 @@ defineExpose({
 <style>
 .cards {
   position: relative;
-  margin: 10px;
+  margin: 10px 0px;
   top: 10px;
   height: 200px;
   width: 100%;

@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import TeamInfo from './TeamInfo.vue'
+import WaitingJoin from './WaitingJoin.vue'
 
 const name = ref('')
 const idx = ref<number | undefined>()
 const selected = ref(false)
 
 async function login() {
+  // Prevent login if name or idx is not set
+  if (!name.value || idx.value === undefined) return
   const host = window.location.hostname
   selected.value = true
   await fetch(`http://${host}:9000/player`, {
@@ -40,6 +43,7 @@ const emit = defineEmits<{
       <input v-model="name" type="text" placeholder="Enter Name" />
       <TeamInfo @update:ready="emitReady" v-model:selected="idx"></TeamInfo>
       <button v-if="!selected" v-on:click="login">Go!</button>
+      <WaitingJoin v-else text="Waiting for other players to join"></WaitingJoin>
     </div>
   </div>
 </template>
@@ -80,7 +84,10 @@ button:hover {
   flex-direction: column;
   gap: 2rem;
 }
+
 h1 {
+  font-size: 2.5rem;
+  color: var(--color-heading);
   margin-left: auto;
   margin-right: auto;
 }
