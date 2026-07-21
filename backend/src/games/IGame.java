@@ -9,7 +9,7 @@ public interface IGame {
 
     public int getType();
 
-    public int wins(List<Card> trick);
+    public int wins(List<Card> trick, int trickNo);
 
     public int score(List<Card> cards);
 

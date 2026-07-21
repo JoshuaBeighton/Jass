@@ -6,6 +6,7 @@ import src.GameManager;
 import src.games.BottomUp;
 import src.games.IGame;
 import src.games.Middle;
+import src.games.Slalom;
 import src.games.TopDown;
 import src.games.Trumps;
 import src.objs.*;
@@ -94,6 +95,9 @@ public class JsonManager {
             case "trumps":
                 String suit = jo.getString("suit");
                 return new Trumps(Suit.fromChar(suit.charAt(0)));
+            case "slalom":
+                String start = jo.getString("start");
+                return new Slalom(start);
             default:
                 break;
         }
@@ -111,6 +115,10 @@ public class JsonManager {
             jo.put("caller", players.get(index).getPlayerName());
             if (g instanceof Trumps) {
                 jo.put("suit", Suit.toString(Suit.fromIndex(g.getType())));
+            }
+
+            if (g instanceof Slalom) {
+                jo.put("start", g.getType() == 0 ? "Top" : "Bottom");
             }
         }
 

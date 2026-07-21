@@ -17,7 +17,7 @@ public class TopDown implements IGame {
         return "Top Down";
     }
 
-    public int wins(List<Card> trick) {
+    public int wins(List<Card> trick, int trickNo) {
         Suit masterSuit = trick.get(0).getSuit();
         int winner = 0;
         TopDownOrdering ordering = new TopDownOrdering();

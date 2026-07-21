@@ -18,7 +18,7 @@ public class BottomUp implements IGame {
         return "Bottom Up";
     }
 
-    public int wins(List<Card> trick) {
+    public int wins(List<Card> trick, int trickNo) {
         Suit masterSuit = trick.get(0).getSuit();
         int winner = 0;
         Comparator<Card> ordering = new BottomUpOrdering();

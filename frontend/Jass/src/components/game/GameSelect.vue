@@ -5,6 +5,7 @@ import type GameMode from '@/interfaces/GameMode.ts'
 
 const isMe = ref(false)
 const trumps = ref(false)
+const slalom = ref(false)
 const nextChooser = ref('')
 
 let id = 0
@@ -15,6 +16,7 @@ const games = ref([
   { id: id++, text: 'Bottom Up', key: 'bottomUp' },
   { id: id++, text: 'Middle', key: 'middle' },
   { id: id++, text: 'Trumps', key: 'trumps' },
+  { id: id++, text: 'Slalom', key: 'slalom' },
   { id: id++, text: 'Pass', key: 'pass' },
 ])
 
@@ -66,12 +68,16 @@ async function fetchNextPlayer() {
 }
 
 function showMainButtons() {
-  return !trumps.value
+  return !trumps.value && !slalom.value
 }
 
 async function sendGame(game: string) {
   if (game.toLowerCase() == 'trumps') {
     trumps.value = true
+    return
+  }
+  if (game.toLowerCase() == 'slalom') {
+    slalom.value = true
     return
   }
 
@@ -82,6 +88,10 @@ async function sendGame(game: string) {
   if (game.startsWith('trumps-')) {
     body['name'] = game.split('-')[0]
     body['suit'] = game.split('-')[1]
+  }
+  if (game.startsWith('slalom-')) {
+    body['name'] = game.split('-')[0]
+    body['start'] = game.split('-')[1]
   }
 
   const res = await fetch(`http://${host}:9000/gameChoice`, {
@@ -118,7 +128,9 @@ onMounted(() => {
         Waiting on <span class="highlightName">{{ nextChooser }}</span>
       </h2>
       <div class="selectArea" v-if="isMe">
-        <h2>{{ trumps ? 'Choose a Suit' : 'Choose a Game' }}</h2>
+        <h2>
+          {{ slalom ? 'Choose a Start Position' : trumps ? 'Choose a Suit' : 'Choose a Game' }}
+        </h2>
         <div class="buttons">
           <button
             v-if="showMainButtons()"
@@ -137,6 +149,16 @@ onMounted(() => {
             @click="() => sendGame('trumps-' + suit.toLowerCase())"
           >
             {{ suit }}
+          </button>
+
+          <button
+            v-if="slalom"
+            v-for="opt in ['Top', 'Bottom']"
+            :key="opt"
+            :class="['suit-btn', opt.toLowerCase()]"
+            @click="() => sendGame('slalom-' + opt.toLowerCase())"
+          >
+            {{ opt }}
           </button>
         </div>
       </div>

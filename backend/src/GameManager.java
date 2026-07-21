@@ -17,7 +17,7 @@ import src.objs.Team;
 
 public class GameManager {
     public static final String[] GAMES = {
-            "Top Down", "Bottom Up", "Middle", "Trumps"
+            "Top Down", "Bottom Up", "Middle", "Trumps", "Slalom"
     };
 
 
@@ -249,7 +249,7 @@ public class GameManager {
         if (currentTrick.size() >= 4) {
             // Get the index of the card that won the trick, add it to the start player
             // (which will be the next player as it's wrapped around)
-            int winner = (currentGame.wins(currentTrick) + nextPlayer) % 4;
+            int winner = (currentGame.wins(currentTrick, trickCount) + nextPlayer) % 4;
             players.get(winner).getTeam().addScore(currentGame.score(currentTrick));
             currentTrick.clear();
             nextPlayer = winner;
