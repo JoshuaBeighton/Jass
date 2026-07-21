@@ -4,6 +4,7 @@ import java.util.List;
 
 import src.GameManager;
 import src.games.BottomUp;
+import src.games.FiveFour;
 import src.games.IGame;
 import src.games.Middle;
 import src.games.Slalom;
@@ -98,6 +99,11 @@ public class JsonManager {
             case "slalom":
                 String start = jo.getString("start");
                 return new Slalom(start);
+            case "fivefour":
+                start = jo.getString("start");
+                System.out.println(start);
+                return new FiveFour(start);
+
             default:
                 break;
         }
@@ -117,7 +123,7 @@ public class JsonManager {
                 jo.put("suit", Suit.toString(Suit.fromIndex(g.getType())));
             }
 
-            if (g instanceof Slalom) {
+            if (g instanceof Slalom || g instanceof FiveFour) {
                 jo.put("start", g.getType() == 0 ? "Top" : "Bottom");
             }
         }

@@ -17,7 +17,7 @@ import src.objs.Team;
 
 public class GameManager {
     public static final String[] GAMES = {
-            "Top Down", "Bottom Up", "Middle", "Trumps", "Slalom"
+            "Top Down", "Bottom Up", "Middle", "Trumps", "Slalom", "FiveFour"
     };
 
 

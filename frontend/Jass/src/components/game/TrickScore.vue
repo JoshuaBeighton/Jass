@@ -23,6 +23,8 @@ const gameDescriptions: Record<string, string> = {
     'The highest card of the trump suit wins! If no trump cards are played, the highest card of the leading suit wins.',
   Slalom:
     'The game alternates between the highest card winning, and the lowest card winning. The caller can choose which way to start!',
+  FiveFour:
+    'Start by playing 5 tricks like a top-down or bottom up, then switch to the other for the last 4',
 }
 
 const description = computed(() => {
@@ -41,7 +43,7 @@ const description = computed(() => {
         <h2 :class="isRed(suitToUnicode(game.suit)) ? 'red' : '' + ' game-title'" v-if="game.suit">
           {{ suitToUnicode(game.suit) }}
         </h2>
-        <h2 class="game-title">({{ game.start }})</h2>
+        <h2 v-if="game.start" class="game-title">({{ game.start }})</h2>
       </div>
       <p class="game-description">{{ description }}</p>
     </header>
