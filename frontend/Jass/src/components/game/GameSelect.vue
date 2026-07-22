@@ -167,7 +167,7 @@ onMounted(() => {
             v-for="opt in ['Top', 'Bottom']"
             :key="opt"
             :class="['suit-btn', opt.toLowerCase()]"
-            @click="() => sendGame(slalom ? 'slalom-' : 'fivefour-' + opt.toLowerCase())"
+            @click="() => sendGame((slalom ? 'slalom-' : 'fivefour-') + opt.toLowerCase())"
           >
             {{ opt }}
           </button>

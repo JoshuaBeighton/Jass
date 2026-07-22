@@ -23,11 +23,11 @@ public class FiveFour implements IGame {
     }
 
     public String getName() {
-        return "Five-Four";
+        return "FiveFour";
     }
 
     public int wins(List<Card> trick, int trickNo) {
-        int polarity = trickNo > 5 ? 0 : 1;
+        int polarity = trickNo > 4 ? 0 : 1;
         if (polarity + type == 1) {
             return new TopDown().wins(trick, trickNo);
         } else {
