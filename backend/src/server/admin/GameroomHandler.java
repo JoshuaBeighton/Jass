@@ -3,6 +3,7 @@ package src.server.admin;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.Random;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -10,8 +11,8 @@ import com.sun.net.httpserver.HttpHandler;
 import src.GameManager;
 import src.server.JassHttpHandler;
 
-public class NextPlayerHandler extends JassHttpHandler implements HttpHandler {
-    public NextPlayerHandler(Map<Integer, GameManager> managers) {
+public class GameroomHandler extends JassHttpHandler implements HttpHandler {
+    public GameroomHandler(Map<Integer, GameManager> managers) {
         super(managers);
     }
 
@@ -28,14 +29,19 @@ public class NextPlayerHandler extends JassHttpHandler implements HttpHandler {
             }
     }
 
-    public void handleGet(HttpExchange exchange) throws IOException {
-        int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
-        GameManager manager = managers.get(key);
-        String response = String.valueOf(manager.getNextPlayer());
+    private void handleGet(HttpExchange exchange) throws IOException {
+        String visibility = exchange.getRequestURI().getPath().split("/gameroom/")[1];
+        int key = 0;
+        Random random = new Random();
+        while (key == 0 || managers.keySet().contains(key)) {
+            key = random.nextInt(1001, 9999);
+        }
+        GameManager manager = new GameManager(visibility.equals("public"));
+        managers.put(key, manager);
+        String response = String.valueOf(key);
         exchange.sendResponseHeaders(200, response.length());
         OutputStream os = exchange.getResponseBody();
         os.write(response.getBytes());
         os.close();
-        return;
     }
 }

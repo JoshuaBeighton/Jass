@@ -24,6 +24,7 @@ const games = ref([
 
 const props = defineProps<{
   name: string
+  gameroom: number
 }>()
 
 const emits = defineEmits<{
@@ -35,7 +36,15 @@ async function fetchNextPlayer() {
 
   try {
     let keepSending = true
-    const res = await fetch(`http://${host}:9000/gameChoice?name=${props.name}&lastidx=${counter}`)
+    const res = await fetch(
+      `http://${host}:9000/gameChoice?name=${props.name}&lastidx=${counter}`,
+      {
+        method: 'GET',
+        headers: {
+          gameroom: props.gameroom.toString(),
+        },
+      },
+    )
     if (!res.ok) throw new Error('Network response was not OK')
     const data = await res.json()
     if (data.chooser != undefined) {
@@ -103,6 +112,7 @@ async function sendGame(game: string) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      gameroom: props.gameroom.toString(),
     },
     body: JSON.stringify(body),
   })
@@ -174,7 +184,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <Scoreboard />
+    <Scoreboard :gameroom="props.gameroom" />
   </div>
 </template>
 

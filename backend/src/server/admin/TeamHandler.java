@@ -2,6 +2,7 @@ package src.server.admin;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Map;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -13,8 +14,8 @@ import src.utils.JsonManager;
 
 public class TeamHandler extends JassHttpHandler implements HttpHandler {
 
-    public TeamHandler(GameManager manager) {
-        super(manager);
+    public TeamHandler(Map<Integer, GameManager> managers) {
+        super(managers);
     }
 
     @Override
@@ -31,6 +32,8 @@ public class TeamHandler extends JassHttpHandler implements HttpHandler {
     }
 
     private void handleGet(HttpExchange exchange) throws IOException {
+        int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
+        GameManager manager = managers.get(key);
         System.out.println("players:");
         for (Player p : manager.getPlayers()) {
             System.out.println(p.getPlayerName());

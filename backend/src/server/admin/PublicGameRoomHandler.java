@@ -4,14 +4,17 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import src.GameManager;
 import src.server.JassHttpHandler;
 
-public class NextPlayerHandler extends JassHttpHandler implements HttpHandler {
-    public NextPlayerHandler(Map<Integer, GameManager> managers) {
+public class PublicGameRoomHandler extends JassHttpHandler implements HttpHandler {
+    public PublicGameRoomHandler(Map<Integer, GameManager> managers) {
         super(managers);
     }
 
@@ -28,14 +31,20 @@ public class NextPlayerHandler extends JassHttpHandler implements HttpHandler {
             }
     }
 
-    public void handleGet(HttpExchange exchange) throws IOException {
-        int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
-        GameManager manager = managers.get(key);
-        String response = String.valueOf(manager.getNextPlayer());
+    private void handleGet(HttpExchange exchange) throws IOException {
+        JSONArray array = new JSONArray();
+        for (int key : managers.keySet()) {
+            if (managers.get(key).visible && managers.get(key).getPlayers().size() < 4) {
+                JSONObject obj = new JSONObject();
+                obj.put("id", key);
+                obj.put("playerCount", managers.get(key).getPlayers().size());
+                array.put(obj);
+            }
+        }
+        String response = array.toString();
         exchange.sendResponseHeaders(200, response.length());
         OutputStream os = exchange.getResponseBody();
         os.write(response.getBytes());
         os.close();
-        return;
     }
 }

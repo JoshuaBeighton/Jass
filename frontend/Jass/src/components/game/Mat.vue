@@ -5,7 +5,7 @@ import TrickScore from './TrickScore.vue'
 import type GameMode from '@/interfaces/GameMode.ts'
 import type CardInterface from '@/interfaces/CardInterface.ts'
 
-const props = defineProps<{ game: GameMode; name: string }>()
+const props = defineProps<{ game: GameMode; name: string; gameroom: number }>()
 
 const players = ref([props.name, 'loading', 'loading', 'loading'])
 const nextPlayer = ref('')
@@ -37,7 +37,13 @@ async function getPlayers() {
   const host = window.location.hostname
 
   try {
-    const res = await fetch(`http://${host}:9000/player/`)
+    const res = await fetch(`http://${host}:9000/player/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        gameroom: props.gameroom.toString(),
+      },
+    })
     if (!res.ok) throw new Error('Network response was not OK')
 
     const data = await res.json()
@@ -71,7 +77,11 @@ async function getNextCard() {
   const host = window.location.hostname
   for (let x = 0; x <= 4; x++) {
     try {
-      const res = await fetch(`http://${host}:9000/cardWait/${count.value % 4}`)
+      const res = await fetch(`http://${host}:9000/cardWait/${count.value % 4}`, {
+        headers: {
+          Gameroom: props.gameroom.toString(),
+        },
+      })
       if (!res.ok) throw new Error('Network response was not OK')
 
       const data = await res.json()
@@ -123,7 +133,12 @@ async function clearDeck() {
   topCard.value = undefined
   rightCard.value = undefined
   bottomCard.value = undefined
-  const settings = { method: 'POST' }
+  const settings = {
+    method: 'POST',
+    headers: {
+      Gameroom: props.gameroom.toString(),
+    },
+  }
   const res = await fetch(`http://${host}:9000/resetTrick`, settings)
   if (!res.ok) throw new Error('Network response was not OK')
   const data = await res.json()
@@ -165,16 +180,16 @@ onMounted(() => {
 
         <div class="trick-area">
           <div class="card-slot card-bottom">
-            <Card :card="bottomCard" :can-play="false" />
+            <Card :card="bottomCard" :can-play="false" :gameroom="props.gameroom" />
           </div>
           <div class="card-slot card-right">
-            <Card :card="rightCard" :can-play="false" />
+            <Card :card="rightCard" :can-play="false" :gameroom="props.gameroom" />
           </div>
           <div class="card-slot card-top">
-            <Card :card="topCard" :can-play="false" />
+            <Card :card="topCard" :can-play="false" :gameroom="props.gameroom" />
           </div>
           <div class="card-slot card-left">
-            <Card :card="leftCard" :can-play="false" />
+            <Card :card="leftCard" :can-play="false" :gameroom="props.gameroom" />
           </div>
         </div>
       </div>

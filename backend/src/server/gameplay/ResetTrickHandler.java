@@ -2,6 +2,7 @@ package src.server.gameplay;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Map;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -11,8 +12,8 @@ import src.server.JassHttpHandler;
 import src.utils.JsonManager;
 
 public class ResetTrickHandler extends JassHttpHandler implements HttpHandler {
-    public ResetTrickHandler(GameManager manager) {
-        super(manager);
+    public ResetTrickHandler(Map<Integer, GameManager> managers) {
+        super(managers);
     }
 
     @Override
@@ -29,6 +30,8 @@ public class ResetTrickHandler extends JassHttpHandler implements HttpHandler {
     }
 
     private void handlePost(HttpExchange exchange) throws IOException {
+        int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
+        GameManager manager = managers.get(key);
         try {
             manager.resetTrick();
         }

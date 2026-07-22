@@ -5,6 +5,9 @@ import Mat from './components/game/Mat.vue'
 import LoginCard from './components/login/LoginCard.vue'
 import { ref } from 'vue'
 import type GameMode from './interfaces/GameMode.ts'
+import RoomChooser from './components/login/RoomChooser.vue'
+
+const gameroomNumber = ref(-1)
 
 function removeLogin() {
   login.value = false
@@ -51,20 +54,34 @@ function gameFinished(finished: boolean) {
 </script>
 
 <template>
-  <LoginCard @update:name="setName" @update:ready="removeLogin" v-if="login"></LoginCard>
-  <Mat
-    :game="currentGame"
-    :name="name"
-    v-if="mat"
-    @update:isme="
-      (val) => {
-        isMe = val
-      }
-    "
-    @update:finished="gameFinished"
-  ></Mat>
-  <Deck v-if="deck" :name="name" :can-play="isMe" ref="deckRef"></Deck>
-  <GameSelect v-if="select" :name="name" @update:selected="gameChosen"></GameSelect>
+  <RoomChooser v-if="gameroomNumber == -1" @update:selected="(val) => (gameroomNumber = val)" />
+  <div v-else>
+    <LoginCard
+      @update:name="setName"
+      @update:ready="removeLogin"
+      v-if="login"
+      :gameroom="gameroomNumber"
+    ></LoginCard>
+    <Mat
+      :gameroom="gameroomNumber"
+      :game="currentGame"
+      :name="name"
+      v-if="mat"
+      @update:isme="
+        (val) => {
+          isMe = val
+        }
+      "
+      @update:finished="gameFinished"
+    ></Mat>
+    <Deck v-if="deck" :name="name" :can-play="isMe" ref="deckRef" :gameroom="gameroomNumber"></Deck>
+    <GameSelect
+      v-if="select"
+      :name="name"
+      @update:selected="gameChosen"
+      :gameroom="gameroomNumber"
+    ></GameSelect>
+  </div>
 </template>
 
 <style></style>

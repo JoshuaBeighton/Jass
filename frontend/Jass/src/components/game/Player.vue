@@ -6,13 +6,19 @@ const props = defineProps<{
   name: string | undefined
   card: CardInterface
   upNext: boolean
+  gameroom: number
 }>()
 </script>
 
 <template>
   <div class="player">
     <p v-bind:class="{ upNext: props.upNext }">{{ props.name }}</p>
-    <Card v-if="card != undefined" :card="props.card" :can-play="false"></Card>
+    <Card
+      v-if="card != undefined"
+      :card="props.card"
+      :can-play="false"
+      :gameroom="props.gameroom"
+    ></Card>
   </div>
 </template>
 

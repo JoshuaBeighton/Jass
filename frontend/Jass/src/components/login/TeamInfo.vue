@@ -6,13 +6,18 @@ const team2 = ref<Array<{ name: string; team: number }>>([])
 const selectedClass = ref('selected')
 const selected = ref(-1)
 let counter = -1
+const props = defineProps<{ gameroom: number }>()
 
 async function fetchTeams() {
   const host = window.location.hostname
 
   try {
     // Long-poll request
-    const res = await fetch(`http://${host}:9000/teamWait/${counter}`)
+    const res = await fetch(`http://${host}:9000/teamWait/${counter}`, {
+      headers: {
+        gameroom: props.gameroom.toString(),
+      },
+    })
     if (!res.ok) throw new Error('Network response was not OK')
 
     const data = await res.json()

@@ -2,6 +2,8 @@ package src.server;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.sun.net.httpserver.HttpServer;
 
@@ -10,10 +12,12 @@ import src.server.admin.*;
 import src.server.gameplay.*;
 
 public class JassHttpServer {
-    private static GameManager manager;
+    private static Map<Integer, GameManager> manager;
 
     public static void init() {
-        manager = new GameManager();
+        manager = new HashMap<Integer, GameManager>();
+        GameManager debugManager = new GameManager(true);
+        manager.put(1001, debugManager);
         try {
             HttpServer server = HttpServer.create(new InetSocketAddress(9000), 0);
 
@@ -27,6 +31,8 @@ public class JassHttpServer {
             server.createContext("/nextCard", new NextCardHandler(manager));
             server.createContext("/resetTrick", new ResetTrickHandler(manager));
             server.createContext("/scores", new ScoresHandler(manager));
+            server.createContext("/gameroom", new GameroomHandler(manager));
+            server.createContext("/publicgameroom", new PublicGameRoomHandler(manager));
 
             server.setExecutor(null);
             server.start();

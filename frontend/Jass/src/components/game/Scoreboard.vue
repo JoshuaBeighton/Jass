@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+const props = defineProps<{ gameroom: number }>()
 
 const scores = ref({
   teams: ['Loading...', 'Loading...'],
@@ -14,7 +15,11 @@ const scores = ref({
 async function fetchScores() {
   const host = window.location.hostname
   try {
-    const res = await fetch(`http://${host}:9000/scores`)
+    const res = await fetch(`http://${host}:9000/scores`, {
+      headers: {
+        gameroom: props.gameroom.toString(),
+      },
+    })
     if (!res.ok) throw new Error('Network response was not OK')
     const data = await res.json()
     scores.value = data

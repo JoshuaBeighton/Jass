@@ -6,6 +6,7 @@ import WaitingJoin from './WaitingJoin.vue'
 const name = ref('')
 const idx = ref<number | undefined>()
 const selected = ref(false)
+const props = defineProps<{ gameroom: number }>()
 
 async function login() {
   // Prevent login if name or idx is not set
@@ -16,6 +17,7 @@ async function login() {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      gameroom: props.gameroom.toString(),
     },
     body: JSON.stringify({
       name: name.value,
@@ -41,7 +43,11 @@ const emit = defineEmits<{
       <h1>Jass</h1>
       <hr />
       <input v-model="name" type="text" placeholder="Enter Name" />
-      <TeamInfo @update:ready="emitReady" v-model:selected="idx"></TeamInfo>
+      <TeamInfo
+        @update:ready="emitReady"
+        v-model:selected="idx"
+        :gameroom="props.gameroom"
+      ></TeamInfo>
       <button v-if="!selected" v-on:click="login">Go!</button>
       <WaitingJoin v-else text="Waiting for other players to join"></WaitingJoin>
     </div>

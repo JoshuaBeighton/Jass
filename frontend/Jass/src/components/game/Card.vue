@@ -6,6 +6,7 @@ import { ref } from 'vue'
 const props = defineProps<{
   card?: Card | undefined
   canPlay: boolean
+  gameroom: number
 }>()
 
 const played = ref(false)
@@ -17,6 +18,7 @@ async function sendCard() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Gameroom: props.gameroom.toString(),
       },
       body: JSON.stringify(replaceCardSuits(concatCard(props.card))),
     })

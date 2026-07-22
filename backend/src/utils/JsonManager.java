@@ -54,10 +54,9 @@ public class JsonManager {
                 return new Player(name, t);
             }
         }
-        Team team = new Team();
-        teams.add(team);
 
-        return new Player(name, team);
+
+        return null;
     }
 
     public static String cardsToJson(List<Card> cards) {

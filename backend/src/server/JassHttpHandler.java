@@ -1,23 +1,24 @@
 package src.server;
 
 import java.io.OutputStream;
+import java.util.Map;
 
 import com.sun.net.httpserver.HttpExchange;
 
 import src.GameManager;
 
 public class JassHttpHandler {
-    protected GameManager manager;
+    protected Map<Integer, GameManager> managers;
 
-    public JassHttpHandler(GameManager manager) {
-        this.manager = manager;
+    public JassHttpHandler(Map<Integer, GameManager> managers) {
+        this.managers = managers;
     }
 
 
     protected static void addCorsHeaders(HttpExchange exchange) {
         exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "http://localhost:5173");
         exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type, Gameroom");
     }
 
     protected static void respondToOPTIONS(HttpExchange exchange) {

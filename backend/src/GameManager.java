@@ -38,12 +38,15 @@ public class GameManager {
     private List<Team> teams;
     public boolean cardsDealt = false;
 
-    public GameManager() {
+    public boolean visible;
+
+    public GameManager(boolean visible) {
         players = new ArrayList<Player>();
         teams = new ArrayList<Team>();
-        teams.add(new Team());
-        teams.add(new Team());
+        teams.add(new Team(0));
+        teams.add(new Team(1));
         fillDeck();
+        this.visible = visible;
     }
 
     private void fillDeck() {

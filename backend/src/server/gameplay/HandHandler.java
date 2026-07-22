@@ -2,6 +2,7 @@ package src.server.gameplay;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Map;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -12,8 +13,8 @@ import src.server.JassHttpHandler;
 import src.utils.JsonManager;
 
 public class HandHandler extends JassHttpHandler implements HttpHandler {
-    public HandHandler(GameManager manager) {
-        super(manager);
+    public HandHandler(Map<Integer, GameManager> managers) {
+        super(managers);
     }
 
     @Override
@@ -31,9 +32,10 @@ public class HandHandler extends JassHttpHandler implements HttpHandler {
 
     public void handleGet(HttpExchange exchange) throws IOException {
         String uri = exchange.getRequestURI().getPath().split("/hand/")[1];
-
+        int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
+        GameManager manager = managers.get(key);
         for (Player p : manager.getPlayers()) {
-            if (uri.toLowerCase().equals(p.getPlayerName().toLowerCase())) {   
+            if (uri.toLowerCase().equals(p.getPlayerName().toLowerCase())) {
                 String response = JsonManager.cardsToJson(p.getCards());
                 exchange.sendResponseHeaders(200, response.length());
                 exchange.getResponseHeaders().add("Content-Type", "application/json");

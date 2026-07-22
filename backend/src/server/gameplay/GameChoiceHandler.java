@@ -3,6 +3,7 @@ package src.server.gameplay;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -13,8 +14,8 @@ import src.server.JassHttpHandler;
 import src.utils.JsonManager;
 
 public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
-    public GameChoiceHandler(GameManager manager) {
-        super(manager);
+    public GameChoiceHandler(Map<Integer, GameManager> managers) {
+        super(managers);
     }
 
     @Override
@@ -34,6 +35,8 @@ public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
     }
 
     private void handleGet(HttpExchange exchange) throws IOException {
+        int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
+        GameManager manager = managers.get(key);
         String uri = exchange.getRequestURI().toString();
         String[] args = uri.split("\\?")[1].split("\\&");
         String name = args[0].split("=")[1];
@@ -71,6 +74,8 @@ public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
     }
 
     private void handlePost(HttpExchange exchange) throws IOException {
+        int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
+        GameManager manager = managers.get(key);
         System.out.println("Choosing game post received!");
         InputStream is = exchange.getRequestBody();
         String requestString = new String(is.readAllBytes());

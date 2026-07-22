@@ -2,6 +2,7 @@ package src.server.gameplay;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Map;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -11,8 +12,8 @@ import src.server.JassHttpHandler;
 import src.utils.JsonManager;
 
 public class CardWaitHandler extends JassHttpHandler implements HttpHandler {
-    public CardWaitHandler(GameManager manager) {
-        super(manager);
+    public CardWaitHandler(Map<Integer, GameManager> managers) {
+        super(managers);
     }
 
     @Override
@@ -27,6 +28,8 @@ public class CardWaitHandler extends JassHttpHandler implements HttpHandler {
     }
 
     private void handleGet(HttpExchange exchange) throws IOException {
+        int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
+        GameManager manager = managers.get(key);
         int count = Integer.parseInt(exchange.getRequestURI().getPath().split("/cardWait/")[1]);
 
         Thread t = new Thread(() -> {

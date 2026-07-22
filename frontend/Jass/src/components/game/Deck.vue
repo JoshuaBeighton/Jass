@@ -7,6 +7,7 @@ import type CardInterface from '@/interfaces/CardInterface.ts'
 const props = defineProps<{
   name: string
   canPlay: boolean
+  gameroom: number
 }>()
 
 const round = ref(0)
@@ -15,7 +16,11 @@ async function fetchHand() {
   const host = window.location.hostname
 
   try {
-    const res = await fetch(`http://${host}:9000/hand/${props.name}`)
+    const res = await fetch(`http://${host}:9000/hand/${props.name}`, {
+      headers: {
+        Gameroom: props.gameroom.toString(),
+      },
+    })
     if (!res.ok) throw new Error('Network response was not OK')
     const data = await res.json()
     cards.value = data
@@ -57,6 +62,7 @@ defineExpose({
       :card="card"
       :can-play="props.canPlay"
       :style="cardStyle(i)"
+      :gameroom="props.gameroom"
     />
   </div>
 </template>
