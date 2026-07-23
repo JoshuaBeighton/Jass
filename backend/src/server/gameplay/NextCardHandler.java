@@ -11,7 +11,15 @@ import com.sun.net.httpserver.HttpHandler;
 import src.GameManager;
 import src.server.JassHttpHandler;
 
+/**
+ * HTTP handler for submitting a card play to the game room.
+ */
 public class NextCardHandler extends JassHttpHandler implements HttpHandler {
+    /**
+     * Creates a new next-card handler.
+     *
+     * @param managers shared map of room ids to GameManager instances
+     */
     public NextCardHandler(Map<Integer, GameManager> managers) {
         super(managers);
     }
@@ -29,6 +37,12 @@ public class NextCardHandler extends JassHttpHandler implements HttpHandler {
             }
     }
 
+    /**
+     * Reads the played card from the request body and submits it to the game.
+     *
+     * @param exchange the HTTP exchange
+     * @throws IOException if reading or writing the request/response fails
+     */
     private void handlePost(HttpExchange exchange) throws IOException {
         int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
         GameManager manager = managers.get(key);
@@ -41,7 +55,6 @@ public class NextCardHandler extends JassHttpHandler implements HttpHandler {
         catch (Exception e) {
             e.printStackTrace();
         }
-
 
         String response = success ? "success" : "failure";
         int code = success ? 200 : 401;

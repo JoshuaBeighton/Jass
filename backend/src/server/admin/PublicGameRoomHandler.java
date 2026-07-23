@@ -13,7 +13,15 @@ import com.sun.net.httpserver.HttpHandler;
 import src.GameManager;
 import src.server.JassHttpHandler;
 
+/**
+ * HTTP handler for listing public game rooms with available player slots.
+ */
 public class PublicGameRoomHandler extends JassHttpHandler implements HttpHandler {
+    /**
+     * Creates a new public game room handler.
+     *
+     * @param managers shared map of room ids to GameManager instances
+     */
     public PublicGameRoomHandler(Map<Integer, GameManager> managers) {
         super(managers);
     }
@@ -31,6 +39,12 @@ public class PublicGameRoomHandler extends JassHttpHandler implements HttpHandle
             }
     }
 
+    /**
+     * Handles a GET request and returns a JSON array of joinable public rooms.
+     *
+     * @param exchange the HTTP exchange
+     * @throws IOException if writing the response fails
+     */
     private void handleGet(HttpExchange exchange) throws IOException {
         JSONArray array = new JSONArray();
         for (int key : managers.keySet()) {

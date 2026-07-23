@@ -12,7 +12,15 @@ import src.objs.Player;
 import src.server.JassHttpHandler;
 import src.utils.JsonManager;
 
+/**
+ * HTTP handler for retrieving a player's hand from a game room.
+ */
 public class HandHandler extends JassHttpHandler implements HttpHandler {
+    /**
+     * Creates a new hand handler.
+     *
+     * @param managers shared map of room ids to GameManager instances
+     */
     public HandHandler(Map<Integer, GameManager> managers) {
         super(managers);
     }
@@ -30,6 +38,12 @@ public class HandHandler extends JassHttpHandler implements HttpHandler {
             }
     }
 
+    /**
+     * Handles a GET request to return the named player's hand.
+     *
+     * @param exchange the HTTP exchange
+     * @throws IOException if writing the response fails
+     */
     public void handleGet(HttpExchange exchange) throws IOException {
         String uri = exchange.getRequestURI().getPath().split("/hand/")[1];
         int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));

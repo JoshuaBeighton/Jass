@@ -11,7 +11,18 @@ import com.sun.net.httpserver.HttpHandler;
 import src.GameManager;
 import src.server.JassHttpHandler;
 
+/**
+ * HTTP handler for creating new game rooms.
+ *
+ * Handles GET requests to generate a new game room key and create the associated GameManager. Supports CORS and OPTIONS
+ * preflight requests.
+ */
 public class GameroomHandler extends JassHttpHandler implements HttpHandler {
+    /**
+     * Constructs a new game room handler with the shared manager map.
+     *
+     * @param managers the map of active game managers keyed by room id
+     */
     public GameroomHandler(Map<Integer, GameManager> managers) {
         super(managers);
     }
@@ -29,6 +40,15 @@ public class GameroomHandler extends JassHttpHandler implements HttpHandler {
             }
     }
 
+    /**
+     * Handles GET requests for creating a new game room.
+     *
+     * Generates a unique numeric room key, constructs a GameManager for the requested visibility, and returns the key in
+     * the response body.
+     *
+     * @param exchange the HTTP exchange
+     * @throws IOException if an I/O error occurs writing the response
+     */
     private void handleGet(HttpExchange exchange) throws IOException {
         String visibility = exchange.getRequestURI().getPath().split("/gameroom/")[1];
         int key = 0;

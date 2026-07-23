@@ -11,13 +11,19 @@ import src.GameManager;
 import src.server.JassHttpHandler;
 import src.utils.JsonManager;
 
+/**
+ * HTTP handler for returning the current scores of the teams in a game room.
+ */
 public class ScoresHandler extends JassHttpHandler implements HttpHandler {
 
+    /**
+     * Creates a new scores handler.
+     *
+     * @param managers shared map of room ids to GameManager instances
+     */
     public ScoresHandler(Map<Integer, GameManager> managers) {
         super(managers);
     }
-
-
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -32,6 +38,12 @@ public class ScoresHandler extends JassHttpHandler implements HttpHandler {
             }
     }
 
+    /**
+     * Handles a GET request and returns team scores as JSON.
+     *
+     * @param exchange the HTTP exchange
+     * @throws IOException if writing the response fails
+     */
     private void handleGet(HttpExchange exchange) throws IOException {
         int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
         GameManager manager = managers.get(key);

@@ -11,7 +11,15 @@ import src.GameManager;
 import src.server.JassHttpHandler;
 import src.utils.JsonManager;
 
+/**
+ * HTTP handler for waiting until a new card is played in the current trick.
+ */
 public class CardWaitHandler extends JassHttpHandler implements HttpHandler {
+    /**
+     * Creates a new card wait handler.
+     *
+     * @param managers shared map of room ids to GameManager instances
+     */
     public CardWaitHandler(Map<Integer, GameManager> managers) {
         super(managers);
     }
@@ -27,6 +35,12 @@ public class CardWaitHandler extends JassHttpHandler implements HttpHandler {
             }
     }
 
+    /**
+     * Handles a GET request that waits until the current trick advances.
+     *
+     * @param exchange the HTTP exchange
+     * @throws IOException if writing the response fails
+     */
     private void handleGet(HttpExchange exchange) throws IOException {
         int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
         GameManager manager = managers.get(key);

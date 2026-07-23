@@ -11,7 +11,15 @@ import src.GameManager;
 import src.server.JassHttpHandler;
 import src.utils.JsonManager;
 
+/**
+ * HTTP handler for resetting the current trick and returning updated scores.
+ */
 public class ResetTrickHandler extends JassHttpHandler implements HttpHandler {
+    /**
+     * Creates a new reset trick handler.
+     *
+     * @param managers shared map of room ids to GameManager instances
+     */
     public ResetTrickHandler(Map<Integer, GameManager> managers) {
         super(managers);
     }
@@ -29,6 +37,12 @@ public class ResetTrickHandler extends JassHttpHandler implements HttpHandler {
             }
     }
 
+    /**
+     * Resets the current trick and returns the updated team scores as JSON.
+     *
+     * @param exchange the HTTP exchange
+     * @throws IOException if writing the response fails
+     */
     private void handlePost(HttpExchange exchange) throws IOException {
         int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
         GameManager manager = managers.get(key);

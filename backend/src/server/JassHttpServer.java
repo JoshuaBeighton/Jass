@@ -11,9 +11,17 @@ import src.GameManager;
 import src.server.admin.*;
 import src.server.gameplay.*;
 
+/**
+ * Application entry point for the Jass HTTP server.
+ *
+ * Registers REST endpoints and starts the embedded HTTP server.
+ */
 public class JassHttpServer {
     private static Map<Integer, GameManager> manager;
 
+    /**
+     * Initializes the server, registers request handlers, and starts listening.
+     */
     public static void init() {
         manager = new HashMap<Integer, GameManager>();
         GameManager debugManager = new GameManager(true);

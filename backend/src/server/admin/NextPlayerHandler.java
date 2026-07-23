@@ -10,7 +10,15 @@ import com.sun.net.httpserver.HttpHandler;
 import src.GameManager;
 import src.server.JassHttpHandler;
 
+/**
+ * HTTP handler for returning the next player index in a game room.
+ */
 public class NextPlayerHandler extends JassHttpHandler implements HttpHandler {
+    /**
+     * Creates a new handler for next-player requests.
+     *
+     * @param managers shared map of room ids to GameManager instances
+     */
     public NextPlayerHandler(Map<Integer, GameManager> managers) {
         super(managers);
     }
@@ -28,6 +36,12 @@ public class NextPlayerHandler extends JassHttpHandler implements HttpHandler {
             }
     }
 
+    /**
+     * Handles a GET request and returns the next player id for the room.
+     *
+     * @param exchange the HTTP exchange
+     * @throws IOException if writing the response fails
+     */
     public void handleGet(HttpExchange exchange) throws IOException {
         int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
         GameManager manager = managers.get(key);

@@ -1,114 +1,60 @@
 package src.objs;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import src.games.BottomUp;
-import src.games.IGame;
-import src.games.Middle;
-import src.games.TopDown;
-import src.games.Trumps;
 import src.games.orderings.Jack9Ordering;
-import src.utils.Utils;
 
+/**
+ * Represents a player in a Jass game.
+ *
+ * A player has a name, a team, and a hand of cards.
+ */
 public class Player {
+    /** The team this player belongs to. */
     private Team team;
-    private String name;
-    private List<Card> cards;
-    private Socket socket;
 
+    /** The player's display name. */
+    private String name;
+
+    /** The cards currently held by the player. */
+    private List<Card> cards;
+
+    /**
+     * Creates a new player with a fixed name and team.
+     *
+     * @param name the player's name
+     * @param t the team to assign
+     */
     public Player(String name, Team t) {
         this.name = name;
         this.team = t;
         this.cards = new ArrayList<Card>();
     }
 
-    public Player(ServerSocket s, List<Team> t, boolean blocking) throws IOException {
-        this.cards = new ArrayList<Card>();
-        if (!blocking) {
-            Thread thread = new Thread(() -> init(s, t));
-            thread.start();
-        } else {
-            init(s, t);
-        }
-
-    }
-
-    private void init(ServerSocket s, List<Team> t) {
-        try {
-            socket = s.accept();
-            writeLine("Name?");
-            InputStream reader = socket.getInputStream();
-            // The buffer to read to.
-            byte[] buffer = new byte[80];
-
-            // Store the amount of bytes acutally read in to the buffer.
-            int b = 0;
-
-            // Wait for input.
-            while (b == 0) {
-                b = reader.read(buffer);
-            }
-            String input = new String(buffer).trim();
-            this.name = input;
-            boolean accept = false;
-            while (!accept) {
-                writeLine("TEAM?");
-
-                // The buffer to read to.
-                buffer = new byte[2];
-
-                // Store the amount of bytes acutally read in to the buffer.
-                b = 0;
-
-                // Wait for input.
-                while (b == 0) {
-                    b = reader.read(buffer);
-                }
-                input = new String(buffer).trim();
-                if (input.charAt(0) == '0' || input.charAt(0) == '1') {
-                    this.team = t.get(Integer.parseInt(input.substring(0, 1)));
-                    t.get(Integer.parseInt(input.substring(0, 1))).players.add(this);
-                    accept = true;
-                }
-            }
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
+    /**
+     * Returns the player's team.
+     *
+     * @return the team
+     */
     public Team getTeam() {
         return team;
     }
 
+    /**
+     * Assigns the player to a team.
+     *
+     * @param team the new team
+     */
     public void setTeam(Team team) {
         this.team = team;
     }
 
-    public void sendHand() {
-        Thread thread = new Thread(() -> {
-            try {
-                writeLine("Your Hand:");
-                for (Card card : cards) {
-                    writeLine(card.toString());
-                }
-                writeLine("\n");
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        thread.start();
-    }
-
+    /**
+     * Prints the player's hand to the server console.
+     */
     public void printHand() {
         System.out.println(name);
         for (Card card : cards) {
@@ -117,28 +63,51 @@ public class Player {
         System.out.println("\n");
     }
 
+    /**
+     * Returns the player's name.
+     *
+     * @return the player name
+     */
     public String getPlayerName() {
         return name;
     }
 
+    /**
+     * Sets the player's name.
+     *
+     * @param name the new name
+     */
     public void setPlayerName(String name) {
         this.name = name;
     }
 
+    /**
+     * Returns the player's current cards.
+     *
+     * @return the hand of cards
+     */
     public List<Card> getCards() {
         return cards;
     }
 
+    /**
+     * Replaces the player's hand.
+     *
+     * @param cards the new card list
+     */
     public void setCards(List<Card> cards) {
         this.cards = cards;
     }
 
     /**
-     * Return whether a certain player is allowed to play a given card.
-     * @param c The card they want to play.
-     * @param played The cards played so far.
-     * @param trump The trump suit, or -1 if not a trumps game mode.
-     * @return Whether the player is allowed to play a given card.
+     * Determines whether the player may legally play the specified card.
+     *
+     * The player must hold the card, and must follow the rules for trumps and suit-following.
+     *
+     * @param c the card to play
+     * @param played the cards already played in the current trick
+     * @param trump the trump suit index, or -1 if not a trumps game
+     * @return true if the play is legal, false otherwise
      */
     public boolean canPlayCard(Card c, List<Card> played, int trump) {
         boolean hasCard = false;
@@ -178,6 +147,11 @@ public class Player {
         return true;
     }
 
+    /**
+     * Removes the first matching card from the player's hand.
+     *
+     * @param c the card to remove
+     */
     public void removeCard(Card c) {
         int toRemove = -1;
         for (int i = 0; i < cards.size(); i++) {
@@ -189,117 +163,11 @@ public class Player {
         }
     }
 
-    public Card getInput(List<Card> played, int code) throws IOException {
-        InputStream reader = socket.getInputStream();
-        Card c = null;
-        sendPlayedCards(played);
-        sendHand();
-        while (c == null) {
-            // The buffer to read to.
-            byte[] buffer = new byte[8];
-            // Store the amount of bytes acutally read in to the buffer.
-            int b = 0;
-
-            // Wait for input.
-            while (b == 0) {
-                b = reader.read(buffer);
-            }
-            String input = new String(buffer).trim();
-            try {
-                Card temp = Card.parseCard(input);
-
-                if (canPlayCard(temp, played, code)) {
-                    c = temp;
-                    removeCard(c);
-                } else {
-                    sendPlayedCards(played);
-                    sendHand();
-                    writeLine("You can't play that card!");
-                }
-            }
-            catch (Exception e) {
-                sendPlayedCards(played);
-                sendHand();
-                writeLine("Invalid Card Format!");
-            }
-        }
-
-        return c;
-    }
-
-    public void sendPlayedCards(List<Card> played) throws IOException {
-        write("\u001B[2J\u001B[H");
-        writeLine("Played So Far:");
-        for (Card card : played) {
-            writeLine(card.toString());
-        }
-    }
-
-    private void writeLine(String input) throws IOException {
-        write(input + "\n");
-    }
-
-    private void write(String input) throws IOException {
-        OutputStream writer = socket.getOutputStream();
-        writer.write(input.getBytes());
-    }
-
-    public IGame chooseGame(boolean forced) throws IOException {
-        InputStream reader = socket.getInputStream();
-        write("\u001B[2J\u001B[H");
-        sendHand();
-        writeLine("Choose Game:");
-        boolean chosen = false;
-        while (!chosen) {
-            // The buffer to read to.
-            byte[] buffer = new byte[8];
-            // Store the amount of bytes acutally read in to the buffer.
-            int b = 0;
-
-            // Wait for input.
-            while (b == 0) {
-                b = reader.read(buffer);
-            }
-            String input = new String(buffer).trim();
-
-            switch (input.charAt(0)) {
-                case 't':
-                    chosen = true;
-                    return new TopDown();
-                case 'b':
-                    chosen = true;
-                    return new BottomUp();
-                case 'm':
-                    chosen = true;
-                    return new Middle();
-                case 'r':
-                    try {
-                        chosen = true;
-                        Suit s = Utils.getSuitFromChar(input.charAt(1));
-                        return new Trumps(s);
-                    }
-                    catch (Exception e) {
-
-                    }
-
-                case 'p':
-                    if (!forced) {
-                        chosen = true;
-                        return null;
-                    }
-                    break;
-                default:
-                    break;
-            }
-
-            write("\u001B[2J\u001B[H");
-            writeLine("****Invalid Choice****");
-            sendHand();
-            writeLine("Choose Game:");
-        }
-        return null;
-    }
-
+    /**
+     * Converts the player into a map representation for JSON serialization.
+     *
+     * @return a map containing the player's name and team index
+     */
     public Map<String, Object> toMap() {
         Map<String, Object> m = new HashMap<String, Object>();
         m.put("name", name);

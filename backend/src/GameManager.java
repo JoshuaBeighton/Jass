@@ -15,11 +15,16 @@ import java.util.concurrent.locks.ReentrantLock;
 import src.objs.Suit;
 import src.objs.Team;
 
+/**
+ * Manages game state for a single Jass room.
+ *
+ * Responsibilities include player ordering, card dealing, game choice flow, trick progression, scoring, and
+ * serialization-friendly data access.
+ */
 public class GameManager {
     public static final String[] GAMES = {
             "Top Down", "Bottom Up", "Middle", "Trumps", "Slalom", "FiveFour"
     };
-
 
     private final int LAST_BONUS = 5;
 
@@ -40,6 +45,11 @@ public class GameManager {
 
     public boolean visible;
 
+    /**
+     * Creates a new GameManager for a room.
+     *
+     * @param visible whether the room should be publicly discoverable
+     */
     public GameManager(boolean visible) {
         players = new ArrayList<Player>();
         teams = new ArrayList<Team>();
@@ -49,6 +59,9 @@ public class GameManager {
         this.visible = visible;
     }
 
+    /**
+     * Populates the undealt deck.
+     */
     private void fillDeck() {
         undealt = new ArrayList<Card>();
         for (Suit s : Suit.values()) {
@@ -58,6 +71,9 @@ public class GameManager {
         }
     }
 
+    /**
+     * Deals cards to players in groups of three until the deck is empty.
+     */
     private void dealCards() {
         // Ensure each player starts with an empty hand.
         for (Player p : players) {
@@ -76,23 +92,38 @@ public class GameManager {
         }
     }
 
+    /**
+     * Sorts each player's hand using the game comparator.
+     */
     private void sortCards() {
         for (Player player : players) {
             Collections.sort(player.getCards(), new CardComparator());
         }
     }
 
-
-
+    /**
+     * Returns the list of players in the room.
+     *
+     * @return current player list
+     */
     public List<Player> getPlayers() {
         return players;
     }
 
+    /**
+     * Returns the list of teams in the room.
+     *
+     * @return current team list
+     */
     public List<Team> getTeams() {
         return teams;
     }
 
-
+    /**
+     * Adds a player to the room and triggers dealing when four players have joined.
+     *
+     * @param p player to add
+     */
     public void addPlayer(Player p) {
         players.add(p);
         p.getTeam().players.add(p);
@@ -110,8 +141,10 @@ public class GameManager {
         }
     }
 
+    /**
+     * Reorders players so partners alternate in the seating order.
+     */
     private void reorderPlayers() {
-
         try {
             List<Player> temp = new ArrayList<Player>();
             int t0Pointer = 0;
@@ -140,6 +173,11 @@ public class GameManager {
         }
     }
 
+    /**
+     * Returns the index of the next player who may choose a game.
+     *
+     * @return next chooser index
+     */
     public int getNextToChoose() {
         int temp = 0;
         nextToChooseLock.lock();
@@ -154,6 +192,11 @@ public class GameManager {
         return temp;
     }
 
+    /**
+     * Returns a copy of the current trick cards.
+     *
+     * @return current trick list
+     */
     public List<Card> getCurrentTrick() {
         List<Card> temp = null;
         trickLock.lock();
@@ -168,6 +211,11 @@ public class GameManager {
         return temp;
     }
 
+    /**
+     * Checks whether the current chooser is forced to select a game.
+     *
+     * @return true if the chooser must choose a game, false otherwise
+     */
     public boolean isForced() {
         boolean forced = false;
         nextToChooseLock.lock();
@@ -186,6 +234,9 @@ public class GameManager {
         return forced;
     }
 
+    /**
+     * Advances the chooser index and decrements the forced-choice counter.
+     */
     public void incrementChooser() {
         nextToChooseLock.lock();
         try {
@@ -202,10 +253,20 @@ public class GameManager {
         }
     }
 
+    /**
+     * Returns the currently selected game.
+     *
+     * @return the current game or null if none is selected
+     */
     public IGame getGame() {
         return currentGame;
     }
 
+    /**
+     * Sets the current game and initializes trick state.
+     *
+     * @param g the chosen game mode
+     */
     public void setGame(IGame g) {
         try {
             currentGame = g;
@@ -216,13 +277,23 @@ public class GameManager {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
+    /**
+     * Returns the index of the player who should play next.
+     *
+     * @return next player index
+     */
     public int getNextPlayer() {
         return nextPlayer;
     }
 
+    /**
+     * Attempts to play the specified card string for the current player.
+     *
+     * @param s the card notation to play
+     * @return true if the card was successfully played, false otherwise
+     */
     public boolean playCard(String s) {
         try {
             System.out.println("Cards played: " + currentTrick.size());
@@ -248,6 +319,9 @@ public class GameManager {
         return true;
     }
 
+    /**
+     * Resolves the current trick, awards points to the winning team, and advances the next player.
+     */
     public void resetTrick() {
         if (currentTrick.size() >= 4) {
             // Get the index of the card that won the trick, add it to the start player
@@ -268,6 +342,9 @@ public class GameManager {
         }
     }
 
+    /**
+     * Resets the game state and prepares a new round.
+     */
     public void resetGame() {
         players.get(nextToChoose).getTeam().setScore(currentGame.getName(), players.get(nextToChoose).getTeam().getScore());
         System.out.println("Resetting Game");

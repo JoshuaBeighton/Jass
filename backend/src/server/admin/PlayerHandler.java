@@ -13,7 +13,15 @@ import src.objs.Player;
 import src.server.JassHttpHandler;
 import src.utils.JsonManager;
 
+/**
+ * HTTP handler for retrieving and adding players to a game room.
+ */
 public class PlayerHandler extends JassHttpHandler implements HttpHandler {
+    /**
+     * Creates a new player handler.
+     *
+     * @param managers shared map of room ids to GameManager instances
+     */
     public PlayerHandler(Map<Integer, GameManager> managers) {
         super(managers);
     }
@@ -35,6 +43,12 @@ public class PlayerHandler extends JassHttpHandler implements HttpHandler {
                 }
     }
 
+    /**
+     * Returns the list of players for the requested game room.
+     *
+     * @param exchange the HTTP exchange
+     * @throws IOException if writing the response fails
+     */
     private void handleGet(HttpExchange exchange) throws IOException {
         int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
         GameManager manager = managers.get(key);
@@ -45,6 +59,12 @@ public class PlayerHandler extends JassHttpHandler implements HttpHandler {
         os.close();
     }
 
+    /**
+     * Adds a new player to the requested game room.
+     *
+     * @param exchange the HTTP exchange
+     * @throws IOException if reading or writing the request/response fails
+     */
     private void handlePost(HttpExchange exchange) throws IOException {
         int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
         GameManager manager = managers.get(key);

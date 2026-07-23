@@ -4,7 +4,16 @@ import javax.naming.InvalidNameException;
 
 import src.objs.Suit;
 
+/**
+ * Utility methods for card and suit formatting.
+ */
 public class Utils {
+    /**
+     * Returns the printable symbol for the given suit.
+     *
+     * @param s the suit to convert
+     * @return suit symbol character
+     */
     public static char getCharFromSuit(Suit s) {
         switch (s) {
             case Suit.HEARTS:
@@ -18,6 +27,15 @@ public class Utils {
         }
     }
 
+    /**
+     * Converts a suit character or symbol to the corresponding Suit enum.
+     *
+     * Accepts both upper- and lowercase letters, as well as suit glyphs.
+     *
+     * @param c the suit character or symbol
+     * @return the matching Suit
+     * @throws InvalidNameException when the input is not a valid suit
+     */
     public static Suit getSuitFromChar(char c) throws InvalidNameException {
         if (c >= 'A' && c <= 'Z') {
             c -= 'A';
@@ -37,6 +55,14 @@ public class Utils {
         }
     }
 
+    /**
+     * Returns the string representation for a card value.
+     *
+     * Face values are returned as letters while numbered cards are returned as digits.
+     *
+     * @param val the numeric card value
+     * @return string form of the card value
+     */
     public static String getCardVal(int val) {
         switch (val) {
             case 11:

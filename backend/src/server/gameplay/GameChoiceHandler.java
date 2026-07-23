@@ -13,7 +13,15 @@ import src.games.IGame;
 import src.server.JassHttpHandler;
 import src.utils.JsonManager;
 
+/**
+ * HTTP handler for game choice polling and submission within a game room.
+ */
 public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
+    /**
+     * Creates a new game choice handler.
+     *
+     * @param managers shared map of room ids to GameManager instances
+     */
     public GameChoiceHandler(Map<Integer, GameManager> managers) {
         super(managers);
     }
@@ -34,6 +42,12 @@ public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
                 }
     }
 
+    /**
+     * Handles a GET request to poll for the current game chooser and game options.
+     *
+     * @param exchange the HTTP exchange
+     * @throws IOException if writing the response fails
+     */
     private void handleGet(HttpExchange exchange) throws IOException {
         int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
         GameManager manager = managers.get(key);
@@ -73,6 +87,12 @@ public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
         t.start();
     }
 
+    /**
+     * Handles a POST request to submit a selected game choice.
+     *
+     * @param exchange the HTTP exchange
+     * @throws IOException if reading or writing the request/response fails
+     */
     private void handlePost(HttpExchange exchange) throws IOException {
         int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
         GameManager manager = managers.get(key);
