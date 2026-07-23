@@ -36,6 +36,8 @@ const emits = defineEmits<{
 }>()
 
 const joinGame = async (roomNo: number | undefined) => {
+  console.log(roomNo)
+
   if (roomNo != undefined) {
     emits('update:selected', roomNo)
     return
@@ -46,8 +48,12 @@ const joinGame = async (roomNo: number | undefined) => {
     error.value = 'Invalid Input'
     return
   }
-
-  emits('update:selected', inp.valueAsNumber)
+  roomNo = Number(inp.value)
+  if (!Number.isNaN(roomNo)) {
+    emits('update:selected', roomNo)
+  } else {
+    error.value = 'Please enter a number'
+  }
 }
 
 const makeGame = async (visible: boolean) => {
@@ -152,6 +158,7 @@ onMounted(() => {
   padding: 1.5rem;
   background-color: var(--color-background-soft);
   border-radius: 12px;
+  border: 1px solid var(--color-border);
   box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.05),
     0 2px 4px -2px rgba(0, 0, 0, 0.05);

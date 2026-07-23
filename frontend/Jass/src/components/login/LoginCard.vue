@@ -38,6 +38,10 @@ const emit = defineEmits<{
 </script>
 
 <template>
+  <div class="header">
+    <h1>Jass</h1>
+    <h1>Room {{ props.gameroom }}</h1>
+  </div>
   <div class="loginCard">
     <div class="loginCard">
       <h1>Jass</h1>
@@ -55,6 +59,23 @@ const emit = defineEmits<{
 </template>
 
 <style>
+.header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0 8px;
+  color: var(--color-heading);
+}
+
+.header h1 {
+  margin: 6px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
 input,
 button {
   font-size: large;
