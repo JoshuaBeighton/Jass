@@ -8,7 +8,7 @@ import src.objs.Suit;
 import src.games.orderings.BottomUpOrdering;
 
 public class BottomUp implements IGame {
-    private int type;
+    private int type = 0;
 
     public int getType() {
         return type;
@@ -18,12 +18,14 @@ public class BottomUp implements IGame {
         return "Bottom Up";
     }
 
+
     public int wins(List<Card> trick, int trickNo) {
         Suit masterSuit = trick.get(0).getSuit();
         int winner = 0;
-        Comparator<Card> ordering = new BottomUpOrdering();
+        Comparator<Card> ordering = new BottomUpOrdering(masterSuit);
         for (int i = 0; i < trick.size(); i++) {
-            if (trick.get(i).getSuit() == masterSuit && ordering.compare(trick.get(i), trick.get(winner)) > 0) {
+            // Compare each card to the winner at that point, and if the current card beats the winner, update the winner.
+            if (ordering.compare(trick.get(i), trick.get(winner)) > 0) {
                 winner = i;
             }
         }
@@ -32,9 +34,5 @@ public class BottomUp implements IGame {
 
     public int score(List<Card> cards) {
         return Scoring.BUScore(cards);
-    }
-
-    public int getSuit() {
-        return -1;
     }
 }

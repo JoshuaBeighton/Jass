@@ -15,7 +15,7 @@ import src.games.IGame;
 import src.games.Middle;
 import src.games.TopDown;
 import src.games.Trumps;
-import src.games.orderings.TrumpOrdering;
+import src.games.orderings.Jack9Ordering;
 import src.utils.Utils;
 
 public class Player {
@@ -155,7 +155,7 @@ public class Player {
         // they cannot play it.
         if (trump != -1 && c.getSuit() == Suit.fromIndex(trump)) {
             boolean beats = true;
-            TrumpOrdering ordering = new TrumpOrdering();
+            Jack9Ordering ordering = new Jack9Ordering(Suit.fromIndex(trump));
             for (Card card : played) {
                 if (card.getSuit() == Suit.fromIndex(trump) && ordering.compare(card, c) > 0) {
                     beats = false;

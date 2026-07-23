@@ -229,7 +229,7 @@ public class GameManager {
             Card candidate = Card.parseCard(s);
             Player currentPlayer = players.get(nextPlayer);
 
-            if (!currentPlayer.canPlayCard(candidate, currentTrick, currentGame.getSuit())) {
+            if (!currentPlayer.canPlayCard(candidate, currentTrick, currentGame.getType())) {
                 System.out.println("Cannot play that card.");
                 return false;
             }

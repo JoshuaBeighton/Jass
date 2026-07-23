@@ -22,9 +22,10 @@ public class Middle implements IGame {
     public int wins(List<Card> trick, int trickNo) {
         Suit masterSuit = trick.get(0).getSuit();
         int winner = 0;
-        Comparator<Card> ordering = new MiddleOrdering(center);
+        Comparator<Card> ordering = new MiddleOrdering(center, masterSuit);
+        // Work from the back of the trick to ensure that tiebreaker of first card applies.
         for (int i = trick.size() - 1; i >= 0; i--) {
-            if (trick.get(i).getSuit() == masterSuit && ordering.compare(trick.get(i), trick.get(winner)) >= 0) {
+            if (ordering.compare(trick.get(i), trick.get(winner)) >= 0) {
                 winner = i;
             }
         }
@@ -33,9 +34,5 @@ public class Middle implements IGame {
 
     public int score(List<Card> cards) {
         return Scoring.TDScore(cards);
-    }
-
-    public int getSuit() {
-        return -1;
     }
 }

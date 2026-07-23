@@ -5,10 +5,10 @@ import java.util.Comparator;
 import src.objs.Card;
 import src.objs.Suit;
 
-public class BottomUpOrdering implements Comparator<src.objs.Card> {
+public class Jack9Ordering implements Comparator<Card> {
     private Suit masterSuit;
 
-    public BottomUpOrdering(Suit masterSuit) {
+    public Jack9Ordering(Suit masterSuit) {
         this.masterSuit = masterSuit;
     }
 
@@ -30,7 +30,27 @@ public class BottomUpOrdering implements Comparator<src.objs.Card> {
             return 1;
         }
 
-        // If they are both of the right suit, then simply subtract to get whether the first or second card has a higher value.
-        return c2.getVal() - c1.getVal();
+        // If the first card is a Jack, it wins.
+        if (c1.getVal() == 11) {
+            return 1;
+        }
+        // If the second card is a Jack, it wins.
+        if (c2.getVal() == 11) {
+            return -1;
+        }
+
+
+        // Now we know neither card is a Jack, if either card is a 9, it wins.
+        if (c1.getVal() == 9) {
+            return 1;
+        }
+        if (c2.getVal() == 9) {
+            return -1;
+        }
+
+        // If neither card is a Jack or 9, the highest card wins.
+        return c1.getVal() - c2.getVal();
+
     }
+
 }
