@@ -1,44 +1,60 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const team1 = ref<Array<{ name: string; team: number }>>([])
 const team2 = ref<Array<{ name: string; team: number }>>([])
 const selectedClass = ref('selected')
 const selected = ref(-1)
-let counter = -1
+let counter = 0
 const props = defineProps<{ gameroom: number }>()
+let eventSource: EventSource | null = null
 
-async function fetchTeams() {
+function connectTeamsStream() {
   const host = window.location.hostname
+  if (eventSource) {
+    eventSource.close()
+  }
 
-  try {
-    // Long-poll request
-    const res = await fetch(`http://${host}:9000/teamWait/${counter}`, {
-      headers: {
-        gameroom: props.gameroom.toString(),
-      },
-    })
-    if (!res.ok) throw new Error('Network response was not OK')
+  eventSource = new EventSource(
+    `http://${host}:9000/teamWait/${counter}?gameroom=${props.gameroom}`,
+    {
+      withCredentials: false,
+    },
+  )
 
-    const data = await res.json()
-    team1.value = data[0].players
-    team2.value = data[1].players
-    counter++
-  } catch (err) {
-    console.error('Error fetching teams:', err)
-  } finally {
-    if (counter >= 4) {
-      emit('update:ready', true)
+  eventSource.addEventListener('teams', (event) => {
+    try {
+      const data = JSON.parse(event.data)
+      team1.value = data[0].players
+      team2.value = data[1].players
+      counter = team1.value.length + team2.value.length
+      if (counter >= 4) {
+        emit('update:ready', true)
+        setTimeout(() => {
+          team1.value = [...team1.value]
+          team2.value = [...team2.value]
+        }, 0)
+      }
+    } catch (err) {
+      console.error('Error parsing teams stream:', err)
     }
-    // Immediately poll again
-    else {
-      fetchTeams()
+  })
+
+  eventSource.onerror = () => {
+    if (eventSource) {
+      eventSource.close()
     }
   }
 }
 
 onMounted(() => {
-  fetchTeams()
+  connectTeamsStream()
+})
+
+onBeforeUnmount(() => {
+  if (eventSource) {
+    eventSource.close()
+  }
 })
 
 const emit = defineEmits<{

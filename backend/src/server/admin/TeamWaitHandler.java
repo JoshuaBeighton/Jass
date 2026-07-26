@@ -3,6 +3,7 @@ package src.server.admin;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
@@ -42,29 +43,47 @@ public class TeamWaitHandler extends JassHttpHandler implements HttpHandler {
      * @throws IOException if writing the response fails
      */
     private void handleGet(HttpExchange exchange) throws IOException {
-        int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
+        int key = getGameroom(exchange);
         GameManager manager = managers.get(key);
-        int count = Integer.parseInt(exchange.getRequestURI().getPath().split("/teamWait/")[1]);
+        String pathSegment = exchange.getRequestURI().getPath().split("/teamWait/")[1];
+        int count = pathSegment.equals("-1") ? 0 : Integer.parseInt(pathSegment);
+
+        startSseResponse(exchange);
+        OutputStream os = exchange.getResponseBody();
+
+        AtomicInteger lastSeen = new AtomicInteger(count);
         Thread t = new Thread(() -> {
             try {
-                while (count >= manager.getPlayers().size()) {
-                    Thread.sleep(100);
+                while (lastSeen.get() < 4) {
+                    while (!Thread.currentThread().isInterrupted()) {
+                        int currentSize = manager.getPlayers().size();
+                        if (currentSize > lastSeen.get()) {
+                            String payload = JsonManager.teamsToJson(manager.getTeams());
+                            writeSseEvent(os, "teams", payload);
+                            lastSeen.set(currentSize);
+                            break;
+                        }
+                        Thread.sleep(100);
+                    }
                 }
-
-                String response = JsonManager.teamsToJson(manager.getTeams());
-                System.out.println(response);
-                exchange.sendResponseHeaders(200, response.getBytes().length);
-                exchange.getResponseHeaders().add("Content-Type", "application/json");
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
             }
-            catch (IOException | InterruptedException e) {
+            catch (Exception e) {
                 e.printStackTrace();
             }
+            finally {
+                try {
+                    os.close();
+                }
+                catch (IOException ignored) {
+                }
+            }
         });
-
         t.start();
     }
 
 }
+
+/**
+ * [ {"score":0, "players":[ ` {"name":"s","team":0}, {"name":"u","team":0}], "index":0}, {"score":0, "players":
+ * [{"name":"a","team":1},{"name":"y","team":1}],"index":1}]
+ */

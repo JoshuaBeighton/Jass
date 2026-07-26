@@ -193,15 +193,43 @@ public class GameManager {
     }
 
     /**
+     * Waits for the chooser to change from the supplied index, but returns promptly
+     * if no change occurs before the timeout elapses.
+     *
+     * @param lastIndex the chooser index seen by the client
+     * @param timeoutMillis the maximum time to wait in milliseconds
+     * @return the current chooser index after waiting
+     */
+    public int waitForChooserChange(int lastIndex, long timeoutMillis) {
+        long deadline = System.currentTimeMillis() + timeoutMillis;
+        while (System.currentTimeMillis() < deadline) {
+            int current = getNextToChoose();
+            if (current != lastIndex) {
+                return current;
+            }
+            try {
+                Thread.sleep(50);
+            }
+            catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return getNextToChoose();
+            }
+        }
+        return getNextToChoose();
+    }
+
+    /**
      * Returns a copy of the current trick cards.
      *
      * @return current trick list
      */
     public List<Card> getCurrentTrick() {
-        List<Card> temp = null;
+        List<Card> temp = new ArrayList<Card>();
         trickLock.lock();
         try {
-            temp = new ArrayList<Card>(currentTrick);
+            if (currentTrick != null) {
+                temp = new ArrayList<Card>(currentTrick);
+            }
         }
         catch (Exception e) {
         }
@@ -209,6 +237,32 @@ public class GameManager {
             trickLock.unlock();
         }
         return temp;
+    }
+
+    /**
+     * Waits for the current trick size to change from the supplied value, but returns
+     * promptly if no change occurs before the timeout elapses.
+     *
+     * @param lastSize the trick size seen by the client
+     * @param timeoutMillis the maximum time to wait in milliseconds
+     * @return the current trick size after waiting
+     */
+    public int waitForTrickChange(int lastSize, long timeoutMillis) {
+        long deadline = System.currentTimeMillis() + timeoutMillis;
+        while (System.currentTimeMillis() < deadline) {
+            int currentSize = getCurrentTrick().size();
+            if (currentSize != lastSize) {
+                return currentSize;
+            }
+            try {
+                Thread.sleep(25);
+            }
+            catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return getCurrentTrick().size();
+            }
+        }
+        return getCurrentTrick().size();
     }
 
     /**
@@ -296,19 +350,27 @@ public class GameManager {
      */
     public boolean playCard(String s) {
         try {
-            System.out.println("Cards played: " + currentTrick.size());
-            Card candidate = Card.parseCard(s);
-            Player currentPlayer = players.get(nextPlayer);
-
-            if (!currentPlayer.canPlayCard(candidate, currentTrick, currentGame.getType())) {
-                System.out.println("Cannot play that card.");
+            if (currentGame == null || currentTrick == null) {
+                System.out.println("No active trick to play into.");
                 return false;
             }
-            trickLock.lock();
-            currentTrick.add(candidate);
-            trickLock.unlock();
 
-            currentPlayer.removeCard(candidate);
+            trickLock.lock();
+            try {
+                System.out.println("Cards played: " + currentTrick.size());
+                Card candidate = Card.parseCard(s);
+                Player currentPlayer = players.get(nextPlayer);
+
+                if (!currentPlayer.canPlayCard(candidate, currentTrick, currentGame.getType())) {
+                    System.out.println("Cannot play that card.");
+                    return false;
+                }
+                currentTrick.add(candidate);
+                currentPlayer.removeCard(candidate);
+            }
+            finally {
+                trickLock.unlock();
+            }
 
         }
         catch (Exception e) {
@@ -323,22 +385,28 @@ public class GameManager {
      * Resolves the current trick, awards points to the winning team, and advances the next player.
      */
     public void resetTrick() {
-        if (currentTrick.size() >= 4) {
-            // Get the index of the card that won the trick, add it to the start player
-            // (which will be the next player as it's wrapped around)
-            int winner = (currentGame.wins(currentTrick, trickCount) + nextPlayer) % 4;
-            players.get(winner).getTeam().addScore(currentGame.score(currentTrick));
-            currentTrick.clear();
-            nextPlayer = winner;
-            trickCount++;
-            System.out.println("Trick Count: " + trickCount);
-            if (trickCount >= 9) {
-                players.get(winner).getTeam().addScore(LAST_BONUS);
-                System.out.println("Game Over! Team 0: " + teams.get(0).getScore() + " Team 1: " + teams.get(1).getScore());
-                resetGame();
+        trickLock.lock();
+        try {
+            if (currentTrick != null && currentTrick.size() >= 4) {
+                // Get the index of the card that won the trick, add it to the start player
+                // (which will be the next player as it's wrapped around)
+                int winner = (currentGame.wins(currentTrick, trickCount) + nextPlayer) % 4;
+                players.get(winner).getTeam().addScore(currentGame.score(currentTrick));
+                currentTrick.clear();
+                nextPlayer = winner;
+                trickCount++;
+                System.out.println("Trick Count: " + trickCount);
+                if (trickCount >= 9) {
+                    players.get(winner).getTeam().addScore(LAST_BONUS);
+                    System.out.println("Game Over! Team 0: " + teams.get(0).getScore() + " Team 1: " + teams.get(1).getScore());
+                    resetGame();
+                }
+            } else {
+                System.out.println("Already cleared");
             }
-        } else {
-            System.out.println("Already cleared");
+        }
+        finally {
+            trickLock.unlock();
         }
     }
 

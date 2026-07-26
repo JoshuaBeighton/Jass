@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -49,42 +50,55 @@ public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
      * @throws IOException if writing the response fails
      */
     private void handleGet(HttpExchange exchange) throws IOException {
-        int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
+        int key = getGameroom(exchange);
         GameManager manager = managers.get(key);
         String uri = exchange.getRequestURI().toString();
         String[] args = uri.split("\\?")[1].split("\\&");
-        String name = args[0].split("=")[1];
         int lastIndex = Integer.parseInt(args[1].split("=")[1]);
-        Thread t = new Thread(() -> {
-            try {
-                if (manager.getPlayers().get(manager.getNextToChoose()).getPlayerName().equals(name)) {
-                    String response = JsonManager.gameChoiceToJson(manager.getNextToChoose(),
-                            manager.getPlayers(), manager.getGame(), manager.isForced());
 
-                    exchange.sendResponseHeaders(200, response.length());
-                    exchange.getResponseHeaders().add("Content-Type", "application/json");
-                    OutputStream os = exchange.getResponseBody();
-                    os.write(response.getBytes());
-                    os.close();
-                    return;
+        startSseResponse(exchange);
+        OutputStream os = exchange.getResponseBody();
+
+        try {
+            AtomicInteger lastSeen = new AtomicInteger(lastIndex);
+            Thread t = new Thread(() -> {
+                try {
+                    while (!Thread.currentThread().isInterrupted()) {
+                        int chooser = manager.getNextToChoose();
+                        if (chooser != lastSeen.get()) {
+                            String response = JsonManager.gameChoiceToJson(chooser == -1 ? manager.getNextPlayer() : chooser, manager.getPlayers(),
+                                    manager.getGame(), manager.isForced());
+                            writeSseEvent(os, "game-choice", response);
+                            lastSeen.set(chooser);
+                        }
+
+                        if (manager.getGame() != null) {
+                            String response = JsonManager.gameChoiceToJson(chooser == -1 ? manager.getNextPlayer() : chooser, manager.getPlayers(),
+                                    manager.getGame(), manager.isForced());
+                            writeSseEvent(os, "game-choice", response);
+                            break;
+                        }
+                        Thread.sleep(100);
+                    }
                 }
-                while (manager.getNextToChoose() == lastIndex) {
-
+                catch (Exception e) {
+                    e.printStackTrace();
                 }
-                exchange.getResponseHeaders().add("Content-Type", "application/json");
-                String response = JsonManager.gameChoiceToJson(manager.getNextToChoose() == -1 ? manager.getNextPlayer() : manager.getNextToChoose(), manager.getPlayers(),
-                        manager.getGame(), manager.isForced());
-
-                exchange.sendResponseHeaders(200, response.length());
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        t.start();
+                finally {
+                    try {
+                        os.close();
+                    }
+                    catch (IOException ignored) {
+                    }
+                }
+            });
+            t.start();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            exchange.sendResponseHeaders(500, 0);
+            exchange.close();
+        }
     }
 
     /**
@@ -94,7 +108,7 @@ public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
      * @throws IOException if reading or writing the request/response fails
      */
     private void handlePost(HttpExchange exchange) throws IOException {
-        int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
+        int key = getGameroom(exchange);
         GameManager manager = managers.get(key);
         System.out.println("Choosing game post received!");
         InputStream is = exchange.getRequestBody();

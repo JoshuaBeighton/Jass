@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import Scoreboard from './Scoreboard.vue'
 import type GameMode from '@/interfaces/GameMode.ts'
 
@@ -11,6 +11,7 @@ const nextChooser = ref('')
 
 let id = 0
 let counter = -1
+let eventSource: EventSource | null = null
 
 const games = ref([
   { id: id++, text: 'Top Down', key: 'topDown' },
@@ -31,50 +32,57 @@ const emits = defineEmits<{
   (e: 'update:selected', value: GameMode): void
 }>()
 
-async function fetchNextPlayer() {
+function connectGameChoiceStream() {
   const host = window.location.hostname
+  if (eventSource) {
+    eventSource.close()
+  }
 
-  try {
-    let keepSending = true
-    const res = await fetch(
-      `http://${host}:9000/gameChoice?name=${props.name}&lastidx=${counter}`,
-      {
-        method: 'GET',
-        headers: {
-          gameroom: props.gameroom.toString(),
-        },
-      },
-    )
-    if (!res.ok) throw new Error('Network response was not OK')
-    const data = await res.json()
-    if (data.chooser != undefined) {
-      nextChooser.value = data.chooser
-      counter++
-      if (counter >= 4) {
-        counter = 0
-      }
-      if (nextChooser.value == props.name) {
-        console.log("It's me!")
-        isMe.value = true
-        games.value = data.available
+  eventSource = new EventSource(
+    `http://${host}:9000/gameChoice?name=${props.name}&lastidx=${counter}&gameroom=${props.gameroom}`,
+    {
+      withCredentials: false,
+    },
+  )
+
+  eventSource.addEventListener('game-choice', (event) => {
+    try {
+      const data = JSON.parse(event.data)
+      if (data.chooser != undefined) {
+        nextChooser.value = data.chooser
+        counter++
+        if (counter >= 4) {
+          counter = 0
+        }
+        if (nextChooser.value == props.name) {
+          isMe.value = true
+          games.value = data.available
+        } else {
+          isMe.value = false
+        }
       } else {
-        isMe.value = false
+        const gameMode: GameMode = {
+          game: data.game,
+          suit: data.suit,
+          start: data.start,
+          caller: data.caller,
+        }
+        emits('update:selected', gameMode)
+        if (eventSource) {
+          eventSource.close()
+          eventSource = null
+        }
       }
-    } else {
-      keepSending = false
-      const gameMode: GameMode = {
-        game: data.game,
-        suit: data.suit,
-        start: data.start,
-        caller: data.caller,
-      }
-      emits('update:selected', gameMode)
+    } catch (err) {
+      console.error('Error parsing game choice stream:', err)
     }
-    if (!isMe.value && keepSending) {
-      fetchNextPlayer()
+  })
+
+  eventSource.onerror = () => {
+    if (eventSource) {
+      eventSource.close()
+      eventSource = null
     }
-  } catch (err) {
-    console.error('Error fetching teams:', err)
   }
 }
 
@@ -117,7 +125,7 @@ async function sendGame(game: string) {
     body: JSON.stringify(body),
   })
   if (game == 'Pass') {
-    fetchNextPlayer()
+    connectGameChoiceStream()
   } else {
     const data = await res.json()
     const gameMode: GameMode = {
@@ -131,7 +139,13 @@ async function sendGame(game: string) {
 }
 
 onMounted(() => {
-  fetchNextPlayer()
+  connectGameChoiceStream()
+})
+
+onBeforeUnmount(() => {
+  if (eventSource) {
+    eventSource.close()
+  }
 })
 </script>
 

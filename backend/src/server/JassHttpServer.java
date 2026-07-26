@@ -2,8 +2,9 @@ package src.server;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
 
 import com.sun.net.httpserver.HttpServer;
 
@@ -23,7 +24,7 @@ public class JassHttpServer {
      * Initializes the server, registers request handlers, and starts listening.
      */
     public static void init() {
-        manager = new HashMap<Integer, GameManager>();
+        manager = new ConcurrentHashMap<Integer, GameManager>();
         GameManager debugManager = new GameManager(true);
         manager.put(1001, debugManager);
         try {
@@ -42,7 +43,7 @@ public class JassHttpServer {
             server.createContext("/gameroom", new GameroomHandler(manager));
             server.createContext("/publicgameroom", new PublicGameRoomHandler(manager));
 
-            server.setExecutor(null);
+            server.setExecutor(Executors.newFixedThreadPool(100));
             server.start();
 
             System.out.println("Server is running on port 9000");

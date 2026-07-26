@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import Card from './Card.vue'
 import TrickScore from './TrickScore.vue'
 import type GameMode from '@/interfaces/GameMode.ts'
@@ -22,12 +22,15 @@ const bottomCard = ref<undefined | CardInterface>(undefined)
 
 const firstPlayer = ref('')
 
+const freeze = ref(false)
+
 const meIdx = ref(-1)
 
 const isMe = ref(false)
 const tricksPlayed = ref(0)
 
 const count = ref(-1)
+let eventSource: EventSource | null = null
 const emits = defineEmits<{
   (e: 'update:isme', value: boolean): void
   (e: 'update:finished', value: boolean): void
@@ -73,18 +76,22 @@ async function getPlayers() {
   }
 }
 
-async function getNextCard() {
+function getNextCard() {
   const host = window.location.hostname
-  for (let x = 0; x <= 4; x++) {
-    try {
-      const res = await fetch(`http://${host}:9000/cardWait/${count.value % 4}`, {
-        headers: {
-          Gameroom: props.gameroom.toString(),
-        },
-      })
-      if (!res.ok) throw new Error('Network response was not OK')
+  if (eventSource) {
+    eventSource.close()
+  }
 
-      const data = await res.json()
+  eventSource = new EventSource(
+    `http://${host}:9000/cardWait/${count.value % 4}?gameroom=${props.gameroom}`,
+    {
+      withCredentials: false,
+    },
+  )
+
+  eventSource.addEventListener('card-state', (event) => {
+    try {
+      const data = JSON.parse(event.data)
       nextPlayer.value = data.next
       firstPlayer.value = data.start
       updateCard(data.currentTrick)
@@ -92,10 +99,16 @@ async function getNextCard() {
       emits('update:isme', isMe.value)
       count.value = data.currentTrick.length
     } catch (err) {
-      console.error('Error fetching players:', err)
+      console.error('Error parsing card stream:', err)
+    }
+  })
+
+  eventSource.onerror = () => {
+    if (eventSource) {
+      eventSource.close()
+      eventSource = null
     }
   }
-  tricksPlayed.value++
 }
 
 function updateCard(cards: [CardInterface]) {
@@ -118,6 +131,9 @@ function updateCard(cards: [CardInterface]) {
         leftCard.value = currentCard
     }
   }
+  if (cards.length >= 4) {
+    freeze.value = true
+  }
 }
 
 function isPlayer(index: number) {
@@ -125,6 +141,8 @@ function isPlayer(index: number) {
 }
 
 async function clearDeck() {
+  tricksPlayed.value++
+
   console.log('Tricks Played:' + tricksPlayed.value)
 
   const host = window.location.hostname
@@ -143,6 +161,7 @@ async function clearDeck() {
   if (!res.ok) throw new Error('Network response was not OK')
   const data = await res.json()
   scores.value = data
+  freeze.value = false
   if (tricksPlayed.value == 9) {
     emits('update:finished', true)
   } else {
@@ -153,6 +172,12 @@ async function clearDeck() {
 onMounted(() => {
   getPlayers()
   getNextCard()
+})
+
+onBeforeUnmount(() => {
+  if (eventSource) {
+    eventSource.close()
+  }
 })
 </script>
 
@@ -195,7 +220,7 @@ onMounted(() => {
       </div>
       <TrickScore :scores="scores" :game="props.game" />
     </div>
-    <button class="continue-button" v-if="count == 4" v-on:click="clearDeck">Continue</button>
+    <button class="continue-button" v-if="freeze" v-on:click="clearDeck">Continue</button>
   </div>
 </template>
 <style scoped>
