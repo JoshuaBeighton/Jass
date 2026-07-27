@@ -94,7 +94,7 @@ const description = computed(() => {
   border-radius: 12px;
   padding: 6px 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-  border: 1px solid #2e2e38;
+  border: 1px solid var(--color-border);
 }
 
 .game-header {

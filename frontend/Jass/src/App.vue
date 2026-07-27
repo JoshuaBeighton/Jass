@@ -7,7 +7,7 @@ import { ref } from 'vue'
 import type GameMode from './interfaces/GameMode.ts'
 import RoomChooser from './components/login/RoomChooser.vue'
 
-const gameroomNumber = ref(-1)
+const gameroomNumber = ref(1001)
 
 function removeLogin() {
   login.value = false

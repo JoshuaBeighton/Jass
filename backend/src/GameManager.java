@@ -2,7 +2,9 @@ package src;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import src.games.IGame;
 import src.objs.Card;
@@ -25,6 +27,9 @@ public class GameManager {
     public static final String[] GAMES = {
             "Top Down", "Bottom Up", "Middle", "Trumps", "Slalom", "FiveFour"
     };
+
+    private Map<String, Integer> gameMultipliers;
+
 
     private final int LAST_BONUS = 5;
 
@@ -55,8 +60,18 @@ public class GameManager {
         teams = new ArrayList<Team>();
         teams.add(new Team(0));
         teams.add(new Team(1));
+
+        // Load the multipliers
+        gameMultipliers = new HashMap<>();
+        for (int i = 0; i < GAMES.length; i++) {
+            gameMultipliers.put(GAMES[i], i + 1);
+        }
         fillDeck();
         this.visible = visible;
+    }
+
+    public Map<String, Integer> getGameMultipliers() {
+        return gameMultipliers;
     }
 
     /**
@@ -193,8 +208,8 @@ public class GameManager {
     }
 
     /**
-     * Waits for the chooser to change from the supplied index, but returns promptly
-     * if no change occurs before the timeout elapses.
+     * Waits for the chooser to change from the supplied index, but returns promptly if no change occurs before the timeout
+     * elapses.
      *
      * @param lastIndex the chooser index seen by the client
      * @param timeoutMillis the maximum time to wait in milliseconds
@@ -240,8 +255,8 @@ public class GameManager {
     }
 
     /**
-     * Waits for the current trick size to change from the supplied value, but returns
-     * promptly if no change occurs before the timeout elapses.
+     * Waits for the current trick size to change from the supplied value, but returns promptly if no change occurs before
+     * the timeout elapses.
      *
      * @param lastSize the trick size seen by the client
      * @param timeoutMillis the maximum time to wait in milliseconds

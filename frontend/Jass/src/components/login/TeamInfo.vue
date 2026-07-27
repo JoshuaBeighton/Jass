@@ -144,7 +144,7 @@ function setTeam2() {
   width: 100%;
   padding: 0.2rem 0.5rem;
 
-  border: 1px solid #666;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
 
   cursor: pointer;
@@ -162,14 +162,14 @@ function setTeam2() {
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--c-accent) 15%, transparent);
-  color: var(--c-accent);
+  color: var(--color-accent);
   transition:
     background-color 150ms,
     color 150ms;
 }
 
 .count.full {
-  background: var(--c-accent);
+  background: var(--color-accent);
   color: white;
 }
 
@@ -190,18 +190,18 @@ function setTeam2() {
 }
 
 .team:hover {
-  border-color: var(--c-accent-muted);
+  border-color: var(--color-accent-muted);
   transform: translateY(-2px);
 }
 
 .team:focus-visible {
   outline: none;
-  border-color: var(--c-accent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--c-accent) 30%, transparent);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 30%, transparent);
 }
 
 .selected {
-  border-color: var(--c-accent);
-  background: rgb(from var(--c-accent) r g b / 10%);
+  border-color: var(--color-accent);
+  background: rgb(from var(--color-accent) r g b / 10%);
 }
 </style>

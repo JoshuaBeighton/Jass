@@ -1,6 +1,7 @@
 package src.utils;
 
 import java.util.List;
+import java.util.Map;
 
 import src.GameManager;
 import src.games.BottomUp;
@@ -240,21 +241,46 @@ public class JsonManager {
      * @param teams the list of teams
      * @return JSON string containing overall game scores and team labels
      */
-    public static String scoresToJson(List<Team> teams) {
+    public static String scoresToJson(List<Team> teams, Map<String, Integer> gameMultipliers) {
         JSONObject result = new JSONObject();
 
         JSONArray scores = new JSONArray();
+        int t1overall = 0;
+        int t2overall = 0;
         for (String game : GameManager.GAMES) {
             JSONObject obj = new JSONObject();
             obj.put("game", game);
-            obj.put("0", teams.get(0).getScore(game));
-            obj.put("1", teams.get(1).getScore(game));
+            obj.put("multiplier", gameMultipliers.get(game));
+            int t1score = teams.get(0).getScore(game);
+            int t2score = teams.get(1).getScore(game);
+            obj.put("0", t1score);
+            obj.put("1", t2score);
+            if (t1score + t2score == -2) {
+                obj.put("calc0", -1);
+                obj.put("calc1", -1);
+            } else {
+                if (t1score > t2score) {
+                    t1overall += t1score - (t2score == -1 ? 0 : t2score);
+                } else
+                    if (t2score > t1score) {
+                        t2overall += (t2score - (t1score == -1 ? 0 : t1score));
+                    }
+                obj.put("calc0", t1score > t2score ? (t1score - (t2score == -1 ? 0 : t2score)) * gameMultipliers.get(game) : 0);
+                obj.put("calc1", t2score > t1score ? (t2score - (t1score == -1 ? 0 : t1score)) * gameMultipliers.get(game) : 0);
+            }
             scores.put(obj);
         }
         JSONArray teamsJSON = new JSONArray();
-        teams.forEach((t) -> {
-            teamsJSON.put(t.players.get(0).getPlayerName() + " & " + t.players.get(1).getPlayerName());
-        });
+
+        JSONObject obj1 = new JSONObject();
+        obj1.put("name", teams.get(0).players.get(0).getPlayerName() + " & " + teams.get(0).players.get(1).getPlayerName());
+        obj1.put("score", t1overall);
+
+        JSONObject obj2 = new JSONObject();
+        obj2.put("name", teams.get(1).players.get(0).getPlayerName() + " & " + teams.get(1).players.get(1).getPlayerName());
+        obj2.put("score", t2overall);
+        teamsJSON.put(obj1);
+        teamsJSON.put(obj2);
 
         result.put("teams", teamsJSON);
         result.put("scores", scores);

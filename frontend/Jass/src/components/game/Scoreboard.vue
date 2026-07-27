@@ -1,14 +1,37 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+
+interface Team {
+  name: string
+  score: number
+}
+
+interface GameScore {
+  game: string
+  multiplier: number
+  0: number
+  1: number
+  calc0: number
+  calc1: number
+}
+
+interface Scores {
+  teams: Team[]
+  scores: GameScore[]
+}
+
 const props = defineProps<{ gameroom: number }>()
 
 const scores = ref({
-  teams: ['Loading...', 'Loading...'],
+  teams: [
+    { name: 'Loading...', score: 0 },
+    { name: 'Loading...', score: 0 },
+  ],
   scores: [
-    { game: 'Game 1', 0: -1, 1: -1 },
-    { game: 'Game 2', 0: -1, 1: -1 },
-    { game: 'Game 3', 0: -1, 1: -1 },
-    { game: 'Game 4', 0: -1, 1: -1 },
+    { game: 'Game 1', multiplier: 1, 0: -1, 1: -1, calc0: -1, calc1: -1 },
+    { game: 'Game 2', multiplier: 2, 0: -1, 1: -1, calc0: -1, calc1: -1 },
+    { game: 'Game 3', multiplier: 3, 0: -1, 1: -1, calc0: -1, calc1: -1 },
+    { game: 'Game 4', multiplier: 4, 0: -1, 1: -1, calc0: -1, calc1: -1 },
   ],
 })
 
@@ -21,7 +44,7 @@ async function fetchScores() {
       },
     })
     if (!res.ok) throw new Error('Network response was not OK')
-    const data = await res.json()
+    const data: Scores = await res.json()
     scores.value = data
   } catch (err) {
     console.error('Error fetching scores:', err)
@@ -42,8 +65,11 @@ onMounted(() => {
         <thead>
           <tr>
             <th class="col-game">Game</th>
-            <th class="col-team">{{ scores['teams'][0] }}</th>
-            <th class="col-team">{{ scores['teams'][1] }}</th>
+            <th class="col-game">Multiplier</th>
+            <th class="col-team">{{ scores.teams[0]?.name ?? 'Loading...' }}</th>
+            <th class="col-team">{{ scores.teams[1]?.name ?? 'Loading...' }}</th>
+            <th class="col-team">{{ scores.teams[0]?.name ?? 'Loading...' }}</th>
+            <th class="col-team">{{ scores.teams[1]?.name ?? 'Loading...' }}</th>
           </tr>
         </thead>
         <tbody>
@@ -53,12 +79,24 @@ onMounted(() => {
             :class="{ 'is-loading': obj.game === 'loading' }"
           >
             <td class="cell-game">{{ obj.game }}</td>
-            <td class="cell-score" :class="{ 'no-score': obj[0] == -1 }">
-              {{ obj[0] == -1 ? '' : obj[0] }}
+            <td class="cell-game">{{ obj.multiplier }}</td>
+            <td class="cell-score" :class="{ loser: obj['0'] < obj['1'] }">
+              {{ obj['0'] == -1 ? '' : obj['0'] }}
             </td>
-            <td class="cell-score" :class="{ 'no-score': obj[1] == -1 }">
-              {{ obj[1] == -1 ? '' : obj[1] }}
+            <td class="cell-score" :class="{ loser: obj['1'] < obj['0'] }">
+              {{ obj['1'] == -1 ? '' : obj['1'] }}
             </td>
+            <td class="cell-score">
+              {{ obj['0'] > obj['1'] && obj.calc0 != -1 ? obj.calc0 : '' }}
+            </td>
+            <td class="cell-score">
+              {{ obj['1'] > obj['0'] && obj.calc1 != -1 ? obj.calc1 : '' }}
+            </td>
+          </tr>
+          <tr>
+            <td class="cell-game overall" colspan="4">Overall Score</td>
+            <td class="cell-game">{{ scores.teams[0]?.score }}</td>
+            <td class="cell-game">{{ scores.teams[1]?.score }}</td>
           </tr>
         </tbody>
       </table>
@@ -108,11 +146,11 @@ th {
 }
 
 .col-game {
-  width: 40%;
+  max-width: 40%;
 }
 
 .col-team {
-  width: 30%;
+  max-width: 30%;
   text-align: center;
   color: var(--color-text);
 }
@@ -135,17 +173,22 @@ td {
 }
 
 .cell-score {
+  font-weight: 600;
   text-align: center;
   font-variant-numeric: tabular-nums;
   color: var(--color-accent);
 }
 
-.no-score {
-  color: var(--color-text-secondary);
+.loser {
+  color: var(--color-red-suit);
 }
 
 .is-loading {
   opacity: 0.5;
   pointer-events: none;
+}
+
+.overall {
+  font-weight: 600;
 }
 </style>

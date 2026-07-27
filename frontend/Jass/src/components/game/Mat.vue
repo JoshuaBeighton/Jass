@@ -251,6 +251,7 @@ onBeforeUnmount(() => {
   position: relative;
   background-color: #1b5e20;
   border-radius: 20px;
+  border: 1px solid var(--color-border);
   width: 550px;
   height: 550px;
   box-shadow:
@@ -276,8 +277,8 @@ onBeforeUnmount(() => {
 .player-info.upNext {
   background: var(--color-accent);
   color: var(--color-heading);
-  border-color: var(--color-heading);
-  box-shadow: 0 0 12px var(--color-heading);
+  border-color: var(--color-border);
+  box-shadow: 0 0 12px var(--color-border);
 }
 
 .p-bottom {
@@ -377,7 +378,7 @@ onBeforeUnmount(() => {
   padding: 12px 24px;
   font-size: 1rem;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--color-text);
   background-color: var(--color-accent);
   border: 1px solid var(--color-border);
   border-radius: 8px;

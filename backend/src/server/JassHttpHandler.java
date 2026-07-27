@@ -67,9 +67,19 @@ public class JassHttpHandler {
     }
 
     protected static void writeSseEvent(OutputStream os, String event, String data) throws IOException {
-        os.write(("event: " + event + "\n").getBytes(StandardCharsets.UTF_8));
-        os.write(("data: " + data + "\n\n").getBytes(StandardCharsets.UTF_8));
-        os.flush();
+        try {
+            os.write(("event: " + event + "\n").getBytes(StandardCharsets.UTF_8));
+            os.write(("data: " + data + "\n\n").getBytes(StandardCharsets.UTF_8));
+            os.flush();
+        }
+        catch (IOException e) {
+            try {
+                os.close();
+            }
+            catch (Exception e1) {
+
+            }
+        }
     }
 
     /**
