@@ -8,6 +8,8 @@ import LoginCard from './components/login/LoginCard.vue'
 import { ref } from 'vue'
 import type GameMode from './interfaces/GameMode.ts'
 import RoomChooser from './components/login/RoomChooser.vue'
+import WinScreen from './components/game/WinScreen.vue'
+import Scoreboard from './components/game/Scoreboard.vue'
 
 // Current gameroom (default 1001 for local testing)
 const gameroomNumber = ref(1001)
@@ -42,12 +44,14 @@ const defaultGame: GameMode = {
 const currentGame = ref(defaultGame)
 const isMe = ref(false)
 const deckRef = ref<InstanceType<typeof Deck>>()
+const winners = ref('')
 
 // Which panes are visible
 const login = ref(true)
 const select = ref(false)
 const mat = ref(false)
 const deck = ref(false)
+const matchOver = ref(false)
 
 // Called when a game finishes to return to selection and refresh hand
 function gameFinished(finished: boolean) {
@@ -56,6 +60,35 @@ function gameFinished(finished: boolean) {
   mat.value = false
   select.value = true
   deckRef.value?.fetchHand()
+}
+
+function matchFinished(finished: string) {
+  login.value = false
+  select.value = false
+  mat.value = false
+  deck.value = false
+  matchOver.value = true
+  winners.value = finished
+}
+
+async function playAgain(sameRoom: boolean) {
+  const host = window.location.hostname
+  let res = await fetch(`http://${host}:9000/resetMatch`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'text/plain',
+      // backend expects gameroom id in a `Gameroom` header
+      Gameroom: gameroomNumber.value.toString(),
+    },
+  })
+
+  if (!sameRoom) {
+    gameroomNumber.value = -1
+    login.value = true
+  } else {
+    login.value = true
+  }
+  matchOver.value = false
 }
 </script>
 
@@ -85,8 +118,15 @@ function gameFinished(finished: boolean) {
       v-if="select"
       :name="name"
       @update:selected="gameChosen"
+      @update:finished="matchFinished"
       :gameroom="gameroomNumber"
     ></GameSelect>
+    <WinScreen
+      v-if="matchOver"
+      :winner-name="winners"
+      :gameroom="gameroomNumber"
+      @update:play-again="playAgain"
+    />
   </div>
 </template>
 

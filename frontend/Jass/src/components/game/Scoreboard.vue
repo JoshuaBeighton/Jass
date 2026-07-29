@@ -26,7 +26,9 @@ interface Scores {
 }
 
 const props = defineProps<{ gameroom: number }>()
-
+const emits = defineEmits<{
+  (e: 'update:finished', value: string): void
+}>()
 // default placeholder data shown until the network request completes
 const scores = ref({
   teams: [
@@ -57,6 +59,20 @@ async function fetchScores() {
     if (!res.ok) throw new Error('Network response was not OK')
     const data: Scores = await res.json()
     scores.value = data
+    let seenNegative = false
+    scores.value.scores.forEach((element) => {
+      if (element['0'] == -1 || element['1'] == -1) {
+        seenNegative = true
+      }
+    })
+    if (!seenNegative) {
+      emits(
+        'update:finished',
+        (scores.value.teams[0]?.score ?? -1) > (scores.value.teams[1]?.score ?? -1)
+          ? (scores.value.teams[0]?.name ?? 'error')
+          : (scores.value.teams[1]?.name ?? 'error'),
+      )
+    }
   } catch (err) {
     console.error('Error fetching scores:', err)
   }
@@ -125,6 +141,8 @@ onMounted(() => {
 }
 
 .scoreboard-container {
+  background-color: var(--color-background);
+  z-index: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;

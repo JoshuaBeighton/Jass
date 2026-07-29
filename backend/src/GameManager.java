@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import src.games.Elephant;
 import src.games.IGame;
@@ -52,6 +53,7 @@ public class GameManager {
     private List<Player> players;
     private List<Team> teams;
     public boolean cardsDealt = false;
+    private int resetReceived = 0;
 
     public boolean visible;
 
@@ -65,6 +67,12 @@ public class GameManager {
         teams = new ArrayList<Team>();
         teams.add(new Team(0));
         teams.add(new Team(1));
+
+        Random rand = new Random();
+        for (String game : GAMES) {
+            teams.get(0).setScore(game, rand.nextInt(158)); // 0-157 inclusive
+            teams.get(1).setScore(game, rand.nextInt(158));
+        }
 
         // Load the multipliers
         gameMultipliers = new HashMap<>();
@@ -457,5 +465,12 @@ public class GameManager {
         currentTrick.clear();
         teams.get(0).resetScore();
         teams.get(1).resetScore();
+    }
+
+
+    public void resetMatch(String toRemove) {
+        players.clear();
+        teams.get(0).resetMatch();
+        teams.get(1).resetMatch();
     }
 }

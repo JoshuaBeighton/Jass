@@ -115,4 +115,13 @@ public class Team {
     public int getScore(String mode) {
         return gameScores.get(mode);
     }
+
+    public void resetMatch() {
+        gameScores = new HashMap<String, Integer>();
+        for (String game : GameManager.GAMES) {
+            gameScores.put(game, -1);
+        }
+        currentScore = 0;
+        players.clear();
+    }
 }

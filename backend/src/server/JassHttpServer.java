@@ -42,6 +42,7 @@ public class JassHttpServer {
             server.createContext("/scores", new ScoresHandler(manager));
             server.createContext("/gameroom", new GameroomHandler(manager));
             server.createContext("/publicgameroom", new PublicGameRoomHandler(manager));
+            server.createContext("/resetMatch", new EndGameHandler(manager));
 
             server.setExecutor(Executors.newFixedThreadPool(100));
             server.start();

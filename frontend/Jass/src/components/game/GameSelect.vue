@@ -41,6 +41,7 @@ const props = defineProps<{
 // Emits a `update:selected` event with the chosen `GameMode` when selection completes
 const emits = defineEmits<{
   (e: 'update:selected', value: GameMode): void
+  (e: 'update:finished', value: string): void
 }>()
 
 /**
@@ -228,7 +229,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </div>
-    <Scoreboard :gameroom="props.gameroom" />
+    <Scoreboard :gameroom="props.gameroom" @update:finished="(t) => emits('update:finished', t)" />
   </div>
 </template>
 
