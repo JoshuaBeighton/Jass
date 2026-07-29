@@ -144,9 +144,9 @@ public class JsonManager {
         switch (name.toLowerCase()) {
             case "pass":
                 return null;
-            case "topdown":
+            case "top down":
                 return new TopDown();
-            case "bottomup":
+            case "bottom up":
                 return new BottomUp();
             case "middle":
                 return new Middle();
@@ -161,7 +161,7 @@ public class JsonManager {
                 return new FiveFour(start);
             case "elephant":
                 return new Elephant();
-            case "saintlegier":
+            case "saint legier":
                 Map<Suit, String> mapping = new HashMap<Suit, String>();
                 String diamonds = jo.getString("diamonds");
                 String spades = jo.getString("spades");
@@ -226,7 +226,7 @@ public class JsonManager {
             JSONObject obj = new JSONObject();
             obj.put("id", id++);
             obj.put("text", game);
-            obj.put("key", game.replace(" ", ""));
+            obj.put("key", game);
             available.put(obj);
         }
 

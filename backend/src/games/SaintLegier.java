@@ -34,10 +34,10 @@ public class SaintLegier implements IGame {
         int winner = 0;
         Comparator<Card> ordering = new MiddleOrdering(10, masterSuit);
         switch (mapping.get(masterSuit).toLowerCase()) {
-            case "topdown":
+            case "top down":
                 ordering = new TopDownOrdering(masterSuit);
                 break;
-            case "bottomup":
+            case "bottom up":
                 ordering = new BottomUpOrdering(masterSuit);
                 break;
             default:

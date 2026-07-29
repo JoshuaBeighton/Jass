@@ -115,13 +115,13 @@ async function playAgain(sameRoom: boolean) {
       @update:finished="gameFinished"
     ></Mat>
     <Deck v-if="deck" :name="name" :can-play="isMe" ref="deckRef" :gameroom="gameroomNumber"></Deck>
-    <GameSelect
+    <Scoreboard
       v-if="select"
       :name="name"
       @update:selected="gameChosen"
       @update:finished="matchFinished"
       :gameroom="gameroomNumber"
-    ></GameSelect>
+    />
     <WinScreen
       v-if="matchOver"
       :winner-name="winners"
