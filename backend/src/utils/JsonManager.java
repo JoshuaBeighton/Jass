@@ -10,6 +10,7 @@ import src.games.BottomUp;
 import src.games.Elephant;
 import src.games.FiveFour;
 import src.games.IGame;
+import src.games.Jack9;
 import src.games.Middle;
 import src.games.SaintLegier;
 import src.games.Slalom;
@@ -172,6 +173,8 @@ public class JsonManager {
                 mapping.put(Suit.HEARTS, hearts);
                 mapping.put(Suit.CLUBS, clubs);
                 return new SaintLegier(mapping);
+            case "jack9":
+                return new Jack9();
             default:
                 break;
         }
