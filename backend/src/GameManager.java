@@ -28,7 +28,7 @@ import src.objs.Team;
  */
 public class GameManager {
     public static final String[] GAMES = {
-            "Top Down", "Bottom Up", "Middle", "Trumps", "Slalom", "FiveFour", "Elephant"
+            "Top Down", "Bottom Up", "Middle", "Trumps", "Slalom", "FiveFour", "Elephant", "Saint Legier"
     };
 
     private Map<String, Integer> gameMultipliers;
@@ -53,7 +53,6 @@ public class GameManager {
     private List<Player> players;
     private List<Team> teams;
     public boolean cardsDealt = false;
-    private int resetReceived = 0;
 
     public boolean visible;
 
@@ -68,11 +67,11 @@ public class GameManager {
         teams.add(new Team(0));
         teams.add(new Team(1));
 
-        Random rand = new Random();
-        for (String game : GAMES) {
-            teams.get(0).setScore(game, rand.nextInt(158)); // 0-157 inclusive
-            teams.get(1).setScore(game, rand.nextInt(158));
-        }
+        // Random rand = new Random();
+        // for (String game : GAMES) {
+        // teams.get(0).setScore(game, rand.nextInt(158)); // 0-157 inclusive
+        // teams.get(1).setScore(game, rand.nextInt(158));
+        // }
 
         // Load the multipliers
         gameMultipliers = new HashMap<>();

@@ -5,6 +5,7 @@
 import type GameMode from '@/interfaces/GameMode'
 import { isRed, suitToUnicode } from '@/utils/SuitManipulation'
 import { computed } from 'vue'
+import SaintLegierCross from './SaintLegierCross.vue'
 
 interface TeamScore {
   p1: string
@@ -30,6 +31,7 @@ const gameDescriptions: Record<string, string> = {
     'The game alternates between the highest card winning, and the lowest card winning. The caller can choose which way to start!',
   FiveFour:
     'Start by playing 5 tricks like a top-down or bottom up, then switch to the other for the last 4',
+  'Saint Legier': 'Each suit has a different ordering: one top-down, one bottom-up and two middle.',
 }
 
 // Choose description based on `game.game`, fallback to a generic helper text
@@ -80,6 +82,13 @@ const description = computed(() => {
         </div>
       </div>
     </div>
+
+    <hr class="divider" />
+
+    <SaintLegierCross
+      v-if="game.game.toLowerCase() == 'saint legier' && game.cross != undefined"
+      :data="game.cross"
+    />
   </div>
 </template>
 

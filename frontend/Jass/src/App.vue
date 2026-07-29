@@ -39,6 +39,7 @@ const defaultGame: GameMode = {
   suit: undefined,
   start: undefined,
   caller: '',
+  cross: undefined,
 }
 
 const currentGame = ref(defaultGame)

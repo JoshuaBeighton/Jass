@@ -3,9 +3,9 @@
 // - Streams game-choice events from the backend so players take turns
 //   selecting the game mode.
 // - When it's this player's turn (`isMe`), shows UI to pick a game,
-//   or additional choices (suit/start) for certain game types.
+//   or additional choices (suit/start/saint-legier assignment) for certain game types.
 
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import Scoreboard from './Scoreboard.vue'
 import type GameMode from '@/interfaces/GameMode.ts'
 
@@ -14,7 +14,44 @@ const isMe = ref(false) // is it this player's turn to choose?
 const trumps = ref(false) // showing trumps suit choices
 const slalom = ref(false) // showing slalom start choices
 const fivefour = ref(false) // showing five-four start choices
+const saintlegier = ref(false) // showing saint-legier per-suit assignment choices
 const nextChooser = ref('') // name of the player who will choose next
+
+// Saint-Legier: each suit must be assigned a game type.
+// Exactly 2 suits -> 'middle', 1 suit -> 'topDown', 1 suit -> 'bottomUp'.
+const suitNames = ['Clubs', 'Diamonds', 'Hearts', 'Spades']
+const gameTypeOptions: { key: string; text: string; max: number }[] = [
+  { key: 'middle', text: 'Middle', max: 2 },
+  { key: 'topDown', text: 'Top Down', max: 1 },
+  { key: 'bottomUp', text: 'Bottom Up', max: 1 },
+]
+const saintlegierAssignments = ref<Record<string, string>>({})
+
+// Remaining slots for a given game type, based on current assignments
+function remainingCount(typeKey: string) {
+  const max = gameTypeOptions.find((o) => o.key === typeKey)?.max ?? 0
+  const used = Object.values(saintlegierAssignments.value).filter((v) => v === typeKey).length
+  return max - used
+}
+
+const saintlegierComplete = computed(
+  () => Object.keys(saintlegierAssignments.value).length === suitNames.length,
+)
+
+function assignSuit(suit: string, typeKey: string) {
+  if (remainingCount(typeKey) <= 0) return
+  saintlegierAssignments.value = { ...saintlegierAssignments.value, [suit]: typeKey }
+}
+
+function unassignSuit(suit: string) {
+  const updated = { ...saintlegierAssignments.value }
+  delete updated[suit]
+  saintlegierAssignments.value = updated
+}
+
+function typeLabel(typeKey: string) {
+  return gameTypeOptions.find((o) => o.key === typeKey)?.text ?? typeKey
+}
 
 // Helpers for building the list of available games
 let id = 0
@@ -29,6 +66,7 @@ const games = ref([
   { id: id++, text: 'Slalom', key: 'slalom' },
   { id: id++, text: 'Five-Four', key: 'fivefour' },
   { id: id++, text: 'Elephant', key: 'elephant' },
+  { id: id++, text: 'Saint Legier', key: 'saint legier' },
   { id: id++, text: 'Pass', key: 'pass' },
 ])
 
@@ -74,6 +112,7 @@ function connectGameChoiceStream() {
           counter = 0
         }
         if (nextChooser.value == props.name) {
+          console.log('SSE available games received:', data.available)
           // it's this player's turn: show available game options
           isMe.value = true
           games.value = data.available
@@ -87,6 +126,7 @@ function connectGameChoiceStream() {
           suit: data.suit,
           start: data.start,
           caller: data.caller,
+          cross: data.cross,
         }
         emits('update:selected', gameMode)
         if (eventSource) {
@@ -110,7 +150,7 @@ function connectGameChoiceStream() {
 
 // Helper to decide whether to show the main game buttons
 function showMainButtons() {
-  return !trumps.value && !slalom.value && !fivefour.value
+  return !trumps.value && !slalom.value && !fivefour.value && !saintlegier.value
 }
 
 /**
@@ -120,6 +160,7 @@ function showMainButtons() {
  *   request body accordingly and posts to `/gameChoice` with `gameroom` header.
  */
 async function sendGame(game: string) {
+  console.log(game)
   if (game.toLowerCase() == 'trumps') {
     trumps.value = true
     return
@@ -128,7 +169,9 @@ async function sendGame(game: string) {
     return
   } else if (game.toLowerCase() == 'fivefour') {
     fivefour.value = true
-    console.log('yo')
+    return
+  } else if (game.toLowerCase() == 'saintlegier') {
+    saintlegier.value = true
     return
   }
 
@@ -164,9 +207,39 @@ async function sendGame(game: string) {
       suit: data.suit,
       start: data.start,
       caller: data.caller,
+      cross: data.cross,
     }
     emits('update:selected', gameMode)
   }
+}
+
+async function sendSaintLegier() {
+  if (!saintlegierComplete.value) return
+
+  const host = window.location.hostname
+
+  let body: any = { name: 'saintlegier' }
+  for (const suit of suitNames) {
+    body[suit.toLowerCase()] = saintlegierAssignments.value[suit]
+  }
+  console.log(body)
+  const res = await fetch(`http://${host}:9000/gameChoice`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      gameroom: props.gameroom.toString(),
+    },
+    body: JSON.stringify(body),
+  })
+  const data = await res.json()
+  const gameMode: GameMode = {
+    game: data.game,
+    suit: data.suit,
+    start: data.start,
+    caller: data.caller,
+    cross: data.cross,
+  }
+  emits('update:selected', gameMode)
 }
 
 onMounted(() => {
@@ -190,11 +263,13 @@ onBeforeUnmount(() => {
       <div class="selectArea" v-if="isMe">
         <h2>
           {{
-            slalom || fivefour
-              ? 'Choose a Start Position'
-              : trumps
-                ? 'Choose a Suit'
-                : 'Choose a Game'
+            saintlegier
+              ? 'Assign a Game to Each Suit'
+              : slalom || fivefour
+                ? 'Choose a Start Position'
+                : trumps
+                  ? 'Choose a Suit'
+                  : 'Choose a Game'
           }}
         </h2>
         <div class="buttons">
@@ -225,6 +300,31 @@ onBeforeUnmount(() => {
             @click="() => sendGame((slalom ? 'slalom-' : 'fivefour-') + opt.toLowerCase())"
           >
             {{ opt }}
+          </button>
+        </div>
+
+        <div v-if="saintlegier" class="saintlegier-assign">
+          <div v-for="suit in suitNames" :key="suit" class="saintlegier-row">
+            <span :class="['suit-name', suit.toLowerCase()]">{{ suit }}</span>
+
+            <div v-if="!saintlegierAssignments[suit]" class="buttons saintlegier-options">
+              <button
+                v-for="opt in gameTypeOptions"
+                :key="opt.key"
+                :disabled="remainingCount(opt.key) <= 0"
+                @click="() => assignSuit(suit, opt.key)"
+              >
+                {{ opt.text }}
+              </button>
+            </div>
+            <div v-else class="saintlegier-assigned">
+              <span>{{ typeLabel(saintlegierAssignments[suit]) }}</span>
+              <button class="change-btn" @click="() => unassignSuit(suit)">Change</button>
+            </div>
+          </div>
+
+          <button v-if="saintlegierComplete" class="confirm-btn" @click="sendSaintLegier">
+            Confirm
           </button>
         </div>
       </div>
@@ -299,6 +399,12 @@ button:active {
   transform: translateY(0);
 }
 
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .suit-btn {
   background-color: var(--color-background);
   border-color: var(--color-border);
@@ -319,5 +425,60 @@ button:active {
 .suit-btn.clubs,
 .suit-btn.spades {
   color: var(--color-text);
+}
+
+.saintlegier-assign {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.saintlegier-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.suit-name {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.suit-name.hearts,
+.suit-name.diamonds {
+  color: var(--color-red-suit);
+}
+
+.saintlegier-options button {
+  flex: 1 1 100px;
+  min-width: 80px;
+  font-size: 0.85rem;
+  padding: 8px 10px;
+}
+
+.saintlegier-assigned {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.change-btn {
+  flex: 0 0 auto;
+  min-width: unset;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+}
+
+.confirm-btn {
+  width: 100%;
+  background-color: var(--color-primary);
+  color: var(--color-background);
+  border-color: var(--color-primary);
+  font-weight: 600;
 }
 </style>

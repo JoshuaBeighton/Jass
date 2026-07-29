@@ -1,7 +1,9 @@
 package src.utils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import src.GameManager;
 import src.games.BottomUp;
@@ -9,6 +11,7 @@ import src.games.Elephant;
 import src.games.FiveFour;
 import src.games.IGame;
 import src.games.Middle;
+import src.games.SaintLegier;
 import src.games.Slalom;
 import src.games.TopDown;
 import src.games.Trumps;
@@ -79,7 +82,6 @@ public class JsonManager {
         JSONObject jo = new JSONObject(json);
         String name = jo.getString("name");
         int idx = jo.getInt("idx");
-        System.out.println("Wants team: " + String.valueOf(idx));
         for (Team t : teams) {
             if (t.getIndex() == idx) {
                 return new Player(name, t);
@@ -138,6 +140,7 @@ public class JsonManager {
     public static IGame jsonToIGame(String json) {
         JSONObject jo = new JSONObject(json);
         String name = jo.getString("name");
+        System.out.println(name);
         switch (name.toLowerCase()) {
             case "pass":
                 return null;
@@ -158,6 +161,17 @@ public class JsonManager {
                 return new FiveFour(start);
             case "elephant":
                 return new Elephant();
+            case "saintlegier":
+                Map<Suit, String> mapping = new HashMap<Suit, String>();
+                String diamonds = jo.getString("diamonds");
+                String spades = jo.getString("spades");
+                String hearts = jo.getString("hearts");
+                String clubs = jo.getString("clubs");
+                mapping.put(Suit.DIAMONDS, diamonds);
+                mapping.put(Suit.SPADES, spades);
+                mapping.put(Suit.HEARTS, hearts);
+                mapping.put(Suit.CLUBS, clubs);
+                return new SaintLegier(mapping);
             default:
                 break;
         }
@@ -186,6 +200,13 @@ public class JsonManager {
             }
             if (g instanceof Slalom || g instanceof FiveFour) {
                 jo.put("start", g.getType() == 0 ? "Top" : "Bottom");
+            }
+            if (g instanceof SaintLegier) {
+                JSONObject cross = new JSONObject();
+                for (Entry<Suit, String> r : ((SaintLegier) g).getMapping().entrySet()) {
+                    cross.put(Suit.toString(r.getKey()), r.getValue());
+                }
+                jo.put("cross", cross);
             }
         }
         return jo.toString();
