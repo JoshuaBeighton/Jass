@@ -6,7 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import src.games.Elephant;
 import src.games.IGame;
+import src.games.Trumps;
 import src.objs.Card;
 import src.objs.Player;
 import src.utils.CardComparator;
@@ -25,7 +27,7 @@ import src.objs.Team;
  */
 public class GameManager {
     public static final String[] GAMES = {
-            "Top Down", "Bottom Up", "Middle", "Trumps", "Slalom", "FiveFour"
+            "Top Down", "Bottom Up", "Middle", "Trumps", "Slalom", "FiveFour", "Elephant"
     };
 
     private Map<String, Integer> gameMultipliers;
@@ -37,6 +39,9 @@ public class GameManager {
     private int nextToChoose = 0;
     private int choicesUntilForced = 4;
     private int nextPlayer = -1;
+    private int gameCaller = -1;
+    private int trickWinner = -1;
+
     private List<Card> currentTrick;
 
     private final Lock nextToChooseLock = new ReentrantLock(true);
@@ -72,6 +77,10 @@ public class GameManager {
 
     public Map<String, Integer> getGameMultipliers() {
         return gameMultipliers;
+    }
+
+    public int getTrickWinner() {
+        return trickWinner;
     }
 
     /**
@@ -340,6 +349,7 @@ public class GameManager {
         try {
             currentGame = g;
             nextPlayer = nextToChoose;
+            gameCaller = nextToChoose;
             nextToChoose = (nextToChoose - 1) % 4;
             currentTrick = new ArrayList<Card>();
         }
@@ -375,8 +385,11 @@ public class GameManager {
                 System.out.println("Cards played: " + currentTrick.size());
                 Card candidate = Card.parseCard(s);
                 Player currentPlayer = players.get(nextPlayer);
-
-                if (!currentPlayer.canPlayCard(candidate, currentTrick, currentGame.getType())) {
+                int suit = -1;
+                if (currentGame instanceof Trumps || currentGame instanceof Elephant) {
+                    suit = currentGame.getType();
+                }
+                if (!currentPlayer.canPlayCard(candidate, currentTrick, suit)) {
                     System.out.println("Cannot play that card.");
                     return false;
                 }
@@ -409,6 +422,7 @@ public class GameManager {
                 players.get(winner).getTeam().addScore(currentGame.score(currentTrick));
                 currentTrick.clear();
                 nextPlayer = winner;
+                trickWinner = winner;
                 trickCount++;
                 System.out.println("Trick Count: " + trickCount);
                 if (trickCount >= 9) {
@@ -429,7 +443,7 @@ public class GameManager {
      * Resets the game state and prepares a new round.
      */
     public void resetGame() {
-        players.get(nextToChoose).getTeam().setScore(currentGame.getName(), players.get(nextToChoose).getTeam().getScore());
+        players.get(gameCaller).getTeam().setScore(currentGame.getName(), players.get(gameCaller).getTeam().getScore());
         System.out.println("Resetting Game");
         fillDeck();
         Collections.shuffle(undealt);

@@ -1,4 +1,7 @@
 <script lang="ts" setup>
+// RoomChooser component
+// - Lets users join an existing public room by code or create a new public/private room.
+// - Loads available public rooms from `/publicgameroom` on mount.
 import { ref, onMounted } from 'vue'
 
 interface Game {
@@ -12,6 +15,7 @@ const games = ref<Game[]>([])
 const isLoading = ref(true)
 const error = ref<string | null>(null)
 
+// Fetch list of public gamerooms
 const fetchGames = async () => {
   isLoading.value = true
   error.value = null
@@ -35,6 +39,7 @@ const emits = defineEmits<{
   (e: 'update:selected', value: number): void
 }>()
 
+// joinGame: either join a given room id or parse the input field and join that
 const joinGame = async (roomNo: number | undefined) => {
   console.log(roomNo)
 
@@ -56,6 +61,7 @@ const joinGame = async (roomNo: number | undefined) => {
   }
 }
 
+// makeGame: create a public or private gameroom via backend and emit its id
 const makeGame = async (visible: boolean) => {
   try {
     const host = window.location.hostname
@@ -80,6 +86,7 @@ onMounted(() => {
 </script>
 
 <template>
+  <!-- Room chooser UI: join by code, create a room, or pick from public list -->
   <div class="lobby-container">
     <div class="card">
       <h3 class="card-title">Join Game</h3>

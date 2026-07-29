@@ -4,31 +4,44 @@ import Card from './Card.vue'
 import TrickScore from './TrickScore.vue'
 import type GameMode from '@/interfaces/GameMode.ts'
 import type CardInterface from '@/interfaces/CardInterface.ts'
+import ElephantSelector from './ElephantSelector.vue'
+import { isElementAccessExpression } from 'typescript'
 
+// Props are the current game mode, current player name, and room number.
 const props = defineProps<{ game: GameMode; name: string; gameroom: number }>()
 
+// The player order is rotated so the current player is always at index 0.
 const players = ref([props.name, 'loading', 'loading', 'loading'])
 const nextPlayer = ref('')
 
+// Score table for the two teams.
 const scores = ref([
   { p1: 'loading', p2: 'loading', score: 0 },
   { p1: 'loading', p2: 'loading', score: 0 },
 ])
 
+// Card slots for the trick display.
 const leftCard = ref<undefined | CardInterface>(undefined)
 const topCard = ref<undefined | CardInterface>(undefined)
 const rightCard = ref<undefined | CardInterface>(undefined)
 const bottomCard = ref<undefined | CardInterface>(undefined)
 
+// Track which player started the current trick.
 const firstPlayer = ref('')
 
+// Prevent advancing the trick until the trick is complete.
 const freeze = ref(false)
 
+// Current player's index in the rotated player view.
 const meIdx = ref(-1)
 
+// Whether the current player is allowed to play now.
 const isMe = ref(false)
 const tricksPlayed = ref(0)
 
+const elephantSelection = ref(false)
+
+// Count of cards already played in the current trick.
 const count = ref(-1)
 let eventSource: EventSource | null = null
 const emits = defineEmits<{
@@ -36,6 +49,15 @@ const emits = defineEmits<{
   (e: 'update:finished', value: boolean): void
 }>()
 
+function setElephantTrump(suit: string) {
+  props.game.suit = suit
+  isMe.value = true
+  elephantSelection.value = false
+  getNextCard()
+  emits('update:isme', isMe.value)
+}
+
+// Fetch player order from the backend and rotate it so the current player is at bottom.
 async function getPlayers() {
   const host = window.location.hostname
 
@@ -59,6 +81,7 @@ async function getPlayers() {
     for (let i = 0; i < 4; i++) {
       players.value[i] = data[(i + meIdx.value) % 4].name
     }
+
     scores.value = [
       {
         p1: String(players.value[0]),
@@ -76,6 +99,7 @@ async function getPlayers() {
   }
 }
 
+// Start or restart the server-sent event stream for trick updates.
 function getNextCard() {
   const host = window.location.hostname
   if (eventSource) {
@@ -111,6 +135,7 @@ function getNextCard() {
   }
 }
 
+// Map incoming trick cards to the correct visual slot based on the trick starter.
 function updateCard(cards: [CardInterface]) {
   const startIndex = players.value.indexOf(firstPlayer.value)
   for (let i = 0; i < cards.length; i++) {
@@ -131,18 +156,20 @@ function updateCard(cards: [CardInterface]) {
         leftCard.value = currentCard
     }
   }
+
   if (cards.length >= 4) {
     freeze.value = true
   }
 }
 
+// Check whether the player at the given seat is due to play next.
 function isPlayer(index: number) {
   return players.value[index] == nextPlayer.value
 }
 
+// Clear the current trick, request updated scores, and continue to the next trick.
 async function clearDeck() {
   tricksPlayed.value++
-
   console.log('Tricks Played:' + tricksPlayed.value)
 
   const host = window.location.hostname
@@ -151,21 +178,48 @@ async function clearDeck() {
   topCard.value = undefined
   rightCard.value = undefined
   bottomCard.value = undefined
+
   const settings = {
     method: 'POST',
     headers: {
-      Gameroom: props.gameroom.toString(),
+      gameroom: props.gameroom.toString(),
     },
   }
+
   const res = await fetch(`http://${host}:9000/resetTrick`, settings)
   if (!res.ok) throw new Error('Network response was not OK')
   const data = await res.json()
-  scores.value = data
+  scores.value = data.scores
+  nextPlayer.value = data.next
+  firstPlayer.value = data.winner
+  isMe.value = nextPlayer.value == props.name
   freeze.value = false
+  console.log('game: ' + props.game.game.toLowerCase())
   if (tricksPlayed.value == 9) {
     emits('update:finished', true)
   } else {
-    getNextCard()
+    if (tricksPlayed.value == 6 && props.game.game.toLowerCase() == 'elephant') {
+      if (firstPlayer.value == props.name) {
+        isMe.value = false
+        emits('update:isme', isMe.value)
+        elephantSelection.value = true
+      } else {
+        const settings = {
+          method: 'GET',
+          headers: {
+            gameroom: props.gameroom.toString(),
+          },
+        }
+
+        const res = await fetch(`http://${host}:9000/gameChoice`, settings)
+        if (!res.ok) throw new Error('Network response was not OK')
+        const data = await res.text()
+        props.game.suit = data
+        getNextCard()
+      }
+    } else {
+      getNextCard()
+    }
   }
 }
 
@@ -221,6 +275,11 @@ onBeforeUnmount(() => {
       <TrickScore :scores="scores" :game="props.game" />
     </div>
     <button class="continue-button" v-if="freeze" v-on:click="clearDeck">Continue</button>
+    <ElephantSelector
+      @finished="setElephantTrump"
+      v-if="elephantSelection"
+      :gameroom="gameroom"
+    ></ElephantSelector>
   </div>
 </template>
 <style scoped>

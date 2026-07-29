@@ -10,7 +10,9 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import src.GameManager;
+import src.games.Elephant;
 import src.games.IGame;
+import src.objs.Suit;
 import src.server.JassHttpHandler;
 import src.utils.JsonManager;
 
@@ -53,6 +55,13 @@ public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
         int key = getGameroom(exchange);
         GameManager manager = managers.get(key);
         String uri = exchange.getRequestURI().toString();
+
+        if (manager.getGame() instanceof Elephant) {
+            System.out.println("doing thread thing");
+            Thread t = new Thread(() -> handleElephantWait(exchange, manager));
+            t.start();
+            return;
+        }
         String[] args = uri.split("\\?")[1].split("\\&");
         int lastIndex = Integer.parseInt(args[1].split("=")[1]);
 
@@ -101,6 +110,33 @@ public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
         }
     }
 
+    private void handleElephantWait(HttpExchange exchange, GameManager manager) {
+        OutputStream os = exchange.getResponseBody();
+        try {
+            // Wait for the suit to be set.
+            while (manager.getGame().getType() == -1) {
+                Thread.sleep(100);
+                System.out.println(manager.getGame().getType());
+            }
+            int suit = manager.getGame().getType();
+            String suitString = Suit.toString(Suit.fromIndex(suit));
+            exchange.getResponseHeaders().add("Content-Type", "text/plain");
+            exchange.sendResponseHeaders(200, suitString.length());
+            os.write(suitString.getBytes());
+            os.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                os.close();
+            }
+            catch (IOException e) {
+            }
+        }
+    }
+
     /**
      * Handles a POST request to submit a selected game choice.
      *
@@ -110,20 +146,36 @@ public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
     private void handlePost(HttpExchange exchange) throws IOException {
         int key = getGameroom(exchange);
         GameManager manager = managers.get(key);
-        System.out.println("Choosing game post received!");
         InputStream is = exchange.getRequestBody();
         String requestString = new String(is.readAllBytes());
-        IGame request = JsonManager.jsonToIGame(requestString);
-        if (request != null) {
-            manager.setGame(request);
-            System.out.println("Game Chosen: " + request.getName());
+
+        if (manager.getGame() == null) {
+            IGame request = JsonManager.jsonToIGame(requestString);
+            if (request != null) {
+                manager.setGame(request);
+            }
+            manager.incrementChooser();
+            String response = JsonManager.gameChoiceToJson(manager.getNextToChoose() == -1 ? manager.getNextPlayer() : manager.getNextToChoose(), manager.getPlayers(), manager.getGame(), manager.isForced());
+            exchange.sendResponseHeaders(200, response.length());
+            OutputStream os = exchange.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
         }
-        manager.incrementChooser();
-        String response = JsonManager.gameChoiceToJson(manager.getNextToChoose() == -1 ? manager.getNextPlayer() : manager.getNextToChoose(), manager.getPlayers(), manager.getGame(), manager.isForced());
-        exchange.sendResponseHeaders(200, response.length());
-        OutputStream os = exchange.getResponseBody();
-        os.write(response.getBytes());
-        os.close();
+
+
+        if (manager.getGame() instanceof Elephant) {
+            String payload = requestString.trim();
+            if (!payload.isEmpty()) {
+                ((Elephant) manager.getGame()).setTrump(Suit.fromChar(payload.charAt(0)));
+            }
+            manager.incrementChooser();
+            String response = "success";
+            exchange.sendResponseHeaders(200, response.length());
+            OutputStream os = exchange.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+            return;
+        }
     }
 }
 

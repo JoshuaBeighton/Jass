@@ -1,4 +1,8 @@
 <script setup lang="ts">
+// TeamInfo component
+// - Streams the current team join state and displays two selectable teams.
+// - Emits `update:selected` when the local user picks a team, and
+//   `update:ready` when both teams are full.
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const team1 = ref<Array<{ name: string; team: number }>>([])
@@ -9,6 +13,7 @@ let counter = 0
 const props = defineProps<{ gameroom: number }>()
 let eventSource: EventSource | null = null
 
+// Open an SSE stream to `/teamWait` to receive updates as players join
 function connectTeamsStream() {
   const host = window.location.hostname
   if (eventSource) {
@@ -29,8 +34,10 @@ function connectTeamsStream() {
       team2.value = data[1].players
       counter = team1.value.length + team2.value.length
       if (counter >= 4) {
+        // both teams full — inform parent that we're ready
         emit('update:ready', true)
         setTimeout(() => {
+          // force shallow copy to trigger reactivity in consuming components
           team1.value = [...team1.value]
           team2.value = [...team2.value]
         }, 0)
@@ -70,6 +77,7 @@ function isTeam2() {
   return selected.value == 1
 }
 
+// Select team 1 if it has fewer than 2 players
 function setTeam1() {
   if (team1.value == undefined || team1.value.length < 2) {
     selected.value = 0
@@ -77,6 +85,7 @@ function setTeam1() {
   }
 }
 
+// Select team 2 if it has fewer than 2 players
 function setTeam2() {
   if (team2.value == undefined || team2.value.length < 2) {
     selected.value = 1
@@ -86,6 +95,7 @@ function setTeam2() {
 </script>
 
 <template>
+  <!-- Two selectable team panels showing current players and counts -->
   <div class="teams">
     <div
       class="team"

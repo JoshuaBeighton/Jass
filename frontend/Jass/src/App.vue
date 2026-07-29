@@ -1,4 +1,6 @@
 <script setup lang="ts">
+// App root component
+// - Orchestrates the main pages: Room chooser, login, game selection, mat (game view), and deck
 import Deck from './components/game/Deck.vue'
 import GameSelect from './components/game/GameSelect.vue'
 import Mat from './components/game/Mat.vue'
@@ -7,8 +9,10 @@ import { ref } from 'vue'
 import type GameMode from './interfaces/GameMode.ts'
 import RoomChooser from './components/login/RoomChooser.vue'
 
+// Current gameroom (default 1001 for local testing)
 const gameroomNumber = ref(1001)
 
+// Navigation helpers triggered by child components
 function removeLogin() {
   login.value = false
   select.value = true
@@ -39,11 +43,13 @@ const currentGame = ref(defaultGame)
 const isMe = ref(false)
 const deckRef = ref<InstanceType<typeof Deck>>()
 
+// Which panes are visible
 const login = ref(true)
 const select = ref(false)
 const mat = ref(false)
 const deck = ref(false)
 
+// Called when a game finishes to return to selection and refresh hand
 function gameFinished(finished: boolean) {
   if (!finished) return
 

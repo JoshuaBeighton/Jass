@@ -1,4 +1,7 @@
 <script setup lang="ts">
+// TrickScore component
+// - Shows a brief description of the current game mode and a per-team
+//   breakdown of trick scores (used while playing a specific game)
 import type GameMode from '@/interfaces/GameMode'
 import { isRed, suitToUnicode } from '@/utils/SuitManipulation'
 import { computed } from 'vue'
@@ -9,11 +12,13 @@ interface TeamScore {
   score: number | string
 }
 
+// Props: array of team score rows and the active GameMode
 const props = defineProps<{
   scores: TeamScore[]
   game: GameMode
 }>()
 
+// Human-readable descriptions for each game mode shown in the UI
 const gameDescriptions: Record<string, string> = {
   'Top Down': 'The highest card wins!',
   'Bottom Up': 'The lowest card wins!',
@@ -27,6 +32,7 @@ const gameDescriptions: Record<string, string> = {
     'Start by playing 5 tricks like a top-down or bottom up, then switch to the other for the last 4',
 }
 
+// Choose description based on `game.game`, fallback to a generic helper text
 const description = computed(() => {
   return (
     gameDescriptions[props.game.game] ||
@@ -36,10 +42,12 @@ const description = computed(() => {
 </script>
 
 <template>
+  <!-- Display current game title, optional suit/start, and a short description -->
   <div class="game-card">
     <header class="game-header">
       <div class="game-title-container">
         <h2 class="game-title">{{ game.game }}</h2>
+        <!-- show suit symbol when present, coloring red suits appropriately -->
         <h2 :class="isRed(suitToUnicode(game.suit)) ? 'red' : '' + ' game-title'" v-if="game.suit">
           {{ suitToUnicode(game.suit) }}
         </h2>
@@ -53,6 +61,7 @@ const description = computed(() => {
     <div class="scores-container">
       <h3 class="scores-title">Scores</h3>
 
+      <!-- List team rows with score badges; the caller's team is highlighted -->
       <div class="scores-list">
         <div v-for="(team, index) in scores" :key="index" class="score-row">
           <div class="players">

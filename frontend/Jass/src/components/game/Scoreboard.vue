@@ -1,4 +1,7 @@
 <script setup lang="ts">
+// Scoreboard component
+// - Fetches score data for the gameroom and renders a compact table
+// - `Scores` contains an array of team metadata and an array of per-game scores
 import { ref, onMounted } from 'vue'
 
 interface Team {
@@ -7,6 +10,8 @@ interface Team {
 }
 
 interface GameScore {
+  // `0` and `1` hold the raw points for the two teams; `calc0`/`calc1` are
+  // computed values shown when available. `-1` denotes unavailable/loading.
   game: string
   multiplier: number
   0: number
@@ -22,6 +27,7 @@ interface Scores {
 
 const props = defineProps<{ gameroom: number }>()
 
+// default placeholder data shown until the network request completes
 const scores = ref({
   teams: [
     { name: 'Loading...', score: 0 },
@@ -35,6 +41,11 @@ const scores = ref({
   ],
 })
 
+/**
+ * fetchScores
+ * - Loads the current scoreboard for the gameroom from `/scores`.
+ * - On success replaces `scores.value` with the server data.
+ */
 async function fetchScores() {
   const host = window.location.hostname
   try {

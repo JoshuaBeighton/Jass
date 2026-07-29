@@ -1,14 +1,22 @@
 <script setup lang="ts">
+// GameSelect component
+// - Streams game-choice events from the backend so players take turns
+//   selecting the game mode.
+// - When it's this player's turn (`isMe`), shows UI to pick a game,
+//   or additional choices (suit/start) for certain game types.
+
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import Scoreboard from './Scoreboard.vue'
 import type GameMode from '@/interfaces/GameMode.ts'
 
-const isMe = ref(false)
-const trumps = ref(false)
-const slalom = ref(false)
-const fivefour = ref(false)
-const nextChooser = ref('')
+// UI state
+const isMe = ref(false) // is it this player's turn to choose?
+const trumps = ref(false) // showing trumps suit choices
+const slalom = ref(false) // showing slalom start choices
+const fivefour = ref(false) // showing five-four start choices
+const nextChooser = ref('') // name of the player who will choose next
 
+// Helpers for building the list of available games
 let id = 0
 let counter = -1
 let eventSource: EventSource | null = null
@@ -20,18 +28,27 @@ const games = ref([
   { id: id++, text: 'Trumps', key: 'trumps' },
   { id: id++, text: 'Slalom', key: 'slalom' },
   { id: id++, text: 'Five-Four', key: 'fivefour' },
+  { id: id++, text: 'Elephant', key: 'elephant' },
   { id: id++, text: 'Pass', key: 'pass' },
 ])
 
+// Props: player's display name and gameroom id
 const props = defineProps<{
   name: string
   gameroom: number
 }>()
 
+// Emits a `update:selected` event with the chosen `GameMode` when selection completes
 const emits = defineEmits<{
   (e: 'update:selected', value: GameMode): void
 }>()
 
+/**
+ * connectGameChoiceStream
+ * - Opens an SSE connection to `/gameChoice` to receive turn/choice updates.
+ * - When `data.chooser` is present, update who's next and available options.
+ * - When the final selection is made, emit `update:selected` and close the stream.
+ */
 function connectGameChoiceStream() {
   const host = window.location.hostname
   if (eventSource) {
@@ -49,18 +66,21 @@ function connectGameChoiceStream() {
     try {
       const data = JSON.parse(event.data)
       if (data.chooser != undefined) {
+        // new chooser rotation update
         nextChooser.value = data.chooser
         counter++
         if (counter >= 4) {
           counter = 0
         }
         if (nextChooser.value == props.name) {
+          // it's this player's turn: show available game options
           isMe.value = true
           games.value = data.available
         } else {
           isMe.value = false
         }
       } else {
+        // selection completed: backend returned the chosen game mode
         const gameMode: GameMode = {
           game: data.game,
           suit: data.suit,
@@ -79,6 +99,7 @@ function connectGameChoiceStream() {
   })
 
   eventSource.onerror = () => {
+    // on any SSE error, close the connection and rely on re-open logic elsewhere
     if (eventSource) {
       eventSource.close()
       eventSource = null
@@ -86,10 +107,17 @@ function connectGameChoiceStream() {
   }
 }
 
+// Helper to decide whether to show the main game buttons
 function showMainButtons() {
   return !trumps.value && !slalom.value && !fivefour.value
 }
 
+/**
+ * sendGame
+ * - Handles clicks from the UI to choose a game or sub-option (suit/start).
+ * - For composite options (e.g., `trumps-hearts`) the code builds the
+ *   request body accordingly and posts to `/gameChoice` with `gameroom` header.
+ */
 async function sendGame(game: string) {
   if (game.toLowerCase() == 'trumps') {
     trumps.value = true
@@ -125,8 +153,10 @@ async function sendGame(game: string) {
     body: JSON.stringify(body),
   })
   if (game == 'Pass') {
+    // if player passed, re-open the stream to wait for next chooser
     connectGameChoiceStream()
   } else {
+    // backend responded with final selection immediately
     const data = await res.json()
     const gameMode: GameMode = {
       game: data.game,

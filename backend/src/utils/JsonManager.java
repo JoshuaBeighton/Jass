@@ -5,6 +5,7 @@ import java.util.Map;
 
 import src.GameManager;
 import src.games.BottomUp;
+import src.games.Elephant;
 import src.games.FiveFour;
 import src.games.IGame;
 import src.games.Middle;
@@ -15,6 +16,7 @@ import src.objs.*;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 
 /**
  * Utility class for converting game objects to and from JSON representations.
@@ -124,7 +126,6 @@ public class JsonManager {
         result.put("currentTrick", cardsToJsonArray(cards));
         result.put("next", p.getPlayerName());
         result.put("start", start.getPlayerName());
-        System.out.println("Next: " + p.getPlayerName() + ", Start: " + start.getPlayerName());
         return result.toString();
     }
 
@@ -154,8 +155,9 @@ public class JsonManager {
                 return new Slalom(start);
             case "fivefour":
                 start = jo.getString("start");
-                System.out.println(start);
                 return new FiveFour(start);
+            case "elephant":
+                return new Elephant();
             default:
                 break;
         }
@@ -223,7 +225,8 @@ public class JsonManager {
      * @param teams the list of teams
      * @return JSON string containing player names and score totals
      */
-    public static String scoreToJson(List<Team> teams) {
+    public static String scoreToJson(List<Team> teams, Player next, Player winner) {
+        JSONObject scoresObj = new JSONObject();
         JSONArray scores = new JSONArray();
         for (Team t : teams) {
             JSONObject obj = new JSONObject();
@@ -232,7 +235,10 @@ public class JsonManager {
             obj.put("score", t.getScore());
             scores.put(obj);
         }
-        return scores.toString();
+        scoresObj.put("scores", scores);
+        scoresObj.put("next", next.getPlayerName());
+        scoresObj.put("winner", winner.getPlayerName());
+        return scoresObj.toString();
     }
 
     /**
@@ -260,10 +266,10 @@ public class JsonManager {
                 obj.put("calc1", -1);
             } else {
                 if (t1score > t2score) {
-                    t1overall += t1score - (t2score == -1 ? 0 : t2score);
+                    t1overall += (t1score - (t2score == -1 ? 0 : t2score)) * gameMultipliers.get(game);
                 } else
                     if (t2score > t1score) {
-                        t2overall += (t2score - (t1score == -1 ? 0 : t1score));
+                        t2overall += ((t2score - (t1score == -1 ? 0 : t1score)) * gameMultipliers.get(game));
                     }
                 obj.put("calc0", t1score > t2score ? (t1score - (t2score == -1 ? 0 : t2score)) * gameMultipliers.get(game) : 0);
                 obj.put("calc1", t2score > t1score ? (t2score - (t1score == -1 ? 0 : t1score)) * gameMultipliers.get(game) : 0);

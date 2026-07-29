@@ -1,13 +1,22 @@
 <script setup lang="ts">
+// LoginCard component
+// - Collects a player's name and team/index selection, posts to the
+//   backend to register the player, and shows a waiting state once selected.
 import { ref } from 'vue'
 import TeamInfo from './TeamInfo.vue'
 import WaitingJoin from './WaitingJoin.vue'
 
+// Reactive form state
 const name = ref('')
 const idx = ref<number | undefined>()
 const selected = ref(false)
 const props = defineProps<{ gameroom: number }>()
 
+/**
+ * login
+ * - Sends a POST to `/player` with the player's name and chosen index.
+ * - Sets `selected` to true to show the waiting UI while backend processes join.
+ */
 async function login() {
   // Prevent login if name or idx is not set
   if (!name.value || idx.value === undefined) return
@@ -26,6 +35,7 @@ async function login() {
   })
 }
 
+// Emit local events to parent when the player is ready or name updates
 function emitReady() {
   emit('update:name', name.value)
   emit('update:ready', true)
@@ -38,6 +48,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
+  <!-- Header showing room number and the login card -->
   <div class="header">
     <h1>Jass</h1>
     <h1>Room {{ props.gameroom }}</h1>
@@ -46,13 +57,17 @@ const emit = defineEmits<{
     <div class="loginCard">
       <h1>Jass</h1>
       <hr />
+      <!-- Player name input -->
       <input v-model="name" type="text" placeholder="Enter Name" />
+      <!-- TeamInfo lets the player pick a seat/team; emits ready when done -->
       <TeamInfo
         @update:ready="emitReady"
         v-model:selected="idx"
         :gameroom="props.gameroom"
       ></TeamInfo>
+      <!-- Show Go button until the player has selected a seat -->
       <button v-if="!selected" v-on:click="login">Go!</button>
+      <!-- After joining, show a waiting indicator -->
       <WaitingJoin v-else text="Waiting for other players to join"></WaitingJoin>
     </div>
   </div>

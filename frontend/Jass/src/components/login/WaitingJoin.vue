@@ -1,4 +1,6 @@
 <script setup lang="ts">
+// WaitingJoin component
+// - Small UI helper that shows an animated ellipsis after a message.
 import { ref, onMounted, onUnmounted } from 'vue'
 
 const props = withDefaults(
@@ -12,6 +14,7 @@ const props = withDefaults(
   },
 )
 
+// Simple dot animation state
 const dotCount = ref(1)
 let dotInterval: number | undefined
 
@@ -27,6 +30,7 @@ onUnmounted(() => {
 </script>
 
 <template>
+  <!-- Message with animated dots to indicate waiting state -->
   <p class="waiting">
     {{ text }}<span class="dots">{{ '.'.repeat(dotCount) }}</span>
   </p>

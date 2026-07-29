@@ -44,7 +44,15 @@ public class ResetTrickHandler extends JassHttpHandler implements HttpHandler {
      * @throws IOException if writing the response fails
      */
     private void handlePost(HttpExchange exchange) throws IOException {
-        int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
+        String header = exchange.getRequestHeaders().getFirst("gameroom");
+        if (header == null || header.isBlank()) {
+            header = exchange.getRequestHeaders().getFirst("Gameroom");
+        }
+        if (header == null || header.isBlank()) {
+            throw new IOException("Missing gameroom header");
+        }
+
+        int key = Integer.parseInt(header);
         GameManager manager = managers.get(key);
         try {
             manager.resetTrick();
@@ -52,7 +60,20 @@ public class ResetTrickHandler extends JassHttpHandler implements HttpHandler {
         catch (Exception e) {
             e.printStackTrace();
         }
-        String response = JsonManager.scoreToJson(manager.getTeams());
+        String response = "";
+        int nextPlayer = manager.getNextPlayer();
+        int winner = manager.getTrickWinner();
+        if (nextPlayer == -1) {
+            response = JsonManager.scoreToJson(manager.getTeams(), manager.getPlayers().get(0), manager.getPlayers().get(0));
+        } else {
+            try {
+                response = JsonManager.scoreToJson(manager.getTeams(), manager.getPlayers().get(nextPlayer), manager.getPlayers().get(winner));
+            }
+            catch (Exception e) {
+                System.out.println("Error Caught!");
+            }
+        }
+
         int code = 200;
         exchange.sendResponseHeaders(code, response.length());
         OutputStream os = exchange.getResponseBody();
