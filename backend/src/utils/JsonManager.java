@@ -12,6 +12,7 @@ import src.games.FiveFour;
 import src.games.IGame;
 import src.games.Jack9;
 import src.games.Middle;
+import src.games.Misere;
 import src.games.SaintLegier;
 import src.games.Slalom;
 import src.games.TopDown;
@@ -175,6 +176,8 @@ public class JsonManager {
                 return new SaintLegier(mapping);
             case "jack9":
                 return new Jack9();
+            case "misere":
+                return new Misere();
             default:
                 break;
         }

@@ -9,6 +9,7 @@ import java.util.Map;
 
 import src.games.Elephant;
 import src.games.IGame;
+import src.games.Misere;
 import src.games.Trumps;
 import src.objs.Card;
 import src.objs.Player;
@@ -28,7 +29,7 @@ import src.objs.Team;
  */
 public class GameManager {
     public static final String[] GAMES = {
-            "Top Down", "Bottom Up", "Middle", "Trumps", "Slalom", "FiveFour", "Elephant", "Saint Legier", "Jack9"
+            "Top Down", "Bottom Up", "Misere", "Middle", "Trumps", "Slalom", "FiveFour", "Elephant", "Saint Legier", "Jack9"
     };
 
     private Map<String, Integer> gameMultipliers;
@@ -426,7 +427,11 @@ public class GameManager {
                 // Get the index of the card that won the trick, add it to the start player
                 // (which will be the next player as it's wrapped around)
                 int winner = (currentGame.wins(currentTrick, trickCount) + nextPlayer) % 4;
-                players.get(winner).getTeam().addScore(currentGame.score(currentTrick));
+                if (currentGame instanceof Misere) {
+                    players.get((winner + 1) % 4).getTeam().addScore(currentGame.score(currentTrick));
+                } else {
+                    players.get(winner).getTeam().addScore(currentGame.score(currentTrick));
+                }
                 currentTrick.clear();
                 nextPlayer = winner;
                 trickWinner = winner;
