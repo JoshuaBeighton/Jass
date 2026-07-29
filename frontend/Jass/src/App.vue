@@ -10,6 +10,7 @@ import type GameMode from './interfaces/GameMode.ts'
 import RoomChooser from './components/login/RoomChooser.vue'
 import WinScreen from './components/game/WinScreen.vue'
 import Scoreboard from './components/game/Scoreboard.vue'
+import ConfigureGame from './components/game/ConfigureGame.vue'
 
 // Current gameroom (default 1001 for local testing)
 const gameroomNumber = ref(1001)
@@ -94,6 +95,8 @@ async function playAgain(sameRoom: boolean) {
 </script>
 
 <template>
+  <ConfigureGame />
+  <!--   
   <RoomChooser v-if="gameroomNumber == -1" @update:selected="(val) => (gameroomNumber = val)" />
   <div v-else>
     <LoginCard
@@ -128,7 +131,7 @@ async function playAgain(sameRoom: boolean) {
       :gameroom="gameroomNumber"
       @update:play-again="playAgain"
     />
-  </div>
+  </div> -->
 </template>
 
 <style></style>

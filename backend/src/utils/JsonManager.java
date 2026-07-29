@@ -320,4 +320,12 @@ public class JsonManager {
 
         return result.toString();
     }
+
+    public static String gameOptionsToJson() {
+        JSONArray ja = new JSONArray();
+        for (String game : GameManager.GAMES) {
+            ja.put(game);
+        }
+        return ja.toString();
+    }
 }
