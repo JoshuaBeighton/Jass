@@ -95,7 +95,7 @@ async function playAgain(sameRoom: boolean) {
 </script>
 
 <template>
-  <ConfigureGame />
+  <ConfigureGame :room-id="gameroomNumber.toString()" />
   <!--   
   <RoomChooser v-if="gameroomNumber == -1" @update:selected="(val) => (gameroomNumber = val)" />
   <div v-else>

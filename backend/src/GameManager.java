@@ -5,7 +5,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-// import java.util.Random;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import src.games.Elephant;
 import src.games.IGame;
@@ -13,27 +14,20 @@ import src.games.Misere;
 import src.games.Trumps;
 import src.objs.Card;
 import src.objs.Player;
-import src.utils.CardComparator;
-
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 import src.objs.Suit;
 import src.objs.Team;
+import src.utils.CardComparator;
 
 /**
  * Manages game state for a single Jass room.
- *
- * Responsibilities include player ordering, card dealing, game choice flow, trick progression, scoring, and
- * serialization-friendly data access.
  */
 public class GameManager {
     public static final String[] GAMES = {
             "Top Down", "Bottom Up", "Misere", "Middle", "Trumps", "Slalom", "FiveFour", "Elephant", "Saint Legier", "Jack9"
     };
 
-    private Map<String, Integer> gameMultipliers;
-
+    private List<Integer> activeMultipliers;
+    private Map<Integer, List<String>> assignments;
 
     private final int LAST_BONUS = 5;
 
@@ -48,6 +42,7 @@ public class GameManager {
 
     private final Lock nextToChooseLock = new ReentrantLock(true);
     private final Lock trickLock = new ReentrantLock(true);
+    private final Lock assignmentLock = new ReentrantLock(true);
     private int trickCount = 0;
 
     private List<Card> undealt;
@@ -68,23 +63,72 @@ public class GameManager {
         teams.add(new Team(0));
         teams.add(new Team(1));
 
-        // Random rand = new Random();
-        // for (String game : GAMES) {
-        // teams.get(0).setScore(game, rand.nextInt(158)); // 0-157 inclusive
-        // teams.get(1).setScore(game, rand.nextInt(158));
-        // }
+        activeMultipliers = new ArrayList<>();
+        assignments = new HashMap<>();
 
-        // Load the multipliers
-        gameMultipliers = new HashMap<>();
-        for (int i = 0; i < GAMES.length; i++) {
-            gameMultipliers.put(GAMES[i], i + 1);
+        // Initialize default multipliers 1..5
+        for (int i = 1; i <= 5; i++) {
+            activeMultipliers.add(i);
+            assignments.put(i, new ArrayList<>());
         }
+
         fillDeck();
         this.visible = visible;
     }
 
-    public Map<String, Integer> getGameMultipliers() {
-        return gameMultipliers;
+    public List<Integer> getActiveMultipliers() {
+        assignmentLock.lock();
+        try {
+            return new ArrayList<>(activeMultipliers);
+        }
+        finally {
+            assignmentLock.unlock();
+        }
+    }
+
+    public Map<Integer, List<String>> getAssignments() {
+        assignmentLock.lock();
+        try {
+            Map<Integer, List<String>> copy = new HashMap<>();
+            assignments.forEach((k, v) -> copy.put(k, new ArrayList<>(v)));
+            return copy;
+        }
+        finally {
+            assignmentLock.unlock();
+        }
+    }
+
+    /**
+     * Dynamically updates multipliers and game assignments from client input.
+     */
+    public void updateAssignments(List<Integer> newMultipliers, Map<Integer, List<String>> newAssignments) {
+        assignmentLock.lock();
+        try {
+            this.activeMultipliers = new ArrayList<>(newMultipliers);
+            this.assignments = new HashMap<>();
+            newAssignments.forEach((k, v) -> this.assignments.put(k, new ArrayList<>(v)));
+        }
+        finally {
+            assignmentLock.unlock();
+        }
+    }
+
+    /**
+     * Returns the multiplier value assigned to a specific game mode name.
+     */
+    public int getMultiplierForGame(String gameName) {
+        assignmentLock.lock();
+        try {
+            for (Map.Entry<Integer, List<String>> entry : assignments.entrySet()) {
+                if (entry.getValue().contains(gameName)) {
+                    return entry.getKey();
+                }
+            }
+            return 1;
+        }
+        finally {
+            assignmentLock.unlock();
+        }
     }
 
     public int getTrickWinner() {
