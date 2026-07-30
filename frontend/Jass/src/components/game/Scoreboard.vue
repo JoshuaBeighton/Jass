@@ -8,7 +8,7 @@ interface Team {
 }
 
 interface GameScore {
-  game: string
+  games: [string]
   multiplier: number
   0: number
   1: number
@@ -40,12 +40,7 @@ const scores = ref<Scores>({
     { name: 'Loading...', score: 0 },
     { name: 'Loading...', score: 0 },
   ],
-  scores: [
-    { game: 'Game 1', multiplier: 1, 0: -1, 1: -1, calc0: -1, calc1: -1 },
-    { game: 'Game 2', multiplier: 2, 0: -1, 1: -1, calc0: -1, calc1: -1 },
-    { game: 'Game 3', multiplier: 3, 0: -1, 1: -1, calc0: -1, calc1: -1 },
-    { game: 'Game 4', multiplier: 4, 0: -1, 1: -1, calc0: -1, calc1: -1 },
-  ],
+  scores: [],
 })
 
 async function fetchScores() {
@@ -333,27 +328,29 @@ onBeforeUnmount(() => {
         <tbody>
           <tr
             v-for="obj in scores['scores']"
-            :key="obj.game"
-            :class="{ 'is-loading': obj.game === 'loading' }"
+            :key="obj.games.join(', ')"
+            :class="{ 'is-loading': obj.games.join(', ') === 'loading' }"
           >
-            <td class="cell-game">{{ obj.game }}</td>
+            <td class="cell-game">{{ obj.games.join(', ') }}</td>
             <td class="cell-game">{{ obj.multiplier }}</td>
             <td class="cell-score" :class="{ loser: obj['0'] < obj['1'] }">
               <p v-if="obj['0'] != -1">{{ obj['0'] }}</p>
               <button
-                @click="sendGame(obj.game)"
+                v-for="game in obj.games"
+                @click="sendGame(game)"
                 v-else-if="isMe && scores.teams[0]?.name.includes(props.name)"
               >
-                Play
+                Play {{ game }}
               </button>
             </td>
             <td class="cell-score" :class="{ loser: obj['1'] < obj['0'] }">
               <p v-if="obj['1'] != -1">{{ obj['1'] }}</p>
               <button
-                @click="sendGame(obj.game)"
+                v-for="game in obj.games"
+                @click="sendGame(game)"
                 v-else-if="isMe && scores.teams[1]?.name.includes(props.name)"
               >
-                Play
+                Play {{ game }}
               </button>
             </td>
             <td class="cell-score">

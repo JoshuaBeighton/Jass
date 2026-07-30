@@ -2,7 +2,6 @@
 // App root component
 // - Orchestrates the main pages: Room chooser, login, game selection, mat (game view), and deck
 import Deck from './components/game/Deck.vue'
-import GameSelect from './components/game/GameSelect.vue'
 import Mat from './components/game/Mat.vue'
 import LoginCard from './components/login/LoginCard.vue'
 import { ref } from 'vue'
@@ -10,6 +9,7 @@ import type GameMode from './interfaces/GameMode.ts'
 import RoomChooser from './components/login/RoomChooser.vue'
 import WinScreen from './components/game/WinScreen.vue'
 import Scoreboard from './components/game/Scoreboard.vue'
+import ConfigureGame from './components/game/ConfigureGame.vue'
 
 // Current gameroom (default 1001 for local testing)
 const gameroomNumber = ref(1001)
@@ -17,8 +17,7 @@ const gameroomNumber = ref(1001)
 // Navigation helpers triggered by child components
 function removeLogin() {
   login.value = false
-  select.value = true
-  deck.value = true
+  configure.value = true
 }
 
 function setName(nameInput: string) {
@@ -49,6 +48,7 @@ const winners = ref('')
 
 // Which panes are visible
 const login = ref(true)
+const configure = ref(false)
 const select = ref(false)
 const mat = ref(false)
 const deck = ref(false)
@@ -91,9 +91,17 @@ async function playAgain(sameRoom: boolean) {
   }
   matchOver.value = false
 }
+
+function onConfigEnd() {
+  configure.value = false
+  select.value = true
+  deck.value = true
+}
 </script>
 
 <template>
+  <ConfigureGame v-if="configure" :room-id="gameroomNumber.toString()" @confirm="onConfigEnd" />
+
   <RoomChooser v-if="gameroomNumber == -1" @update:selected="(val) => (gameroomNumber = val)" />
   <div v-else>
     <LoginCard

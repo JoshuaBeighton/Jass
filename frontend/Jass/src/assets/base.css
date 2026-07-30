@@ -40,6 +40,7 @@
   --color-accent-muted: var(--c-accent-muted);
   --color-red-suit: #dc2626;
   --section-gap: 160px;
+  --color-danger: #dc2626;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -53,12 +54,15 @@
 
     --color-heading: var(--vt-c-white);
     --color-text: rgba(245, 245, 245, 0.9);
-    --color-text-muted: var(233, 233, 233, 0.8);
+    --color-text-muted: var(255, 3, 233, 0.9);
 
     --color-red-suit: #dc2626;
     --color-black-suit: #fafafa;
     --color-accent: #178722;
     --color-accent-muted: rgba(15, 64, 20, 0.7);
+
+    --color-danger: #ff2b2b;
+    --color-danger-muted: #79131388;
   }
 }
 
