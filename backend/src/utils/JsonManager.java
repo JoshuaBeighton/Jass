@@ -257,7 +257,6 @@ public class JsonManager {
         JSONObject jo = new JSONObject();
         if (g == null) {
             jo.put("chooser", players.get(index).getPlayerName());
-            jo.put("available", availableGamesToJson(players.get(index).getTeam(), forced));
         } else {
             jo.put("game", g.getName());
             jo.put("caller", players.get(index).getPlayerName());
@@ -278,33 +277,33 @@ public class JsonManager {
         return jo.toString();
     }
 
-    /**
-     * Builds a JSON array describing games available to the current team.
-     *
-     * @param t the team whose available games are listed
-     * @param forced whether passing is disallowed
-     * @return JSON array of available game options
-     */
-    private static JSONArray availableGamesToJson(Team t, boolean forced) {
-        JSONArray available = new JSONArray();
-        int id = 0;
-        for (String game : t.getGamesAvailable()) {
-            JSONObject obj = new JSONObject();
-            obj.put("id", id++);
-            obj.put("text", game);
-            obj.put("key", game);
-            available.put(obj);
-        }
+    // /**
+    // * Builds a JSON array describing games available to the current team.
+    // *
+    // * @param t the team whose available games are listed
+    // * @param forced whether passing is disallowed
+    // * @return JSON array of available game options
+    // */
+    // private static JSONArray availableGamesToJson(Team t, boolean forced, Map<Integer, List<String>> assignments) {
+    // JSONArray available = new JSONArray();
+    // int id = 0;
+    // for (int multiplier : t.getGamesAvailable()) {
+    // JSONObject obj = new JSONObject();
+    // obj.put("id", id++);
+    // obj.put("text", new JSONArray(assignments.get(multiplier)));
+    // obj.put("key", multiplier);
+    // available.put(obj);
+    // }
 
-        if (!forced) {
-            JSONObject obj = new JSONObject();
-            obj.put("id", id++);
-            obj.put("text", "Pass");
-            obj.put("key", "Pass");
-            available.put(obj);
-        }
-        return available;
-    }
+    // if (!forced) {
+    // JSONObject obj = new JSONObject();
+    // obj.put("id", id++);
+    // obj.put("text", "Pass");
+    // obj.put("key", "Pass");
+    // available.put(obj);
+    // }
+    // return available;
+    // }
 
     /**
      * Converts team score summary data to JSON.
@@ -328,22 +327,21 @@ public class JsonManager {
         return scoresObj.toString();
     }
 
-    public static String scoresToJson(List<Team> teams, GameManager manager) {
+    public static String scoresToJson(GameManager manager) {
         JSONObject result = new JSONObject();
+        List<Team> teams = manager.getTeams();
 
         JSONArray scores = new JSONArray();
         int t1overall = 0;
         int t2overall = 0;
 
-        for (String game : GameManager.GAMES) {
+        for (int multiplier : manager.getActiveMultipliers()) {
             JSONObject obj = new JSONObject();
-            obj.put("game", game);
+            obj.put("games", new JSONArray(manager.getAssignments().get(multiplier)));
 
-            int mult = manager.getMultiplierForGame(game);
-            obj.put("multiplier", mult);
-
-            int t1score = teams.get(0).getScore(game);
-            int t2score = teams.get(1).getScore(game);
+            obj.put("multiplier", multiplier);
+            int t1score = teams.get(0).getScore(multiplier);
+            int t2score = teams.get(1).getScore(multiplier);
             obj.put("0", t1score);
             obj.put("1", t2score);
 
@@ -352,12 +350,12 @@ public class JsonManager {
                 obj.put("calc1", -1);
             } else {
                 if (t1score > t2score) {
-                    t1overall += (t1score - (t2score == -1 ? 0 : t2score)) * mult;
+                    t1overall += (t1score - (t2score == -1 ? 0 : t2score)) * multiplier;
                 } else if (t2score > t1score) {
-                    t2overall += ((t2score - (t1score == -1 ? 0 : t1score)) * mult);
+                    t2overall += ((t2score - (t1score == -1 ? 0 : t1score)) * multiplier);
                 }
-                obj.put("calc0", t1score > t2score ? (t1score - (t2score == -1 ? 0 : t2score)) * mult : 0);
-                obj.put("calc1", t2score > t1score ? (t2score - (t1score == -1 ? 0 : t1score)) * mult : 0);
+                obj.put("calc0", t1score > t2score ? (t1score - (t2score == -1 ? 0 : t2score)) * multiplier : 0);
+                obj.put("calc1", t2score > t1score ? (t2score - (t1score == -1 ? 0 : t1score)) * multiplier : 0);
             }
             scores.put(obj);
         }
@@ -365,6 +363,7 @@ public class JsonManager {
         JSONArray teamsJSON = new JSONArray();
 
         JSONObject obj1 = new JSONObject();
+
         obj1.put("name", teams.get(0).players.get(0).getPlayerName() + " & " + teams.get(0).players.get(1).getPlayerName());
         obj1.put("score", t1overall);
 

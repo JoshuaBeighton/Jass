@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -30,7 +31,7 @@ public class GameManager {
     private Map<Integer, List<String>> assignments;
 
     private final int LAST_BONUS = 5;
-
+    public boolean gamesConfigrured = false;
     private IGame currentGame;
     private int nextToChoose = 0;
     private int choicesUntilForced = 4;
@@ -499,7 +500,11 @@ public class GameManager {
      * Resets the game state and prepares a new round.
      */
     public void resetGame() {
-        players.get(gameCaller).getTeam().setScore(currentGame.getName(), players.get(gameCaller).getTeam().getScore());
+        for (Entry<Integer, List<String>> t : assignments.entrySet()) {
+            if (t.getValue().contains(currentGame.getName())) {
+                players.get(gameCaller).getTeam().setScore(t.getKey(), players.get(gameCaller).getTeam().getScore());
+            }
+        }
         System.out.println("Resetting Game");
         fillDeck();
         Collections.shuffle(undealt);
@@ -518,7 +523,13 @@ public class GameManager {
 
     public void resetMatch(String toRemove) {
         players.clear();
-        teams.get(0).resetMatch();
-        teams.get(1).resetMatch();
+        teams.get(0).resetMatch(activeMultipliers);
+        teams.get(1).resetMatch(activeMultipliers);
+    }
+
+    public void confirmConfig() {
+        gamesConfigrured = true;
+        teams.get(0).configureGames(activeMultipliers);
+        teams.get(1).configureGames(activeMultipliers);
     }
 }

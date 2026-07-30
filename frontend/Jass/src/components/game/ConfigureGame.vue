@@ -114,6 +114,10 @@ function connectSSE(): void {
 
   eventSource.onmessage = (event: MessageEvent) => {
     try {
+      if (event.data == 'done') {
+        emit('confirm', JSON.parse(JSON.stringify(assignments)))
+        return
+      }
       const data: Partial<RoomStatePayload> = JSON.parse(event.data)
       applyRemoteState(data)
     } catch (err) {
@@ -236,8 +240,18 @@ function onDrop(target: number | string): void {
 }
 
 // --- Actions ---
-function confirm(): void {
+async function confirm() {
   if (!allTiersFilled.value) return
+  try {
+    const host = window.location.hostname
+    await fetch(`http://${host}:9000/gameSelection/?gameroom=${props.roomId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: 'done',
+    })
+  } catch (err) {
+    console.error('Failed to sync state update to server:', err)
+  }
   emit('confirm', JSON.parse(JSON.stringify(assignments)))
 }
 

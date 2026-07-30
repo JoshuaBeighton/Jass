@@ -77,6 +77,10 @@ public class GameOptionsSelectionHandler extends JassHttpHandler implements Http
                         writeSseEvent(os, "message", currentJson);
                         lastSentJson = currentJson;
                     }
+                    if (manager.gamesConfigrured) {
+                        writeSseEvent(os, "message", "done");
+                        break;
+                    }
 
                     Thread.sleep(150);
                 }
@@ -114,7 +118,10 @@ public class GameOptionsSelectionHandler extends JassHttpHandler implements Http
 
         try (InputStream is = exchange.getRequestBody()) {
             String requestBody = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-
+            if (requestBody.equals("done")) {
+                manager.confirmConfig();
+                return;
+            }
             // Mutate state in shared GameManager
             JsonManager.updateRoomStateFromJSON(manager, requestBody);
 

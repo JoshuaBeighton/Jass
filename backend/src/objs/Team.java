@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import src.GameManager;
 
 /**
  * Represents a team in the Jass game.
@@ -23,15 +22,15 @@ public class Team {
     private int index;
 
     /** Scores for each game mode, or -1 for modes that have not yet been played. */
-    private Map<String, Integer> gameScores;
+    private Map<Integer, Integer> gameScores;
 
     /**
      * Returns the list of game modes still available for this team.
      *
      * @return list of available game mode names
      */
-    public List<String> getGamesAvailable() {
-        List<String> available = new ArrayList<String>();
+    public List<Integer> getGamesAvailable() {
+        List<Integer> available = new ArrayList<Integer>();
         gameScores.forEach((game, score) -> {
             if (score == -1) {
                 available.add(game);
@@ -49,11 +48,17 @@ public class Team {
         players = new ArrayList<Player>();
         currentScore = 0;
         this.index = index;
-        gameScores = new HashMap<String, Integer>();
-        for (String game : GameManager.GAMES) {
-            gameScores.put(game, -1);
+        gameScores = new HashMap<Integer, Integer>();
+    }
+
+    public void configureGames(List<Integer> multipliers) {
+        if (multipliers != null) {
+            for (int n : multipliers) {
+                gameScores.put(n, -1);
+            }
         }
     }
+
 
     /**
      * Adds points to the team's current total score.
@@ -99,27 +104,27 @@ public class Team {
     /**
      * Stores the score for a specific game mode.
      *
-     * @param mode the game mode name
+     * @param multiplier the game mode name
      * @param score the score achieved in that mode
      */
-    public void setScore(String mode, int score) {
-        gameScores.put(mode, score);
+    public void setScore(int multiplier, int score) {
+        gameScores.put(multiplier, score);
     }
 
     /**
      * Returns the score recorded for a specific game mode.
      *
-     * @param mode the game mode name
+     * @param multiplier the game mode name
      * @return the score for that mode
      */
-    public int getScore(String mode) {
-        return gameScores.get(mode);
+    public int getScore(int multiplier) {
+        return gameScores.get(multiplier);
     }
 
-    public void resetMatch() {
-        gameScores = new HashMap<String, Integer>();
-        for (String game : GameManager.GAMES) {
-            gameScores.put(game, -1);
+    public void resetMatch(List<Integer> multipliers) {
+        gameScores = new HashMap<Integer, Integer>();
+        for (int n : multipliers) {
+            gameScores.put(n, -1);
         }
         currentScore = 0;
         players.clear();

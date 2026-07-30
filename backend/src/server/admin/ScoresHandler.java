@@ -47,7 +47,7 @@ public class ScoresHandler extends JassHttpHandler implements HttpHandler {
     private void handleGet(HttpExchange exchange) throws IOException {
         int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
         GameManager manager = managers.get(key);
-        String response = JsonManager.scoresToJson(manager.getTeams(), manager);
+        String response = JsonManager.scoresToJson(manager);
         exchange.sendResponseHeaders(200, response.length());
         exchange.getResponseHeaders().add("Content-Type", "application/json");
         OutputStream os = exchange.getResponseBody();
