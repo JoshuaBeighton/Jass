@@ -18,7 +18,7 @@ jobs:
           key: ${{ secrets.DEPLOY_KEY }}
           passphrase: ${{ secrets.DEPLOY_PASSPHRASE }}
           script: |
-            echo "Test" >> /root/test.txt
+            echo "Testing" >> /root/test.txt
             killall run.sh
             cd /var/www/Jass
             git pull origin main
