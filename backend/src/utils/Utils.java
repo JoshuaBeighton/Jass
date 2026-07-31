@@ -16,11 +16,11 @@ public class Utils {
      */
     public static char getCharFromSuit(Suit s) {
         switch (s) {
-            case Suit.HEARTS:
+            case HEARTS:
                 return '♥';
-            case Suit.DIAMONDS:
+            case DIAMONDS:
                 return '♦';
-            case Suit.SPADES:
+            case SPADES:
                 return '♠';
             default:
                 return '♣';
