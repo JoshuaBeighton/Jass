@@ -36,6 +36,7 @@ public class GameManager {
     private int nextPlayer = -1;
     private int gameCaller = -1;
     private int trickWinner = -1;
+    private boolean reset = false;
 
     private List<Card> currentTrick;
 
@@ -213,6 +214,7 @@ public class GameManager {
                 System.out.println(pl.getPlayerName());
                 pl.printHand();
             }
+            reset = true;
         }
     }
 
@@ -517,10 +519,13 @@ public class GameManager {
 
 
     public void resetMatch(String toRemove) {
-        players.clear();
-        teams.get(0).resetMatch(activeMultipliers);
-        teams.get(1).resetMatch(activeMultipliers);
-        gamesConfigrured = false;
+        if (reset) {
+            players.clear();
+            teams.get(0).resetMatch(activeMultipliers);
+            teams.get(1).resetMatch(activeMultipliers);
+            gamesConfigrured = false;
+        }
+        reset = false;
     }
 
     public void confirmConfig() {
