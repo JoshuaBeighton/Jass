@@ -67,5 +67,10 @@ jobs:
           passphrase: ${{ secrets.DEPLOY_PASSPHRASE }}
           script: |
             cd /var/www/Jass/backend
-            pkill -f "src.Main" || true
-            ./run.sh &
+        
+            if [ -f jass.pid ]; then
+              kill $(cat jass.pid) || true
+              rm jass.pid
+            fi
+        
+            nohup ./run.sh > jass.log 2>&1 &
