@@ -37,10 +37,10 @@ const directionMap = computed(() => {
 
   for (const suit of SUIT_ORDER) {
     switch (props.data[suit]) {
-      case 'topDown':
+      case 'Top Down':
         map.topDown = suit
         break
-      case 'bottomUp':
+      case 'Bottom Up':
         map.bottomUp = suit
         break
       case 'middle':
