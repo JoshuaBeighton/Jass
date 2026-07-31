@@ -273,7 +273,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
       </div>
-      <TrickScore :scores="scores" :game="props.game" />
+      <TrickScore :scores="scores" :game="props.game" :played="tricksPlayed" />
     </div>
     <button class="continue-button" v-if="freeze" v-on:click="clearDeck">Continue</button>
     <ElephantSelector

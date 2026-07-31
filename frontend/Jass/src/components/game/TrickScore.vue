@@ -17,6 +17,7 @@ interface TeamScore {
 const props = defineProps<{
   scores: TeamScore[]
   game: GameMode
+  played: number
 }>()
 
 // Human-readable descriptions for each game mode shown in the UI
@@ -41,6 +42,42 @@ const description = computed(() => {
     'Work together with your teammate to outscore the opposition.'
   )
 })
+
+function getOpppositeStart(start: String): String {
+  console.log(start)
+  if (start.toLowerCase() === 'top') {
+    return '(Bottom)'
+  } else if (start.toLowerCase() === 'bottom') {
+    return '(Top)'
+  }
+  return 'error'
+}
+
+function getSubText(): String {
+  switch (props.game.game.toLowerCase()) {
+    case 'elephant':
+      if (props.played < 3) {
+        return '(Top)'
+      } else if (props.played < 6) {
+        return '(Bottom)'
+      } else {
+        return ''
+      }
+    case 'slalom':
+      if (props.played % 2 == 0) {
+        return '(' + props.game.start + ')'
+      } else {
+        return getOpppositeStart(props.game.start ?? 'error')
+      }
+    case 'fivefour':
+      if (props.played < 5) {
+        return props.game.start ?? 'error'
+      } else {
+        return getOpppositeStart(props.game.start ?? 'error')
+      }
+  }
+  return ''
+}
 </script>
 
 <template>
@@ -53,7 +90,7 @@ const description = computed(() => {
         <h2 :class="isRed(suitToUnicode(game.suit)) ? 'red' : '' + ' game-title'" v-if="game.suit">
           {{ suitToUnicode(game.suit) }}
         </h2>
-        <h2 v-if="game.start" class="game-title">({{ game.start }})</h2>
+        <h2 class="game-title">{{ getSubText() }}</h2>
       </div>
       <p class="game-description">{{ description }}</p>
     </header>
