@@ -47,7 +47,7 @@ const scores = ref<Scores>({
 async function fetchScores() {
   const host = window.location.hostname
   try {
-    const res = await fetch(`http://${host}:9000/multipliers`, {
+    const res = await fetch(`/api/multipliers`, {
       headers: {
         gameroom: props.gameroom.toString(),
       },
@@ -152,7 +152,7 @@ function connectGameChoiceStream() {
   }
 
   eventSource = new EventSource(
-    `http://${host}:9000/gamemodeChoice?name=${props.name}&lastidx=${counter}&gameroom=${props.gameroom}`,
+    `/api/gamemodeChoice?name=${props.name}&lastidx=${counter}&gameroom=${props.gameroom}`,
     { withCredentials: false },
   )
 
@@ -225,7 +225,7 @@ async function sendGame(game: string) {
     body['color'] = game.split('-')[1]
   }
 
-  const res = await fetch(`http://${host}:9000/gamemodeChoice`, {
+  const res = await fetch(`/api/gamemodeChoice`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -260,7 +260,7 @@ async function sendSaintLegier() {
     body[suit.toLowerCase()] = saintlegierAssignments.value[suit]
   }
 
-  const res = await fetch(`http://${host}:9000/gamemodeChoice`, {
+  const res = await fetch(`/api/gamemodeChoice`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

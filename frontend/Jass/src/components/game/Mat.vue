@@ -62,7 +62,7 @@ async function getPlayers() {
   const host = window.location.hostname
 
   try {
-    const res = await fetch(`http://${host}:9000/player/`, {
+    const res = await fetch(`/api/player/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ function getNextCard() {
   }
 
   eventSource = new EventSource(
-    `http://${host}:9000/cardWait/${count.value % 4}?gameroom=${props.gameroom}&player=${props.name}`,
+    `/api/cardWait/${count.value % 4}?gameroom=${props.gameroom}&player=${props.name}`,
     {
       withCredentials: false,
     },
@@ -187,7 +187,7 @@ async function clearDeck() {
     },
   }
 
-  const res = await fetch(`http://${host}:9000/resetTrick`, settings)
+  const res = await fetch(`/api/resetTrick`, settings)
   if (!res.ok) throw new Error('Network response was not OK')
   const data = await res.json()
   scores.value = data.scores
@@ -212,7 +212,7 @@ async function clearDeck() {
           },
         }
 
-        const res = await fetch(`http://${host}:9000/gamemodeChoice`, settings)
+        const res = await fetch(`/api/gamemodeChoice`, settings)
         if (!res.ok) throw new Error('Network response was not OK')
         const data = await res.text()
         props.game.suit = data

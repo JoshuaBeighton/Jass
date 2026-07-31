@@ -20,12 +20,9 @@ function connectTeamsStream() {
     eventSource.close()
   }
 
-  eventSource = new EventSource(
-    `http://${host}:9000/teamWait/${counter}?gameroom=${props.gameroom}`,
-    {
-      withCredentials: false,
-    },
-  )
+  eventSource = new EventSource(`/api/teamWait/${counter}?gameroom=${props.gameroom}`, {
+    withCredentials: false,
+  })
 
   eventSource.addEventListener('teams', (event) => {
     try {

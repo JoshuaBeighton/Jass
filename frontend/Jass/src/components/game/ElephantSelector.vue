@@ -24,7 +24,7 @@ async function finishSelection() {
   const host = window.location.hostname
 
   try {
-    const response = await fetch(`http://${host}:9000/gamemodeChoice`, {
+    const response = await fetch(`/api/gamemodeChoice`, {
       method: 'POST',
       headers: {
         'Content-Type': 'text/plain',

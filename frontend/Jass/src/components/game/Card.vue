@@ -33,7 +33,7 @@ const played = ref(false)
 async function sendCard() {
   if (props.canPlay && props.card) {
     const host = window.location.hostname
-    let res = await fetch(`http://${host}:9000/nextCard`, {
+    let res = await fetch(`/api/nextCard`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

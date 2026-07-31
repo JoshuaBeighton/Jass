@@ -22,7 +22,7 @@ async function login() {
   if (!name.value || idx.value === undefined) return
   const host = window.location.hostname
   selected.value = true
-  await fetch(`http://${host}:9000/player`, {
+  await fetch(`/api/player`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -74,7 +74,7 @@ function matchFinished(finished: string) {
 
 async function playAgain(sameRoom: boolean) {
   const host = window.location.hostname
-  let res = await fetch(`http://${host}:9000/resetMatch`, {
+  let res = await fetch(`/api/resetMatch`, {
     method: 'POST',
     headers: {
       'Content-Type': 'text/plain',

@@ -77,7 +77,7 @@ async function sendGame(game: string) {
     body['color'] = game.split('-')[1]
   }
 
-  const res = await fetch(`http://${host}:9000/gamemodeChoice`, {
+  const res = await fetch(`/api/gamemodeChoice`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ async function sendSaintLegier() {
     body[suit.toLowerCase()] = saintlegierAssignments.value[suit]
   }
 
-  const res = await fetch(`http://${host}:9000/gamemodeChoice`, {
+  const res = await fetch(`/api/gamemodeChoice`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

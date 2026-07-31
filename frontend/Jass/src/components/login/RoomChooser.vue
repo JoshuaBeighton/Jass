@@ -21,7 +21,7 @@ const fetchGames = async () => {
   error.value = null
   try {
     const host = window.location.hostname
-    const response = await fetch(`http://${host}:9000/publicroomlist`)
+    const response = await fetch(`/api/publicroomlist`)
     if (!response.ok) {
       throw new Error(`Failed to load games (${response.status})`)
     }
@@ -65,7 +65,7 @@ const joinGame = async (roomNo: number | undefined) => {
 const makeGame = async (visible: boolean) => {
   try {
     const host = window.location.hostname
-    const url = `http://${host}:9000/room/` + (visible ? 'public' : 'private')
+    const url = `/api/room/` + (visible ? 'public' : 'private')
     const response = await fetch(url)
     if (!response.ok) {
       throw new Error(`Failed to join game (${response.status})`)

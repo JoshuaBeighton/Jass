@@ -26,7 +26,7 @@ async function fetchHand() {
   const host = window.location.hostname
 
   try {
-    const res = await fetch(`http://${host}:9000/hand/${props.name}`, {
+    const res = await fetch(`/api/hand/${props.name}`, {
       headers: {
         Gameroom: props.gameroom.toString(),
       },
