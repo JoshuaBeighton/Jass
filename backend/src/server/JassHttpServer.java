@@ -41,7 +41,7 @@ public class JassHttpServer {
             server.createContext("/api/resetTrick", new ResetTrickHandler(manager));
             server.createContext("/api/multipliers", new MultipliersHandler(manager));
             server.createContext("/api/room", new RoomHandler(manager));
-            server.createContext("/api/api/publicroomlist", new PublicRoomListHandler(manager));
+            server.createContext("/api/publicroomlist", new PublicRoomListHandler(manager));
             server.createContext("/api/endMatch", new EndMatchHandler(manager));
             server.createContext("/api/gamemodeList", new GamemodeListHandler(manager));
             server.createContext("/api/multiplierConfiguration", new MultiplierConfigurationHandler(manager));

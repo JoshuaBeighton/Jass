@@ -13,6 +13,6 @@ export default defineConfig({
     },
   },
   server: {
-    allowedHosts: ['coiffeurjass.com'],
+    allowedHosts: ['coiffeurjass.com', 'www.coiffeurjass.com'],
   },
 })
