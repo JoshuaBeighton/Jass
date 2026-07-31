@@ -16,7 +16,7 @@ trap cleanup INT TERM
 
 (
     cd ./frontend/Jass || exit 1
-    npm run dev
+    npm run dev -- --host 0.0.0.0
 ) &
 FRONTEND_PID=$!
 

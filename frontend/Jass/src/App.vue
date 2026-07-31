@@ -12,7 +12,7 @@ import Scoreboard from './components/game/Scoreboard.vue'
 import ConfigureMultipliers from './components/game/ConfigureMultipliers.vue'
 
 // Current gameroom (default 1001 for local testing)
-const gameroomNumber = ref(1001)
+const gameroomNumber = ref(-1)
 
 // Navigation helpers triggered by child components
 function removeLogin() {
