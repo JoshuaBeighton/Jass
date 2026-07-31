@@ -63,17 +63,27 @@ public class GameManager {
         teams.add(new Team(0));
         teams.add(new Team(1));
 
-        activeMultipliers = new ArrayList<>();
+        activeMultipliers = new ArrayList<Integer>();
         assignments = new HashMap<>();
+        List<List<String>> assignmentStrings = List.of(
+                List.of("Trumps"),
+                List.of("Top Down", "Bottom Up"),
+                List.of("Misere"),
+                List.of("Rio", "Jack9"),
+                List.of("Middle", "Saint Legier"),
+                List.of("Slalom", "FiveFour"));
 
         // Initialize default multipliers 1..5
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 1; i <= 6; i++) {
             activeMultipliers.add(i);
-            assignments.put(i, new ArrayList<>());
+            assignments.put(i, assignmentStrings.get(i - 1));
         }
+
 
         fillDeck();
         this.visible = visible;
+
+
     }
 
     public List<Integer> getActiveMultipliers() {
