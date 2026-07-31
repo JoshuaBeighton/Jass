@@ -9,10 +9,8 @@ import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import src.games.Elephant;
 import src.games.IGame;
 import src.games.Misere;
-import src.games.Trumps;
 import src.objs.Card;
 import src.objs.Player;
 import src.objs.Suit;
@@ -24,7 +22,7 @@ import src.utils.CardComparator;
  */
 public class GameManager {
     public static final String[] GAMES = {
-            "Top Down", "Bottom Up", "Misere", "Middle", "Trumps", "Slalom", "FiveFour", "Elephant", "Saint Legier", "Jack9"
+            "Top Down", "Bottom Up", "Misere", "Middle", "Trumps", "Slalom", "FiveFour", "Elephant", "Saint Legier", "Jack9", "Rio"
     };
 
     private List<Integer> activeMultipliers;
@@ -438,11 +436,8 @@ public class GameManager {
                 System.out.println("Cards played: " + currentTrick.size());
                 Card candidate = Card.parseCard(s);
                 Player currentPlayer = players.get(nextPlayer);
-                int suit = -1;
-                if (currentGame instanceof Trumps || currentGame instanceof Elephant) {
-                    suit = currentGame.getType();
-                }
-                if (!currentPlayer.canPlayCard(candidate, currentTrick, suit)) {
+
+                if (!currentPlayer.canPlayCard(candidate, currentTrick, currentGame)) {
                     System.out.println("Cannot play that card.");
                     return false;
                 }

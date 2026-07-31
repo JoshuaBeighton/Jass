@@ -81,6 +81,7 @@ const trumps = ref(false)
 const slalom = ref(false)
 const fivefour = ref(false)
 const saintlegier = ref(false)
+const rio = ref(false)
 const nextChooser = ref('')
 
 let gameIdCounter = 0
@@ -219,6 +220,9 @@ async function sendGame(game: string) {
   } else if (game.toLowerCase() === 'saint legier') {
     saintlegier.value = true
     return
+  } else if (game.toLowerCase() === 'rio') {
+    rio.value = true
+    return
   }
 
   const host = window.location.hostname
@@ -231,6 +235,10 @@ async function sendGame(game: string) {
   if (game.startsWith('slalom-') || game.startsWith('fivefour-')) {
     body['name'] = game.split('-')[0]
     body['start'] = game.split('-')[1]
+  }
+  if (game.startsWith('rio')) {
+    body['name'] = game.split('-')[0]
+    body['color'] = game.split('-')[1]
   }
 
   const res = await fetch(`http://${host}:9000/gameChoice`, {
@@ -402,6 +410,16 @@ onBeforeUnmount(() => {
           @click="() => sendGame((slalom ? 'slalom-' : 'fivefour-') + opt.toLowerCase())"
         >
           {{ opt }}
+        </button>
+
+        <button
+          v-if="rio"
+          v-for="color in ['Red', 'Black']"
+          :key="color"
+          :class="['suit-btn', color.toLowerCase()]"
+          @click="() => sendGame('rio-' + color.toLowerCase())"
+        >
+          {{ color }}
         </button>
       </div>
 

@@ -48,7 +48,7 @@ function confettiStyle(n: number) {
       <button class="play-again" @click="emits('update:playAgain', true)">Play again</button>
       <button class="play-again" @click="emits('update:playAgain', false)">Leave Room</button>
     </div>
-    <Scoreboard :gameroom="gameroom" />
+    <Scoreboard :gameroom="gameroom" :name="''" />
   </div>
 </template>
 

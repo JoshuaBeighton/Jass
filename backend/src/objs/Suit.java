@@ -24,6 +24,13 @@ public enum Suit {
         return index;
     }
 
+    public String getColor() {
+        if (this == HEARTS || this == DIAMONDS) {
+            return "red";
+        }
+        return "black";
+    }
+
     /**
      * Converts an index to its corresponding Suit.
      *

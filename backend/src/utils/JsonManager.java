@@ -17,6 +17,7 @@ import src.games.IGame;
 import src.games.Jack9;
 import src.games.Middle;
 import src.games.Misere;
+import src.games.Rio;
 import src.games.SaintLegier;
 import src.games.Slalom;
 import src.games.TopDown;
@@ -238,6 +239,9 @@ public class JsonManager {
                 return new Jack9();
             case "misere":
                 return new Misere();
+            case "rio":
+                String suitColor = jo.getString("color");
+                return new Rio(suitColor);
             default:
                 break;
         }

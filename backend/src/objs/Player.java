@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import src.games.Elephant;
+import src.games.IGame;
+import src.games.Rio;
+import src.games.Trumps;
 import src.games.orderings.Jack9Ordering;
 
 /**
@@ -109,7 +113,8 @@ public class Player {
      * @param trump the trump suit index, or -1 if not a trumps game
      * @return true if the play is legal, false otherwise
      */
-    public boolean canPlayCard(Card c, List<Card> played, int trump) {
+    public boolean canPlayCard(Card c, List<Card> played, IGame game) {
+        // Ensure the player has the card they are trying to play in their hand.
         boolean hasCard = false;
         for (Card card : cards) {
             if (c.equals(card))
@@ -119,29 +124,71 @@ public class Player {
             return false;
         }
 
-        // Deal with trumps. If the card is a trump of a value above any played trump, it can be played. If the card is not a
-        // trump, but the player has a trump,
-        // they cannot play it.
-        if (trump != -1 && c.getSuit() == Suit.fromIndex(trump)) {
-            boolean beats = true;
-            Jack9Ordering ordering = new Jack9Ordering(Suit.fromIndex(trump));
-            for (Card card : played) {
-                if (card.getSuit() == Suit.fromIndex(trump) && ordering.compare(card, c) > 0) {
-                    beats = false;
+        // If this is the first card in the trick, they can play any card.
+        if (played.size() == 0) {
+            return true;
+        }
+
+        // If they followed suit, they can always play that card.
+        Suit masterSuit = played.get(0).getSuit();
+        if (c.getSuit() == masterSuit)
+            return true;
+
+        // Handle trumps or elephant in the trump stage.
+        if (game instanceof Trumps || (game instanceof Elephant && game.getType() != -1)) {
+            Suit trumpSuit = Suit.fromIndex(game.getType());
+
+            // If they are playing a trump.
+            if (c.getSuit() == trumpSuit) {
+                // If it beats all the trumps played so far.
+                boolean beats = true;
+                Jack9Ordering ordering = new Jack9Ordering(trumpSuit);
+                for (Card card : played) {
+                    if (ordering.compare(card, c) > 0) {
+                        beats = false;
+                    }
                 }
-            }
-            if (beats) {
-                return true;
+                if (beats) {
+                    return true;
+                }
             }
         }
-        // If a card has been played, the first card in the trick doesn't match the suit of the played card, and the played card
-        // isn't a trump.
-        if (played.size() > 0 && c.getSuit() != played.get(0).getSuit()) {
-            // Check if the player has an option to follow suit.
-            for (Card card : cards) {
-                if (card.getSuit() == played.get(0).getSuit()) {
-                    return false;
+        // Handle rio
+        else if (game instanceof Rio) {
+            String color = game.getType() == 0 ? "red" : "black";
+
+            // Get the trump suit of the current trick.
+            Suit trumpSuit = null;
+            for (int i = played.size() - 1; i > 0; i--) {
+                if (played.get(i).getSuit().getColor().equals(color)) {
+                    trumpSuit = played.get(i).getSuit();
                 }
+            }
+
+            // If trumping for the first time, return true
+            if (trumpSuit == null && c.getSuit().getColor().equals(color))
+                return true;
+
+
+            // If playing a trump against a current trump.
+            if (c.getSuit() == trumpSuit) {
+                boolean beats = true;
+                Jack9Ordering ordering = new Jack9Ordering(trumpSuit);
+                for (Card card : played) {
+                    if (ordering.compare(card, c) > 0) {
+                        beats = false;
+                    }
+                }
+                if (beats) {
+                    return true;
+                }
+            }
+        }
+        // Default case
+
+        for (Card available : cards) {
+            if (available.getSuit() == masterSuit) {
+                return false;
             }
         }
         return true;
