@@ -84,17 +84,7 @@ public class Card {
      */
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-
-        // Use red coloring for red suits in terminal output.
-        if (suit == Suit.HEARTS || suit == Suit.DIAMONDS) {
-            sb.append("\u001B[31m");
-        }
-
-        sb.append(Utils.getCardVal(val));
-        sb.append(Utils.getCharFromSuit(suit));
-        sb.append("\u001B[0m");
-        return sb.toString();
+        return String.valueOf(val) + suit.name();
     }
 
     /**

@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+
 import src.GameManager;
 import src.games.BottomUp;
 import src.games.Elephant;
@@ -129,11 +130,27 @@ public class JsonManager {
      * @param start trick start player
      * @return JSON string describing the current trick state
      */
-    public static String currentTrickToJSON(List<Card> cards, Player p, Player start) {
+    public static String currentTrickToJSON(GameManager manager, String player) {
         JSONObject result = new JSONObject();
-        result.put("currentTrick", cardsToJsonArray(cards));
-        result.put("next", p.getPlayerName());
-        result.put("start", start.getPlayerName());
+        result.put("currentTrick", cardsToJsonArray(manager.getCurrentTrick()));
+        result.put("next", manager.getPlayers().get(manager.getNextPlayer()).getPlayerName());
+        result.put("start", manager.getPlayers().get(
+                Math.floorMod(
+                        manager.getNextPlayer() - manager.getCurrentTrick().size(),
+                        4))
+                .getPlayerName());
+        if (manager.getPlayers().get(manager.getNextPlayer()).getPlayerName().equals(player)) {
+            Map<Card, Boolean> playable = manager.getPlayers().get(manager.getNextPlayer()).playable(manager.getCurrentTrick(), manager.getGame());
+            JSONArray arr = new JSONArray();
+            for (Entry<Card, Boolean> entry : playable.entrySet()) {
+                JSONObject playableObj = new JSONObject();
+                playableObj.put("suit", entry.getKey().getSuit().name());
+                playableObj.put("value", entry.getKey().getVal());
+                playableObj.put("playable", entry.getValue());
+                arr.put(playableObj);
+            }
+            result.put("playable", arr);
+        }
         return result.toString();
     }
 

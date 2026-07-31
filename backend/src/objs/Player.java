@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 import src.games.Elephant;
 import src.games.IGame;
 import src.games.Rio;
@@ -101,6 +102,14 @@ public class Player {
      */
     public void setCards(List<Card> cards) {
         this.cards = cards;
+    }
+
+    public Map<Card, Boolean> playable(List<Card> played, IGame game) {
+        Map<Card, Boolean> result = new HashMap<Card, Boolean>();
+        for (Card card : cards) {
+            result.put(card, canPlayCard(card, played, game));
+        }
+        return result;
     }
 
     /**

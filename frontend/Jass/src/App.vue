@@ -117,12 +117,19 @@ function onConfigEnd() {
       v-if="mat"
       @update:isme="
         (val) => {
+          console.log(val)
           isMe = val
         }
       "
       @update:finished="gameFinished"
     ></Mat>
-    <Deck v-if="deck" :name="name" :can-play="isMe" ref="deckRef" :gameroom="gameroomNumber"></Deck>
+    <Deck
+      v-if="deck"
+      :name="name"
+      :can-play="mat ? isMe : false"
+      ref="deckRef"
+      :gameroom="gameroomNumber"
+    ></Deck>
     <Scoreboard
       v-if="select"
       :name="name"

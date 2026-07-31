@@ -15,6 +15,7 @@ const props = defineProps<{
   card?: Card | undefined
   canPlay: boolean
   gameroom: number
+  overlay: boolean
 }>()
 
 // Local state: whether this card has been successfully played
@@ -52,22 +53,14 @@ async function sendCard() {
   }
 }
 </script>
-
 <template>
-  <!-- Render card image when a `card` prop is present and it hasn't
-       already been played. Clicking the outer div will attempt to play
-       the card via the `sendCard` handler. -->
   <div v-if="card && !played" class="card" @click="sendCard">
-    <!--
-      - `:class` binds red/black classes based on suit color
-      - `:src` references the image file matching the normalized card string
-      - `:alt` shows a short symbol for accessibility (rank + suit)
-    -->
     <img
       :class="{ red: isRed(concatCard(props.card)), black: !isRed(concatCard(props.card)) }"
       :src="`/images/cards/${replaceCardSuits(concatCard(props.card)).toLowerCase()}.png`"
       :alt="toSym(concatCard(props.card))"
     />
+    <div v-if="!overlay" class="covering"></div>
   </div>
 </template>
 
@@ -94,5 +87,12 @@ img {
   /* Ensure the card image fills the container height */
   padding: 0;
   height: 100%;
+}
+
+.covering {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  pointer-events: none;
 }
 </style>

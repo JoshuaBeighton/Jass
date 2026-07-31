@@ -47,6 +47,18 @@ public class CardWaitHandler extends JassHttpHandler implements HttpHandler {
         GameManager manager = managers.get(key);
         int count = Integer.parseInt(exchange.getRequestURI().getPath().split("/cardWait/")[1]);
 
+        // Get player name.
+        String playerName = "";
+        String query = exchange.getRequestURI().getQuery();
+        if (query != null) {
+            for (String param : query.split("&")) {
+                String[] parts = param.split("=", 2);
+                if (parts.length == 2 && parts[0].equals("player")) {
+                    playerName = parts[1];
+                }
+            }
+        }
+        final String player = playerName;
         startSseResponse(exchange);
         OutputStream os = exchange.getResponseBody();
 
@@ -57,12 +69,7 @@ public class CardWaitHandler extends JassHttpHandler implements HttpHandler {
                     while (!Thread.currentThread().isInterrupted()) {
                         int size = manager.getCurrentTrick().size();
                         if (size != lastSeen.get()) {
-                            String response = JsonManager.currentTrickToJSON(manager.getCurrentTrick(),
-                                    manager.getPlayers().get(manager.getNextPlayer()),
-                                    manager.getPlayers().get(
-                                            Math.floorMod(
-                                                    manager.getNextPlayer() - manager.getCurrentTrick().size(),
-                                                    4)));
+                            String response = JsonManager.currentTrickToJSON(manager, player);
                             writeSseEvent(os, "card-state", response);
                             lastSeen.set(size);
                         }

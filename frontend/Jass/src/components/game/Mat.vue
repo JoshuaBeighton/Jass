@@ -45,7 +45,7 @@ const elephantSelection = ref(false)
 const count = ref(-1)
 let eventSource: EventSource | null = null
 const emits = defineEmits<{
-  (e: 'update:isme', value: boolean): void
+  (e: 'update:isme', value: any): void
   (e: 'update:finished', value: boolean): void
 }>()
 
@@ -107,7 +107,7 @@ function getNextCard() {
   }
 
   eventSource = new EventSource(
-    `http://${host}:9000/cardWait/${count.value % 4}?gameroom=${props.gameroom}`,
+    `http://${host}:9000/cardWait/${count.value % 4}?gameroom=${props.gameroom}&player=${props.name}`,
     {
       withCredentials: false,
     },
@@ -119,7 +119,8 @@ function getNextCard() {
       nextPlayer.value = data.next
       firstPlayer.value = data.start
       updateCard(data.currentTrick)
-      isMe.value = nextPlayer.value == props.name
+      isMe.value = nextPlayer.value == props.name ? data.playable : false
+      console.log(isMe)
       emits('update:isme', isMe.value)
       count.value = data.currentTrick.length
     } catch (err) {
@@ -259,16 +260,16 @@ onBeforeUnmount(() => {
 
         <div class="trick-area">
           <div class="card-slot card-bottom">
-            <Card :card="bottomCard" :can-play="false" :gameroom="props.gameroom" />
+            <Card :card="bottomCard" :can-play="false" :overlay="true" :gameroom="props.gameroom" />
           </div>
           <div class="card-slot card-right">
-            <Card :card="rightCard" :can-play="false" :gameroom="props.gameroom" />
+            <Card :card="rightCard" :can-play="false" :overlay="true" :gameroom="props.gameroom" />
           </div>
           <div class="card-slot card-top">
-            <Card :card="topCard" :can-play="false" :gameroom="props.gameroom" />
+            <Card :card="topCard" :can-play="false" :overlay="true" :gameroom="props.gameroom" />
           </div>
           <div class="card-slot card-left">
-            <Card :card="leftCard" :can-play="false" :gameroom="props.gameroom" />
+            <Card :card="leftCard" :can-play="false" :overlay="true" :gameroom="props.gameroom" />
           </div>
         </div>
       </div>

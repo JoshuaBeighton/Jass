@@ -9,7 +9,7 @@ import type CardInterface from '@/interfaces/CardInterface.ts'
 
 const props = defineProps<{
   name: string
-  canPlay: boolean
+  canPlay: boolean | CardInterface[]
   gameroom: number
 }>()
 
@@ -65,6 +65,34 @@ function cardStyle(i: number) {
   }
 }
 
+function canPlayCard(card: any): boolean {
+  if (typeof props.canPlay === 'boolean') {
+    return props.canPlay
+  }
+
+  for (const element of props.canPlay) {
+    if (element.suit === card.suit && element.value === card.number) {
+      return element.playable
+    }
+  }
+
+  return true
+}
+
+function overlayCard(card: any): boolean {
+  if (typeof props.canPlay === 'boolean') {
+    return true
+  }
+
+  for (const element of props.canPlay) {
+    if (element.suit === card.suit && element.value === card.number) {
+      return element.playable
+    }
+  }
+
+  return true
+}
+
 // Allow parent components to call `fetchHand()` via template ref
 defineExpose({
   fetchHand,
@@ -78,9 +106,10 @@ defineExpose({
       v-for="(card, i) in cards"
       :key="String(i) + ':' + String(round)"
       :card="card"
-      :can-play="props.canPlay"
+      :can-play="canPlayCard(card)"
       :style="cardStyle(i)"
       :gameroom="props.gameroom"
+      :overlay="overlayCard(card)"
     />
   </div>
 </template>

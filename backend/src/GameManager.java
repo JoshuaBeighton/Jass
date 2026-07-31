@@ -520,6 +520,7 @@ public class GameManager {
         players.clear();
         teams.get(0).resetMatch(activeMultipliers);
         teams.get(1).resetMatch(activeMultipliers);
+        gamesConfigrured = false;
     }
 
     public void confirmConfig() {
