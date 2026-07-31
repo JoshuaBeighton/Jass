@@ -10,7 +10,55 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to VPS
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/Jass/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend/Jass
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend/Jass
+        run: npm run build
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: 24
+          distribution: temurin
+
+      - name: Build backend
+        working-directory: backend
+        run: ./build.sh
+
+      - name: Upload frontend
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          passphrase: ${{ secrets.DEPLOY_PASSPHRASE }}
+          source: "frontend/Jass/dist/*"
+          target: "/var/www/Jass/frontend/Jass/dist"
+
+      - name: Upload backend
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          passphrase: ${{ secrets.DEPLOY_PASSPHRASE }}
+          source: "backend/bin/*"
+          target: "/var/www/Jass/backend/bin"
+
+      - name: Restart backend
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -18,12 +66,6 @@ jobs:
           key: ${{ secrets.DEPLOY_KEY }}
           passphrase: ${{ secrets.DEPLOY_PASSPHRASE }}
           script: |
-            echo "Testing" >> /root/test.txt
-            killall run.sh
-            cd /var/www/Jass
-            git pull origin main
-            cd frontend/Jass
-            npm ci
-            npm run build
-            cd ../..
+            cd /var/www/Jass/backend
+            pkill -f "src.Main" || true
             ./run.sh &
