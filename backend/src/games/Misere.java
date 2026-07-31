@@ -6,7 +6,7 @@ import src.games.orderings.TopDownOrdering;
 import src.objs.Card;
 import src.objs.Suit;
 
-public class Misere implements IGame {
+public class Misere implements IGamemode {
     private int type;
 
     public int getType() {

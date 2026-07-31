@@ -11,7 +11,7 @@ export type TierAssignments = Record<number | string, GameOption[]>
 
 export interface RoomStatePayload {
   multipliers: number[]
-  assignments: TierAssignments
+  gamemodes: TierAssignments
 }
 
 export interface ComponentProps {
@@ -70,16 +70,16 @@ function normalizeGameOptions(raw: unknown[]): GameOption[] {
 async function broadcastStateChange(): Promise<void> {
   const payload: RoomStatePayload = {
     multipliers: [...activeMultipliers.value],
-    assignments: JSON.parse(JSON.stringify(assignments)),
+    gamemodes: JSON.parse(JSON.stringify(assignments)),
   }
 
   // 1. Emit to Vue parent component
-  emit('update:assignments', payload.assignments)
+  emit('update:assignments', payload.gamemodes)
 
   // 2. Broadcast state update to SSE room server
   try {
     const host = window.location.hostname
-    await fetch(`http://${host}:9000/gameSelection/?gameroom=${props.roomId}`, {
+    await fetch(`http://${host}:9000/multiplierConfiguration/?gameroom=${props.roomId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -95,22 +95,24 @@ function applyRemoteState(data: Partial<RoomStatePayload>): void {
     activeMultipliers.value = data.multipliers
   }
 
-  if (data.assignments) {
+  if (data.gamemodes) {
     // Clear out keys no longer present
     Object.keys(assignments).forEach((key) => {
-      if (!(key in data.assignments!)) {
+      if (!(key in data.gamemodes!)) {
         delete assignments[key]
       }
     })
     // Merge new tier assignments reactively
-    Object.assign(assignments, data.assignments)
+    Object.assign(assignments, data.gamemodes)
   }
 }
 
 // Establish SSE connection
 function connectSSE(): void {
   const host = window.location.hostname
-  eventSource = new EventSource(`http://${host}:9000/gameSelection/?gameroom=${props.roomId}`)
+  eventSource = new EventSource(
+    `http://${host}:9000/multiplierConfiguration/?gameroom=${props.roomId}`,
+  )
 
   eventSource.onmessage = (event: MessageEvent) => {
     try {
@@ -135,7 +137,7 @@ async function loadGameOptions(): Promise<void> {
   loadError.value = ''
   try {
     const host = window.location.hostname
-    const response = await fetch(`http://${host}:9000/gameOptions`)
+    const response = await fetch(`http://${host}:9000/gamemodeList`)
     if (!response.ok) {
       throw new Error(`Request failed with status ${response.status}`)
     }
@@ -244,7 +246,7 @@ async function confirm() {
   if (!allTiersFilled.value) return
   try {
     const host = window.location.hostname
-    await fetch(`http://${host}:9000/gameSelection/?gameroom=${props.roomId}`, {
+    await fetch(`http://${host}:9000/multiplierConfiguration/?gameroom=${props.roomId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: 'done',
@@ -400,10 +402,10 @@ function addRow(): void {
   box-sizing: border-box;
 }
 
-.header h2 {
-  margin: 0 0 4px;
-  font-size: 1.25rem;
-  font-weight: 600;
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .hint {
@@ -632,10 +634,11 @@ function addRow(): void {
 
 .footer {
   display: flex;
-  align-items: center;
+  flex-direction: row;
   justify-content: space-between;
+  align-items: center;
   margin-top: 20px;
-  gap: 12px;
+  /* gap: 12px; */
 }
 
 .footer-warning {
@@ -644,9 +647,7 @@ function addRow(): void {
 }
 
 .confirm-btn {
-  margin-left: auto;
   padding: 8px 18px;
-  font: inherit;
   border: none;
   border-radius: 8px;
   background: var(--color-accent);

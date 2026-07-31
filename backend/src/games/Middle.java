@@ -7,7 +7,7 @@ import src.objs.Card;
 import src.objs.Suit;
 import src.games.orderings.MiddleOrdering;
 
-public class Middle implements IGame {
+public class Middle implements IGamemode {
     int center = 10;
 
     public int getType() {

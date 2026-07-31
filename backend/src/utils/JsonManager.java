@@ -11,22 +11,8 @@ import org.json.JSONObject;
 
 
 import src.GameManager;
-import src.games.BottomUp;
-import src.games.Elephant;
-import src.games.FiveFour;
-import src.games.IGame;
-import src.games.Jack9;
-import src.games.Middle;
-import src.games.Misere;
-import src.games.Rio;
-import src.games.SaintLegier;
-import src.games.Slalom;
-import src.games.TopDown;
-import src.games.Trumps;
-import src.objs.Card;
-import src.objs.Player;
-import src.objs.Suit;
-import src.objs.Team;
+import src.games.*;
+import src.objs.*;
 
 /**
  * Utility class for converting game objects to and from JSON representations.
@@ -71,7 +57,7 @@ public class JsonManager {
         teams.forEach((t) -> {
             JSONObject teamObj = new JSONObject();
             teamObj.put("index", t.getIndex());
-            teamObj.put("score", t.getScore());
+            teamObj.put("score", t.getGameScore());
             teamObj.put("players", playersToJsonArray(t.players));
             result.put(teamObj);
         });
@@ -140,7 +126,7 @@ public class JsonManager {
                         4))
                 .getPlayerName());
         if (manager.getPlayers().get(manager.getNextPlayer()).getPlayerName().equals(player)) {
-            Map<Card, Boolean> playable = manager.getPlayers().get(manager.getNextPlayer()).playable(manager.getCurrentTrick(), manager.getGame());
+            Map<Card, Boolean> playable = manager.getPlayers().get(manager.getNextPlayer()).playable(manager.getCurrentTrick(), manager.getGamemode());
             JSONArray arr = new JSONArray();
             for (Entry<Card, Boolean> entry : playable.entrySet()) {
                 JSONObject playableObj = new JSONObject();
@@ -157,31 +143,31 @@ public class JsonManager {
     /**
      * Converts room multipliers and assignment mapping to JSON payload for Vue SSE sync.
      */
-    public static String roomStateToJSON(List<Integer> multipliers, Map<Integer, List<String>> assignments) {
+    public static String multipliersToJSON(List<Integer> multipliers, Map<Integer, List<String>> assignments) {
         JSONObject root = new JSONObject();
         JSONArray multsArray = new JSONArray(multipliers);
-        JSONObject assignmentsObj = new JSONObject();
+        JSONObject gamemodes = new JSONObject();
 
         assignments.forEach((key, list) -> {
             JSONArray items = new JSONArray();
-            for (String gameName : list) {
+            for (String gamemodeName : list) {
                 JSONObject gameObj = new JSONObject();
-                gameObj.put("id", gameName);
-                gameObj.put("name", gameName);
+                gameObj.put("id", gamemodeName);
+                gameObj.put("name", gamemodeName);
                 items.put(gameObj);
             }
-            assignmentsObj.put(String.valueOf(key), items);
+            gamemodes.put(String.valueOf(key), items);
         });
 
         root.put("multipliers", multsArray);
-        root.put("assignments", assignmentsObj);
+        root.put("gamemodes", gamemodes);
         return root.toString();
     }
 
     /**
      * Updates GameManager instance state from incoming Vue POST state JSON.
      */
-    public static void updateRoomStateFromJSON(GameManager manager, String json) {
+    public static void updateMultipliersFromJSON(GameManager manager, String json) {
         JSONObject root = new JSONObject(json);
         List<Integer> multipliers = new ArrayList<>();
         Map<Integer, List<String>> assignments = new HashMap<>();
@@ -194,17 +180,17 @@ public class JsonManager {
         }
 
         if (root.has("assignments")) {
-            JSONObject assignObj = root.getJSONObject("assignments");
-            for (String key : assignObj.keySet()) {
+            JSONObject gamemodesObj = root.getJSONObject("gamemodes");
+            for (String key : gamemodesObj.keySet()) {
                 int mult = Integer.parseInt(key);
-                JSONArray gameArr = assignObj.getJSONArray(key);
-                List<String> gamesList = new ArrayList<>();
+                JSONArray gamemodeArr = gamemodesObj.getJSONArray(key);
+                List<String> gamemodesList = new ArrayList<>();
 
-                for (int i = 0; i < gameArr.length(); i++) {
-                    JSONObject gameObj = gameArr.getJSONObject(i);
-                    gamesList.add(gameObj.getString("id"));
+                for (int i = 0; i < gamemodeArr.length(); i++) {
+                    JSONObject gameObj = gamemodeArr.getJSONObject(i);
+                    gamemodesList.add(gameObj.getString("id"));
                 }
-                assignments.put(mult, gamesList);
+                assignments.put(mult, gamemodesList);
             }
         }
 
@@ -217,11 +203,10 @@ public class JsonManager {
      * @param json the game selection JSON
      * @return the chosen IGame or null for pass
      */
-    public static IGame jsonToIGame(String json) {
+    public static IGamemode jsonToIGame(String json) {
         JSONObject jo = new JSONObject(json);
-        String name = jo.getString("name");
-        System.out.println(name);
-        switch (name.toLowerCase()) {
+        String gamemode = jo.getString("gamemode");
+        switch (gamemode.toLowerCase()) {
             case "pass":
                 return null;
             case "top down":
@@ -274,7 +259,7 @@ public class JsonManager {
      * @param forced whether the chooser is forced to select a game
      * @return JSON string representing the game selection payload
      */
-    public static String gameChoiceToJson(int index, List<Player> players, IGame g, boolean forced) {
+    public static String gamemodeChoiceToJson(int index, List<Player> players, IGamemode g, boolean forced) {
         JSONObject jo = new JSONObject();
         if (g == null) {
             jo.put("chooser", players.get(index).getPlayerName());
@@ -298,48 +283,20 @@ public class JsonManager {
         return jo.toString();
     }
 
-    // /**
-    // * Builds a JSON array describing games available to the current team.
-    // *
-    // * @param t the team whose available games are listed
-    // * @param forced whether passing is disallowed
-    // * @return JSON array of available game options
-    // */
-    // private static JSONArray availableGamesToJson(Team t, boolean forced, Map<Integer, List<String>> assignments) {
-    // JSONArray available = new JSONArray();
-    // int id = 0;
-    // for (int multiplier : t.getGamesAvailable()) {
-    // JSONObject obj = new JSONObject();
-    // obj.put("id", id++);
-    // obj.put("text", new JSONArray(assignments.get(multiplier)));
-    // obj.put("key", multiplier);
-    // available.put(obj);
-    // }
-
-    // if (!forced) {
-    // JSONObject obj = new JSONObject();
-    // obj.put("id", id++);
-    // obj.put("text", "Pass");
-    // obj.put("key", "Pass");
-    // available.put(obj);
-    // }
-    // return available;
-    // }
-
     /**
-     * Converts team score summary data to JSON.
+     * Converts game-level team score summary data to JSON.
      *
      * @param teams the list of teams
      * @return JSON string containing player names and score totals
      */
-    public static String scoreToJson(List<Team> teams, Player next, Player winner) {
+    public static String gameScoreToJson(List<Team> teams, Player next, Player winner) {
         JSONObject scoresObj = new JSONObject();
         JSONArray scores = new JSONArray();
         for (Team t : teams) {
             JSONObject obj = new JSONObject();
             obj.put("p1", t.players.get(0).getPlayerName());
             obj.put("p2", t.players.get(1).getPlayerName());
-            obj.put("score", t.getScore());
+            obj.put("score", t.getGameScore());
             scores.put(obj);
         }
         scoresObj.put("scores", scores);
@@ -348,7 +305,7 @@ public class JsonManager {
         return scoresObj.toString();
     }
 
-    public static String scoresToJson(GameManager manager) {
+    public static String multiplierScoresToJson(GameManager manager) {
         JSONObject result = new JSONObject();
         List<Team> teams = manager.getTeams();
 
@@ -358,11 +315,11 @@ public class JsonManager {
 
         for (int multiplier : manager.getActiveMultipliers()) {
             JSONObject obj = new JSONObject();
-            obj.put("games", new JSONArray(manager.getAssignments().get(multiplier)));
+            obj.put("games", new JSONArray(manager.getGamemodes().get(multiplier)));
 
             obj.put("multiplier", multiplier);
-            int t1score = teams.get(0).getScore(multiplier);
-            int t2score = teams.get(1).getScore(multiplier);
+            int t1score = teams.get(0).getMultiplierScore(multiplier);
+            int t2score = teams.get(1).getMultiplierScore(multiplier);
             obj.put("0", t1score);
             obj.put("1", t2score);
 
@@ -401,7 +358,7 @@ public class JsonManager {
         return result.toString();
     }
 
-    public static String gameOptionsToJson() {
+    public static String gameModeOptionsToJson() {
         JSONArray ja = new JSONArray();
         for (String game : GameManager.GAMES) {
             ja.put(game);

@@ -50,7 +50,7 @@ public class HandHandler extends JassHttpHandler implements HttpHandler {
         GameManager manager = managers.get(key);
         for (Player p : manager.getPlayers()) {
             if (uri.toLowerCase().equals(p.getPlayerName().toLowerCase())) {
-                String response = JsonManager.cardsToJson(p.getCards());
+                String response = JsonManager.cardsToJson(p.getHand());
                 exchange.sendResponseHeaders(200, response.length());
                 exchange.getResponseHeaders().add("Content-Type", "application/json");
                 OutputStream os = exchange.getResponseBody();

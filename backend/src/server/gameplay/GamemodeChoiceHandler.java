@@ -11,7 +11,7 @@ import com.sun.net.httpserver.HttpHandler;
 
 import src.GameManager;
 import src.games.Elephant;
-import src.games.IGame;
+import src.games.IGamemode;
 import src.objs.Suit;
 import src.server.JassHttpHandler;
 import src.utils.JsonManager;
@@ -19,13 +19,13 @@ import src.utils.JsonManager;
 /**
  * HTTP handler for game choice polling and submission within a game room.
  */
-public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
+public class GamemodeChoiceHandler extends JassHttpHandler implements HttpHandler {
     /**
-     * Creates a new game choice handler.
+     * Creates a new game mode choice handler.
      *
      * @param managers shared map of room ids to GameManager instances
      */
-    public GameChoiceHandler(Map<Integer, GameManager> managers) {
+    public GamemodeChoiceHandler(Map<Integer, GameManager> managers) {
         super(managers);
     }
 
@@ -52,12 +52,11 @@ public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
      * @throws IOException if writing the response fails
      */
     private void handleGet(HttpExchange exchange) throws IOException {
-        int key = getGameroom(exchange);
+        int key = getRoom(exchange);
         GameManager manager = managers.get(key);
         String uri = exchange.getRequestURI().toString();
 
-        if (manager.getGame() instanceof Elephant) {
-            System.out.println("doing thread thing");
+        if (manager.getGamemode() instanceof Elephant) {
             Thread t = new Thread(() -> handleElephantWait(exchange, manager));
             t.start();
             return;
@@ -75,15 +74,15 @@ public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
                     while (!Thread.currentThread().isInterrupted()) {
                         int chooser = manager.getNextToChoose();
                         if (chooser != lastSeen.get()) {
-                            String response = JsonManager.gameChoiceToJson(chooser == -1 ? manager.getNextPlayer() : chooser, manager.getPlayers(),
-                                    manager.getGame(), manager.isForced());
+                            String response = JsonManager.gamemodeChoiceToJson(chooser == -1 ? manager.getNextPlayer() : chooser, manager.getPlayers(),
+                                    manager.getGamemode(), manager.isForced());
                             writeSseEvent(os, "game-choice", response);
                             lastSeen.set(chooser);
                         }
 
-                        if (manager.getGame() != null) {
-                            String response = JsonManager.gameChoiceToJson(chooser == -1 ? manager.getNextPlayer() : chooser, manager.getPlayers(),
-                                    manager.getGame(), manager.isForced());
+                        if (manager.getGamemode() != null) {
+                            String response = JsonManager.gamemodeChoiceToJson(chooser == -1 ? manager.getNextPlayer() : chooser, manager.getPlayers(),
+                                    manager.getGamemode(), manager.isForced());
                             writeSseEvent(os, "game-choice", response);
                             break;
                         }
@@ -114,11 +113,10 @@ public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
         OutputStream os = exchange.getResponseBody();
         try {
             // Wait for the suit to be set.
-            while (manager.getGame().getType() == -1) {
+            while (manager.getGamemode().getType() == -1) {
                 Thread.sleep(100);
-                System.out.println(manager.getGame().getType());
             }
-            int suit = manager.getGame().getType();
+            int suit = manager.getGamemode().getType();
             String suitString = Suit.toString(Suit.fromIndex(suit));
             exchange.getResponseHeaders().add("Content-Type", "text/plain");
             exchange.sendResponseHeaders(200, suitString.length());
@@ -138,24 +136,24 @@ public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
     }
 
     /**
-     * Handles a POST request to submit a selected game choice.
+     * Handles a POST request to submit a selected gamemode choice.
      *
      * @param exchange the HTTP exchange
      * @throws IOException if reading or writing the request/response fails
      */
     private void handlePost(HttpExchange exchange) throws IOException {
-        int key = getGameroom(exchange);
+        int key = getRoom(exchange);
         GameManager manager = managers.get(key);
         InputStream is = exchange.getRequestBody();
         String requestString = new String(is.readAllBytes());
 
-        if (manager.getGame() == null) {
-            IGame request = JsonManager.jsonToIGame(requestString);
+        if (manager.getGamemode() == null) {
+            IGamemode request = JsonManager.jsonToIGame(requestString);
             if (request != null) {
-                manager.setGame(request);
+                manager.setGamemode(request);
             }
             manager.incrementChooser();
-            String response = JsonManager.gameChoiceToJson(manager.getNextToChoose() == -1 ? manager.getNextPlayer() : manager.getNextToChoose(), manager.getPlayers(), manager.getGame(), manager.isForced());
+            String response = JsonManager.gamemodeChoiceToJson(manager.getNextToChoose() == -1 ? manager.getNextPlayer() : manager.getNextToChoose(), manager.getPlayers(), manager.getGamemode(), manager.isForced());
             exchange.sendResponseHeaders(200, response.length());
             OutputStream os = exchange.getResponseBody();
             os.write(response.getBytes());
@@ -163,10 +161,10 @@ public class GameChoiceHandler extends JassHttpHandler implements HttpHandler {
         }
 
 
-        if (manager.getGame() instanceof Elephant) {
+        if (manager.getGamemode() instanceof Elephant) {
             String payload = requestString.trim();
             if (!payload.isEmpty()) {
-                ((Elephant) manager.getGame()).setTrump(Suit.fromChar(payload.charAt(0)));
+                ((Elephant) manager.getGamemode()).setTrump(Suit.fromChar(payload.charAt(0)));
             }
             manager.incrementChooser();
             String response = "success";

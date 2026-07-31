@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import src.games.IGame;
+import src.games.IGamemode;
 import src.games.Misere;
 import src.objs.Card;
 import src.objs.Player;
@@ -26,11 +26,11 @@ public class GameManager {
     };
 
     private List<Integer> activeMultipliers;
-    private Map<Integer, List<String>> assignments;
+    private Map<Integer, List<String>> gamemodes;
 
     private final int LAST_BONUS = 5;
     public boolean gamesConfigrured = false;
-    private IGame currentGame;
+    private IGamemode currentGamemode;
     private int nextToChoose = 0;
     private int choicesUntilForced = 4;
     private int nextPlayer = -1;
@@ -64,7 +64,7 @@ public class GameManager {
         teams.add(new Team(1));
 
         activeMultipliers = new ArrayList<Integer>();
-        assignments = new HashMap<>();
+        gamemodes = new HashMap<>();
         List<List<String>> assignmentStrings = List.of(
                 List.of("Trumps"),
                 List.of("Top Down", "Bottom Up"),
@@ -76,14 +76,11 @@ public class GameManager {
         // Initialize default multipliers 1..5
         for (int i = 1; i <= 6; i++) {
             activeMultipliers.add(i);
-            assignments.put(i, assignmentStrings.get(i - 1));
+            gamemodes.put(i, assignmentStrings.get(i - 1));
         }
-
 
         fillDeck();
         this.visible = visible;
-
-
     }
 
     public List<Integer> getActiveMultipliers() {
@@ -96,11 +93,11 @@ public class GameManager {
         }
     }
 
-    public Map<Integer, List<String>> getAssignments() {
+    public Map<Integer, List<String>> getGamemodes() {
         assignmentLock.lock();
         try {
             Map<Integer, List<String>> copy = new HashMap<>();
-            assignments.forEach((k, v) -> copy.put(k, new ArrayList<>(v)));
+            gamemodes.forEach((k, v) -> copy.put(k, new ArrayList<>(v)));
             return copy;
         }
         finally {
@@ -115,8 +112,8 @@ public class GameManager {
         assignmentLock.lock();
         try {
             this.activeMultipliers = new ArrayList<>(newMultipliers);
-            this.assignments = new HashMap<>();
-            newAssignments.forEach((k, v) -> this.assignments.put(k, new ArrayList<>(v)));
+            this.gamemodes = new HashMap<>();
+            newAssignments.forEach((k, v) -> this.gamemodes.put(k, new ArrayList<>(v)));
         }
         finally {
             assignmentLock.unlock();
@@ -129,7 +126,7 @@ public class GameManager {
     public int getMultiplierForGame(String gameName) {
         assignmentLock.lock();
         try {
-            for (Map.Entry<Integer, List<String>> entry : assignments.entrySet()) {
+            for (Map.Entry<Integer, List<String>> entry : gamemodes.entrySet()) {
                 if (entry.getValue().contains(gameName)) {
                     return entry.getKey();
                 }
@@ -163,14 +160,14 @@ public class GameManager {
     private void dealCards() {
         // Ensure each player starts with an empty hand.
         for (Player p : players) {
-            p.getCards().clear();
+            p.getHand().clear();
         }
 
         int playerIndex = 0;
 
         while (!undealt.isEmpty()) {
             // Mimic traditional Jass dealing, where 3 cards are dealt to a player at once.
-            players.get(playerIndex).getCards().addAll(undealt.subList(0, 3));
+            players.get(playerIndex).getHand().addAll(undealt.subList(0, 3));
             undealt.removeAll(undealt.subList(0, 3));
             playerIndex++;
             if (playerIndex >= players.size())
@@ -183,7 +180,7 @@ public class GameManager {
      */
     private void sortCards() {
         for (Player player : players) {
-            Collections.sort(player.getCards(), new CardComparator());
+            Collections.sort(player.getHand(), new CardComparator());
         }
     }
 
@@ -220,10 +217,6 @@ public class GameManager {
             dealCards();
             sortCards();
             cardsDealt = true;
-            for (Player pl : players) {
-                System.out.println(pl.getPlayerName());
-                pl.printHand();
-            }
             reset = true;
         }
     }
@@ -251,9 +244,6 @@ public class GameManager {
                 t1Pointer++;
             }
             players = temp;
-            for (int i = 0; i < players.size(); i++) {
-                System.out.println(players.get(i).getPlayerName());
-            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -364,7 +354,6 @@ public class GameManager {
             if (choicesUntilForced <= 0) {
                 forced = true;
                 choicesUntilForced = 4;
-                System.out.println("FORCED");
             }
         }
         catch (Exception e) {
@@ -399,8 +388,8 @@ public class GameManager {
      *
      * @return the current game or null if none is selected
      */
-    public IGame getGame() {
-        return currentGame;
+    public IGamemode getGamemode() {
+        return currentGamemode;
     }
 
     /**
@@ -408,9 +397,9 @@ public class GameManager {
      *
      * @param g the chosen game mode
      */
-    public void setGame(IGame g) {
+    public void setGamemode(IGamemode g) {
         try {
-            currentGame = g;
+            currentGamemode = g;
             nextPlayer = nextToChoose;
             gameCaller = nextToChoose;
             nextToChoose = (nextToChoose - 1) % 4;
@@ -438,19 +427,16 @@ public class GameManager {
      */
     public boolean playCard(String s) {
         try {
-            if (currentGame == null || currentTrick == null) {
-                System.out.println("No active trick to play into.");
+            if (currentGamemode == null || currentTrick == null) {
                 return false;
             }
 
             trickLock.lock();
             try {
-                System.out.println("Cards played: " + currentTrick.size());
                 Card candidate = Card.parseCard(s);
                 Player currentPlayer = players.get(nextPlayer);
 
-                if (!currentPlayer.canPlayCard(candidate, currentTrick, currentGame)) {
-                    System.out.println("Cannot play that card.");
+                if (!currentPlayer.canPlayCard(candidate, currentTrick, currentGamemode)) {
                     return false;
                 }
                 currentTrick.add(candidate);
@@ -478,24 +464,21 @@ public class GameManager {
             if (currentTrick != null && currentTrick.size() >= 4) {
                 // Get the index of the card that won the trick, add it to the start player
                 // (which will be the next player as it's wrapped around)
-                int winner = (currentGame.wins(currentTrick, trickCount) + nextPlayer) % 4;
-                if (currentGame instanceof Misere) {
-                    players.get((winner + 1) % 4).getTeam().addScore(currentGame.score(currentTrick));
+                int winner = (currentGamemode.wins(currentTrick, trickCount) + nextPlayer) % 4;
+                if (currentGamemode instanceof Misere) {
+                    players.get((winner + 1) % 4).getTeam().addGameScore(currentGamemode.score(currentTrick));
                 } else {
-                    players.get(winner).getTeam().addScore(currentGame.score(currentTrick));
+                    players.get(winner).getTeam().addGameScore(currentGamemode.score(currentTrick));
                 }
                 currentTrick.clear();
                 nextPlayer = winner;
                 trickWinner = winner;
                 trickCount++;
-                System.out.println("Trick Count: " + trickCount);
                 if (trickCount >= 9) {
-                    players.get(winner).getTeam().addScore(LAST_BONUS);
-                    System.out.println("Game Over! Team 0: " + teams.get(0).getScore() + " Team 1: " + teams.get(1).getScore());
+                    players.get(winner).getTeam().addGameScore(LAST_BONUS);
                     resetGame();
                 }
             } else {
-                System.out.println("Already cleared");
             }
         }
         finally {
@@ -507,28 +490,30 @@ public class GameManager {
      * Resets the game state and prepares a new round.
      */
     public void resetGame() {
-        for (Entry<Integer, List<String>> t : assignments.entrySet()) {
-            if (t.getValue().contains(currentGame.getName())) {
-                players.get(gameCaller).getTeam().setScore(t.getKey(), players.get(gameCaller).getTeam().getScore());
+        for (Entry<Integer, List<String>> t : gamemodes.entrySet()) {
+            if (t.getValue().contains(currentGamemode.getName())) {
+                players.get(gameCaller).getTeam().setMultiplierScore(t.getKey(), players.get(gameCaller).getTeam().getGameScore());
             }
         }
-        System.out.println("Resetting Game");
         fillDeck();
         Collections.shuffle(undealt);
         dealCards();
         sortCards();
         trickCount = 0;
-        currentGame = null;
+        currentGamemode = null;
         nextToChoose = 0;
         choicesUntilForced = 4;
         nextPlayer = -1;
         currentTrick.clear();
-        teams.get(0).resetScore();
-        teams.get(1).resetScore();
+        teams.get(0).resetGameScore();
+        teams.get(1).resetGameScore();
     }
 
 
-    public void resetMatch(String toRemove) {
+    /**
+     * Reset the whole match.
+     */
+    public void resetMatch() {
         if (reset) {
             players.clear();
             teams.get(0).resetMatch(activeMultipliers);
@@ -538,9 +523,9 @@ public class GameManager {
         reset = false;
     }
 
-    public void confirmConfig() {
+    public void confirmMultipliers() {
         gamesConfigrured = true;
-        teams.get(0).configureGames(activeMultipliers);
-        teams.get(1).configureGames(activeMultipliers);
+        teams.get(0).configureMultipliers(activeMultipliers);
+        teams.get(1).configureMultipliers(activeMultipliers);
     }
 }

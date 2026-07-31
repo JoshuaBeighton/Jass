@@ -17,13 +17,13 @@ import src.server.JassHttpHandler;
  * Handles GET requests to generate a new game room key and create the associated GameManager. Supports CORS and OPTIONS
  * preflight requests.
  */
-public class GameroomHandler extends JassHttpHandler implements HttpHandler {
+public class RoomHandler extends JassHttpHandler implements HttpHandler {
     /**
      * Constructs a new game room handler with the shared manager map.
      *
      * @param managers the map of active game managers keyed by room id
      */
-    public GameroomHandler(Map<Integer, GameManager> managers) {
+    public RoomHandler(Map<Integer, GameManager> managers) {
         super(managers);
     }
 
@@ -50,7 +50,7 @@ public class GameroomHandler extends JassHttpHandler implements HttpHandler {
      * @throws IOException if an I/O error occurs writing the response
      */
     private void handleGet(HttpExchange exchange) throws IOException {
-        String visibility = exchange.getRequestURI().getPath().split("/gameroom/")[1];
+        String visibility = exchange.getRequestURI().getPath().split("/room/")[1];
         int key = 0;
         Random random = new Random();
         while (key == 0 || managers.keySet().contains(key)) {

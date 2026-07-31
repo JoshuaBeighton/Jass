@@ -66,8 +66,8 @@ public class PlayerHandler extends JassHttpHandler implements HttpHandler {
      * @throws IOException if reading or writing the request/response fails
      */
     private void handlePost(HttpExchange exchange) throws IOException {
-        int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
-        GameManager manager = managers.get(key);
+        int room = getRoom(exchange);
+        GameManager manager = managers.get(room);
         InputStream is = exchange.getRequestBody();
         String requestString = new String(is.readAllBytes());
         Player request = JsonManager.JsonToPlayer(requestString, manager.getTeams());

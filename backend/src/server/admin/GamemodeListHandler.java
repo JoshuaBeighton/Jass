@@ -11,14 +11,14 @@ import src.GameManager;
 import src.server.JassHttpHandler;
 import src.utils.JsonManager;
 
-public class GameOptionsHandler extends JassHttpHandler implements HttpHandler {
+public class GamemodeListHandler extends JassHttpHandler implements HttpHandler {
 
     /**
-     * Creates a new scores handler.
+     * Creates a new GamemodeList handler
      *
      * @param managers shared map of room ids to GameManager instances
      */
-    public GameOptionsHandler(Map<Integer, GameManager> managers) {
+    public GamemodeListHandler(Map<Integer, GameManager> managers) {
         super(managers);
     }
 
@@ -42,7 +42,7 @@ public class GameOptionsHandler extends JassHttpHandler implements HttpHandler {
      * @throws IOException if writing the response fails
      */
     private void handleGet(HttpExchange exchange) throws IOException {
-        String response = JsonManager.gameOptionsToJson();
+        String response = JsonManager.gameModeOptionsToJson();
         exchange.sendResponseHeaders(200, response.length());
         exchange.getResponseHeaders().add("Content-Type", "application/json");
         OutputStream os = exchange.getResponseBody();

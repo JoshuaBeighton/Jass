@@ -16,11 +16,11 @@ public class TestPlayer {
 
         Player p = new Player("Jim", new Team(0));
 
-        assertEquals(p.getCards().size(), 0);
+        assertEquals(p.getHand().size(), 0);
 
-        p.getCards().add(c1);
+        p.getHand().add(c1);
 
-        assertEquals(p.getCards().size(), 1);
+        assertEquals(p.getHand().size(), 1);
     }
 
 
@@ -31,15 +31,15 @@ public class TestPlayer {
 
         Player p = new Player("Jim", new Team(0));
 
-        assertEquals(p.getCards().size(), 0);
+        assertEquals(p.getHand().size(), 0);
 
-        p.getCards().add(c1);
+        p.getHand().add(c1);
 
-        assertEquals(p.getCards().size(), 1);
+        assertEquals(p.getHand().size(), 1);
 
         p.removeCard(c2);
 
-        assertEquals(p.getCards().size(), 0);
+        assertEquals(p.getHand().size(), 0);
     }
 
 
@@ -50,14 +50,14 @@ public class TestPlayer {
 
         Player p = new Player("Jim", new Team(0));
 
-        assertEquals(p.getCards().size(), 0);
+        assertEquals(p.getHand().size(), 0);
 
-        p.getCards().add(c1);
+        p.getHand().add(c1);
 
-        assertEquals(p.getCards().size(), 1);
+        assertEquals(p.getHand().size(), 1);
 
         p.removeCard(c2);
 
-        assertEquals(p.getCards().size(), 0);
+        assertEquals(p.getHand().size(), 0);
     }
 }

@@ -5,7 +5,7 @@ import java.util.List;
 import src.objs.Card;
 import src.objs.Suit;
 
-public class Elephant implements IGame {
+public class Elephant implements IGamemode {
     private Suit trumpSuit;
 
     public int getType() {

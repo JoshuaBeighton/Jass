@@ -16,28 +16,13 @@ public class Team {
     public List<Player> players;
 
     /** The team's accumulated score for the current match. */
-    private int currentScore;
+    private int gameScore;
 
     /** The team index used to identify teams in game state and serialization. */
     private int index;
 
     /** Scores for each game mode, or -1 for modes that have not yet been played. */
-    private Map<Integer, Integer> gameScores;
-
-    /**
-     * Returns the list of game modes still available for this team.
-     *
-     * @return list of available game mode names
-     */
-    public List<Integer> getGamesAvailable() {
-        List<Integer> available = new ArrayList<Integer>();
-        gameScores.forEach((game, score) -> {
-            if (score == -1) {
-                available.add(game);
-            }
-        });
-        return available;
-    }
+    private Map<Integer, Integer> multiplierScores;
 
     /**
      * Constructs a new team with the given index and initializes scores.
@@ -46,15 +31,15 @@ public class Team {
      */
     public Team(int index) {
         players = new ArrayList<Player>();
-        currentScore = 0;
+        gameScore = 0;
         this.index = index;
-        gameScores = new HashMap<Integer, Integer>();
+        multiplierScores = new HashMap<Integer, Integer>();
     }
 
-    public void configureGames(List<Integer> multipliers) {
+    public void configureMultipliers(List<Integer> multipliers) {
         if (multipliers != null) {
             for (int n : multipliers) {
-                gameScores.put(n, -1);
+                multiplierScores.put(n, -1);
             }
         }
     }
@@ -65,15 +50,15 @@ public class Team {
      *
      * @param val points to add
      */
-    public void addScore(int val) {
-        currentScore += val;
+    public void addGameScore(int val) {
+        gameScore += val;
     }
 
     /**
      * Resets the team's current score to zero.
      */
-    public void resetScore() {
-        currentScore = 0;
+    public void resetGameScore() {
+        gameScore = 0;
     }
 
     /**
@@ -81,8 +66,8 @@ public class Team {
      *
      * @return current score
      */
-    public int getScore() {
-        return currentScore;
+    public int getGameScore() {
+        return gameScore;
     }
 
     /**
@@ -95,20 +80,13 @@ public class Team {
     }
 
     /**
-     * Prints the team score and player names to standard output.
-     */
-    public void printScore() {
-        System.out.printf("Team %s & %s:\t%d\n", players.get(0).getPlayerName(), players.get(1).getPlayerName(), currentScore);
-    }
-
-    /**
      * Stores the score for a specific game mode.
      *
      * @param multiplier the game mode name
      * @param score the score achieved in that mode
      */
-    public void setScore(int multiplier, int score) {
-        gameScores.put(multiplier, score);
+    public void setMultiplierScore(int multiplier, int score) {
+        multiplierScores.put(multiplier, score);
     }
 
     /**
@@ -117,16 +95,16 @@ public class Team {
      * @param multiplier the game mode name
      * @return the score for that mode
      */
-    public int getScore(int multiplier) {
-        return gameScores.get(multiplier);
+    public int getMultiplierScore(int multiplier) {
+        return multiplierScores.get(multiplier);
     }
 
     public void resetMatch(List<Integer> multipliers) {
-        gameScores = new HashMap<Integer, Integer>();
+        multiplierScores = new HashMap<Integer, Integer>();
         for (int n : multipliers) {
-            gameScores.put(n, -1);
+            multiplierScores.put(n, -1);
         }
-        currentScore = 0;
+        gameScore = 0;
         players.clear();
     }
 }

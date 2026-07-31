@@ -75,6 +75,8 @@ function getSubText(): String {
       } else {
         return getOpppositeStart(props.game.start ?? 'error')
       }
+    case 'trumps':
+      return suitToUnicode(props.game.suit ?? 'error')
   }
   return ''
 }
@@ -86,10 +88,6 @@ function getSubText(): String {
     <header class="game-header">
       <div class="game-title-container">
         <h2 class="game-title">{{ game.game }}</h2>
-        <!-- show suit symbol when present, coloring red suits appropriately -->
-        <h2 :class="isRed(suitToUnicode(game.suit)) ? 'red' : '' + ' game-title'" v-if="game.suit">
-          {{ suitToUnicode(game.suit) }}
-        </h2>
         <h2 class="game-title">{{ getSubText() }}</h2>
       </div>
       <p class="game-description">{{ description }}</p>

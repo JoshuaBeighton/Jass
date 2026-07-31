@@ -68,7 +68,7 @@ async function sendCard() {
 /* Styles for the card container and suit color helpers */
 .card {
   width: 100px;
-  height: 150px;
+  height: 145px;
   display: flex;
   justify-content: center;
   align-items: center;

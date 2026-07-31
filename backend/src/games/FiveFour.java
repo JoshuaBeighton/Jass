@@ -4,7 +4,7 @@ import java.util.List;
 
 import src.objs.Card;
 
-public class FiveFour implements IGame {
+public class FiveFour implements IGamemode {
     public FiveFour(String start) {
         if (start.equals("top")) {
             type = 0;

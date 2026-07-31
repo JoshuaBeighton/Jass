@@ -4,24 +4,25 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import src.GameManager;
 import src.server.JassHttpHandler;
-import src.utils.JsonManager;
 
 /**
- * HTTP handler for returning the current scores of the teams in a game room.
+ * HTTP handler for listing public game rooms with available player slots.
  */
-public class ScoresHandler extends JassHttpHandler implements HttpHandler {
-
+public class PublicRoomListHandler extends JassHttpHandler implements HttpHandler {
     /**
-     * Creates a new scores handler.
+     * Creates a new public game room handler.
      *
      * @param managers shared map of room ids to GameManager instances
      */
-    public ScoresHandler(Map<Integer, GameManager> managers) {
+    public PublicRoomListHandler(Map<Integer, GameManager> managers) {
         super(managers);
     }
 
@@ -39,20 +40,25 @@ public class ScoresHandler extends JassHttpHandler implements HttpHandler {
     }
 
     /**
-     * Handles a GET request and returns team scores as JSON.
+     * Handles a GET request and returns a JSON array of joinable public rooms.
      *
      * @param exchange the HTTP exchange
      * @throws IOException if writing the response fails
      */
     private void handleGet(HttpExchange exchange) throws IOException {
-        int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
-        GameManager manager = managers.get(key);
-        String response = JsonManager.scoresToJson(manager);
+        JSONArray array = new JSONArray();
+        for (int key : managers.keySet()) {
+            if (managers.get(key).visible && managers.get(key).getPlayers().size() < 4) {
+                JSONObject obj = new JSONObject();
+                obj.put("id", key);
+                obj.put("playerCount", managers.get(key).getPlayers().size());
+                array.put(obj);
+            }
+        }
+        String response = array.toString();
         exchange.sendResponseHeaders(200, response.length());
-        exchange.getResponseHeaders().add("Content-Type", "application/json");
         OutputStream os = exchange.getResponseBody();
         os.write(response.getBytes());
         os.close();
     }
-
 }

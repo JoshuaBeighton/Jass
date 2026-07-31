@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import type GameMode from '@/interfaces/GameMode.ts'
+import SecondarySelection from './SecondarySelection.vue'
 
 interface Team {
   name: string
@@ -46,7 +47,7 @@ const scores = ref<Scores>({
 async function fetchScores() {
   const host = window.location.hostname
   try {
-    const res = await fetch(`http://${host}:9000/scores`, {
+    const res = await fetch(`http://${host}:9000/multipliers`, {
       headers: {
         gameroom: props.gameroom.toString(),
       },
@@ -77,11 +78,9 @@ async function fetchScores() {
 // --- Game Selection & SSE State ---
 
 const isMe = ref(false)
-const trumps = ref(false)
-const slalom = ref(false)
-const fivefour = ref(false)
-const saintlegier = ref(false)
-const rio = ref(false)
+
+const secondaryChoice = ref('')
+
 const nextChooser = ref('')
 
 let gameIdCounter = 0
@@ -136,14 +135,11 @@ function typeLabel(typeKey: string) {
 }
 
 function showMainButtons() {
-  return !trumps.value && !slalom.value && !fivefour.value && !saintlegier.value
+  return secondaryChoice.value == ''
 }
 
 function resetSelectionSubStates() {
-  trumps.value = false
-  slalom.value = false
-  fivefour.value = false
-  saintlegier.value = false
+  secondaryChoice.value = ''
   saintlegierAssignments.value = {}
 }
 
@@ -156,7 +152,7 @@ function connectGameChoiceStream() {
   }
 
   eventSource = new EventSource(
-    `http://${host}:9000/gameChoice?name=${props.name}&lastidx=${counter}&gameroom=${props.gameroom}`,
+    `http://${host}:9000/gamemodeChoice?name=${props.name}&lastidx=${counter}&gameroom=${props.gameroom}`,
     { withCredentials: false },
   )
 
@@ -207,41 +203,29 @@ function connectGameChoiceStream() {
 // --- Game Actions ---
 
 async function sendGame(game: string) {
-  console.log(game)
-  if (game.toLowerCase() === 'trumps') {
-    trumps.value = true
-    return
-  } else if (game.toLowerCase() === 'slalom') {
-    slalom.value = true
-    return
-  } else if (game.toLowerCase() === 'fivefour') {
-    fivefour.value = true
-    return
-  } else if (game.toLowerCase() === 'saint legier') {
-    saintlegier.value = true
-    return
-  } else if (game.toLowerCase() === 'rio') {
-    rio.value = true
+  if (['trumps', 'slalom', 'fivefour', 'saint legier', 'rio'].includes(game.toLowerCase())) {
+    secondaryChoice.value = game.toLowerCase()
+    console.log(secondaryChoice.value)
     return
   }
 
   const host = window.location.hostname
 
-  let body: Record<string, any> = { name: game }
+  let body: Record<string, any> = { gamemode: game }
   if (game.startsWith('trumps-')) {
-    body['name'] = game.split('-')[0]
+    body['gamemode'] = game.split('-')[0]
     body['suit'] = game.split('-')[1]
   }
   if (game.startsWith('slalom-') || game.startsWith('fivefour-')) {
-    body['name'] = game.split('-')[0]
+    body['gamemode'] = game.split('-')[0]
     body['start'] = game.split('-')[1]
   }
   if (game.startsWith('rio')) {
-    body['name'] = game.split('-')[0]
+    body['gamemode'] = game.split('-')[0]
     body['color'] = game.split('-')[1]
   }
 
-  const res = await fetch(`http://${host}:9000/gameChoice`, {
+  const res = await fetch(`http://${host}:9000/gamemodeChoice`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -271,12 +255,12 @@ async function sendSaintLegier() {
 
   const host = window.location.hostname
 
-  let body: Record<string, any> = { name: 'saint legier' }
+  let body: Record<string, any> = { gamemode: 'saint legier' }
   for (const suit of suitNames) {
     body[suit.toLowerCase()] = saintlegierAssignments.value[suit]
   }
 
-  const res = await fetch(`http://${host}:9000/gameChoice`, {
+  const res = await fetch(`http://${host}:9000/gamemodeChoice`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -376,82 +360,7 @@ onBeforeUnmount(() => {
         </tbody>
       </table>
     </div>
-
-    <!-- Active Selection Area rendered when it is this player's turn -->
-    <div v-if="isMe" class="selectArea">
-      <h2>
-        {{
-          saintlegier
-            ? 'Assign a Game to Each Suit'
-            : slalom || fivefour
-              ? 'Choose a Start Position'
-              : trumps
-                ? 'Choose a Suit'
-                : 'Choose a Game'
-        }}
-      </h2>
-
-      <div class="buttons">
-        <button
-          v-if="trumps"
-          v-for="suit in ['Clubs', 'Diamonds', 'Hearts', 'Spades']"
-          :key="suit"
-          :class="['suit-btn', suit.toLowerCase()]"
-          @click="() => sendGame('trumps-' + suit.toLowerCase())"
-        >
-          {{ suit }}
-        </button>
-
-        <button
-          v-else-if="slalom || fivefour"
-          v-for="opt in ['Top', 'Bottom']"
-          :key="opt"
-          :class="['suit-btn', opt.toLowerCase()]"
-          @click="() => sendGame((slalom ? 'slalom-' : 'fivefour-') + opt.toLowerCase())"
-        >
-          {{ opt }}
-        </button>
-
-        <button
-          v-if="rio"
-          v-for="color in ['Red', 'Black']"
-          :key="color"
-          :class="['suit-btn', color.toLowerCase()]"
-          @click="() => sendGame('rio-' + color.toLowerCase())"
-        >
-          {{ color }}
-        </button>
-      </div>
-
-      <div v-if="saintlegier" class="saintlegier-assign">
-        <div v-for="suit in suitNames" :key="suit" class="saintlegier-row">
-          <span :class="['suit-name', suit.toLowerCase()]">{{ suit }}</span>
-
-          <div v-if="!saintlegierAssignments[suit]" class="buttons saintlegier-options">
-            <button
-              v-for="opt in gameTypeOptions"
-              :key="opt.key"
-              :disabled="remainingCount(opt.key) <= 0"
-              @click="() => assignSuit(suit, opt.key)"
-            >
-              {{ opt.text }}
-            </button>
-          </div>
-          <div v-else class="saintlegier-assigned">
-            <span>{{ typeLabel(saintlegierAssignments[suit]) }}</span>
-            <button class="change-btn" @click="() => unassignSuit(suit)">Change</button>
-          </div>
-        </div>
-
-        <button v-if="saintlegierComplete" class="confirm-btn" @click="sendSaintLegier">
-          Confirm
-        </button>
-      </div>
-
-      <button v-if="!(saintlegier || slalom || fivefour || trumps)" @click="sendGame('Pass')">
-        Pass
-      </button>
-    </div>
+    <SecondarySelection v-if="isMe" :gameroom="gameroom" :name="secondaryChoice" />
   </div>
 </template>
 
@@ -553,81 +462,18 @@ button:disabled {
   transform: none;
 }
 
-.suit-btn {
-  background-color: var(--color-background);
-  border-color: var(--color-border);
-}
-
-.suit-btn.hearts,
-.suit-btn.diamonds {
-  color: var(--color-red-suit);
-}
-
-.suit-btn.hearts:hover,
-.suit-btn.diamonds:hover,
-.suit-btn.clubs:hover,
-.suit-btn.spades:hover {
-  background-color: var(--color-background-mute);
-}
-
-.suit-btn.clubs,
-.suit-btn.spades {
-  color: var(--color-text);
-}
-
-.saintlegier-assign {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-}
-
-.saintlegier-row {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 10px;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background-color: var(--color-background);
-}
-
-.suit-name {
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.suit-name.hearts,
-.suit-name.diamonds {
-  color: var(--color-red-suit);
-}
-
-.saintlegier-options button {
-  flex: 1 1 100px;
-  min-width: 80px;
-  font-size: 0.85rem;
-  padding: 8px 10px;
-}
-
-.saintlegier-assigned {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
 .change-btn {
-  flex: 0 0 auto;
-  min-width: unset;
+  width: fit-content;
   padding: 6px 10px;
   font-size: 0.8rem;
 }
 
 .confirm-btn {
   width: 100%;
-  background-color: var(--color-primary);
-  color: var(--color-background);
-  border-color: var(--color-primary);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  border-color: var(--color-background);
+  border: 2px solid var(--color-border);
   font-weight: 600;
 }
 

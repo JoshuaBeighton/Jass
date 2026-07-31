@@ -7,7 +7,7 @@ import java.util.Map;
 
 
 import src.games.Elephant;
-import src.games.IGame;
+import src.games.IGamemode;
 import src.games.Rio;
 import src.games.Trumps;
 import src.games.orderings.Jack9Ordering;
@@ -25,7 +25,7 @@ public class Player {
     private String name;
 
     /** The cards currently held by the player. */
-    private List<Card> cards;
+    private List<Card> hand;
 
     /**
      * Creates a new player with a fixed name and team.
@@ -36,7 +36,7 @@ public class Player {
     public Player(String name, Team t) {
         this.name = name;
         this.team = t;
-        this.cards = new ArrayList<Card>();
+        this.hand = new ArrayList<Card>();
     }
 
     /**
@@ -55,17 +55,6 @@ public class Player {
      */
     public void setTeam(Team team) {
         this.team = team;
-    }
-
-    /**
-     * Prints the player's hand to the server console.
-     */
-    public void printHand() {
-        System.out.println(name);
-        for (Card card : cards) {
-            System.out.println(card.toString());
-        }
-        System.out.println("\n");
     }
 
     /**
@@ -91,8 +80,8 @@ public class Player {
      *
      * @return the hand of cards
      */
-    public List<Card> getCards() {
-        return cards;
+    public List<Card> getHand() {
+        return hand;
     }
 
     /**
@@ -100,14 +89,14 @@ public class Player {
      *
      * @param cards the new card list
      */
-    public void setCards(List<Card> cards) {
-        this.cards = cards;
+    public void setHand(List<Card> cards) {
+        this.hand = cards;
     }
 
-    public Map<Card, Boolean> playable(List<Card> played, IGame game) {
+    public Map<Card, Boolean> playable(List<Card> trick, IGamemode gamemode) {
         Map<Card, Boolean> result = new HashMap<Card, Boolean>();
-        for (Card card : cards) {
-            result.put(card, canPlayCard(card, played, game));
+        for (Card card : hand) {
+            result.put(card, canPlayCard(card, trick, gamemode));
         }
         return result;
     }
@@ -118,14 +107,14 @@ public class Player {
      * The player must hold the card, and must follow the rules for trumps and suit-following.
      *
      * @param c the card to play
-     * @param played the cards already played in the current trick
+     * @param trick the cards already played in the current trick
      * @param trump the trump suit index, or -1 if not a trumps game
      * @return true if the play is legal, false otherwise
      */
-    public boolean canPlayCard(Card c, List<Card> played, IGame game) {
+    public boolean canPlayCard(Card c, List<Card> trick, IGamemode gamemode) {
         // Ensure the player has the card they are trying to play in their hand.
         boolean hasCard = false;
-        for (Card card : cards) {
+        for (Card card : hand) {
             if (c.equals(card))
                 hasCard = true;
         }
@@ -134,25 +123,25 @@ public class Player {
         }
 
         // If this is the first card in the trick, they can play any card.
-        if (played.size() == 0) {
+        if (trick.size() == 0) {
             return true;
         }
 
         // If they followed suit, they can always play that card.
-        Suit masterSuit = played.get(0).getSuit();
+        Suit masterSuit = trick.get(0).getSuit();
         if (c.getSuit() == masterSuit)
             return true;
 
         // Handle trumps or elephant in the trump stage.
-        if (game instanceof Trumps || (game instanceof Elephant && game.getType() != -1)) {
-            Suit trumpSuit = Suit.fromIndex(game.getType());
+        if (gamemode instanceof Trumps || (gamemode instanceof Elephant && gamemode.getType() != -1)) {
+            Suit trumpSuit = Suit.fromIndex(gamemode.getType());
 
             // If they are playing a trump.
             if (c.getSuit() == trumpSuit) {
                 // If it beats all the trumps played so far.
                 boolean beats = true;
                 Jack9Ordering ordering = new Jack9Ordering(trumpSuit);
-                for (Card card : played) {
+                for (Card card : trick) {
                     if (ordering.compare(card, c) > 0) {
                         beats = false;
                     }
@@ -163,14 +152,14 @@ public class Player {
             }
         }
         // Handle rio
-        else if (game instanceof Rio) {
-            String color = game.getType() == 0 ? "red" : "black";
+        else if (gamemode instanceof Rio) {
+            String color = gamemode.getType() == 0 ? "red" : "black";
 
             // Get the trump suit of the current trick.
             Suit trumpSuit = null;
-            for (int i = played.size() - 1; i > 0; i--) {
-                if (played.get(i).getSuit().getColor().equals(color)) {
-                    trumpSuit = played.get(i).getSuit();
+            for (int i = trick.size() - 1; i > 0; i--) {
+                if (trick.get(i).getSuit().getColor().equals(color)) {
+                    trumpSuit = trick.get(i).getSuit();
                 }
             }
 
@@ -183,7 +172,7 @@ public class Player {
             if (c.getSuit() == trumpSuit) {
                 boolean beats = true;
                 Jack9Ordering ordering = new Jack9Ordering(trumpSuit);
-                for (Card card : played) {
+                for (Card card : trick) {
                     if (ordering.compare(card, c) > 0) {
                         beats = false;
                     }
@@ -195,7 +184,7 @@ public class Player {
         }
         // Default case
 
-        for (Card available : cards) {
+        for (Card available : hand) {
             if (available.getSuit() == masterSuit) {
                 return false;
             }
@@ -210,12 +199,12 @@ public class Player {
      */
     public void removeCard(Card c) {
         int toRemove = -1;
-        for (int i = 0; i < cards.size(); i++) {
-            if (cards.get(i).equals(c))
+        for (int i = 0; i < hand.size(); i++) {
+            if (hand.get(i).equals(c))
                 toRemove = i;
         }
         if (toRemove != -1) {
-            cards.remove(toRemove);
+            hand.remove(toRemove);
         }
     }
 

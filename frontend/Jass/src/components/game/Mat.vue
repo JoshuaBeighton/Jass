@@ -212,7 +212,7 @@ async function clearDeck() {
           },
         }
 
-        const res = await fetch(`http://${host}:9000/gameChoice`, settings)
+        const res = await fetch(`http://${host}:9000/gamemodeChoice`, settings)
         if (!res.ok) throw new Error('Network response was not OK')
         const data = await res.text()
         props.game.suit = data

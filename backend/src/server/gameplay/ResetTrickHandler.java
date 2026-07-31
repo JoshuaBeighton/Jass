@@ -64,13 +64,12 @@ public class ResetTrickHandler extends JassHttpHandler implements HttpHandler {
         int nextPlayer = manager.getNextPlayer();
         int winner = manager.getTrickWinner();
         if (nextPlayer == -1) {
-            response = JsonManager.scoreToJson(manager.getTeams(), manager.getPlayers().get(0), manager.getPlayers().get(0));
+            response = JsonManager.gameScoreToJson(manager.getTeams(), manager.getPlayers().get(0), manager.getPlayers().get(0));
         } else {
             try {
-                response = JsonManager.scoreToJson(manager.getTeams(), manager.getPlayers().get(nextPlayer), manager.getPlayers().get(winner));
+                response = JsonManager.gameScoreToJson(manager.getTeams(), manager.getPlayers().get(nextPlayer), manager.getPlayers().get(winner));
             }
             catch (Exception e) {
-                System.out.println("Error Caught!");
             }
         }
 

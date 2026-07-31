@@ -7,7 +7,7 @@ import src.objs.Card;
 import src.objs.Suit;
 import src.games.orderings.BottomUpOrdering;
 
-public class BottomUp implements IGame {
+public class BottomUp implements IGamemode {
     private int type = 0;
 
     public int getType() {

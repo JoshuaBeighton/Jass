@@ -43,8 +43,8 @@ public class NextPlayerHandler extends JassHttpHandler implements HttpHandler {
      * @throws IOException if writing the response fails
      */
     public void handleGet(HttpExchange exchange) throws IOException {
-        int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
-        GameManager manager = managers.get(key);
+        int room = getRoom(exchange);
+        GameManager manager = managers.get(room);
         String response = String.valueOf(manager.getNextPlayer());
         exchange.sendResponseHeaders(200, response.length());
         OutputStream os = exchange.getResponseBody();

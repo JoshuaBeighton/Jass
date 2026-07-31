@@ -7,7 +7,7 @@ import src.games.orderings.Jack9Ordering;
 import src.objs.Card;
 import src.objs.Suit;
 
-public class Rio implements IGame {
+public class Rio implements IGamemode {
     private String trumpColor;
 
     /**

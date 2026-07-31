@@ -4,7 +4,7 @@ import java.util.List;
 
 import src.objs.Card;
 
-public interface IGame {
+public interface IGamemode {
     /**
      * 
      * @return The name of the game being played.

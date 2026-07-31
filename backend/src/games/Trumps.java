@@ -7,7 +7,7 @@ import src.games.orderings.Jack9Ordering;
 import src.objs.Card;
 import src.objs.Suit;
 
-public class Trumps implements IGame {
+public class Trumps implements IGamemode {
     private Suit trump;
 
     /**

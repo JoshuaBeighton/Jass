@@ -43,7 +43,7 @@ public class CardWaitHandler extends JassHttpHandler implements HttpHandler {
      * @throws IOException if writing the response fails
      */
     private void handleGet(HttpExchange exchange) throws IOException {
-        int key = getGameroom(exchange);
+        int key = getRoom(exchange);
         GameManager manager = managers.get(key);
         int count = Integer.parseInt(exchange.getRequestURI().getPath().split("/cardWait/")[1]);
 

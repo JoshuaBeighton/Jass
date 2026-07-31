@@ -35,21 +35,20 @@ public class JassHttpServer {
             server.createContext("/teams", new TeamHandler(manager));
             server.createContext("/teamWait", new TeamWaitHandler(manager));
             server.createContext("/hand", new HandHandler(manager));
-            server.createContext("/gameChoice", new GameChoiceHandler(manager));
+            server.createContext("/gamemodeChoice", new GamemodeChoiceHandler(manager));
             server.createContext("/cardWait", new CardWaitHandler(manager));
             server.createContext("/nextCard", new NextCardHandler(manager));
             server.createContext("/resetTrick", new ResetTrickHandler(manager));
-            server.createContext("/scores", new ScoresHandler(manager));
-            server.createContext("/gameroom", new GameroomHandler(manager));
-            server.createContext("/publicgameroom", new PublicGameRoomHandler(manager));
-            server.createContext("/resetMatch", new EndGameHandler(manager));
-            server.createContext("/gameOptions", new GameOptionsHandler(manager));
-            server.createContext("/gameSelection", new GameOptionsSelectionHandler(manager));
+            server.createContext("/multipliers", new MultipliersHandler(manager));
+            server.createContext("/room", new RoomHandler(manager));
+            server.createContext("/publicroomlist", new PublicRoomListHandler(manager));
+            server.createContext("/endMatch", new EndMatchHandler(manager));
+            server.createContext("/gamemodeList", new GamemodeListHandler(manager));
+            server.createContext("/multiplierConfiguration", new MultiplierConfigurationHandler(manager));
 
             server.setExecutor(Executors.newFixedThreadPool(100));
             server.start();
 
-            System.out.println("Server is running on port 9000");
         }
         catch (IOException e) {
             System.out.println("Error starting the server: " + e.getMessage());

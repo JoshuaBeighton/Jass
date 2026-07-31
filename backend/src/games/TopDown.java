@@ -6,7 +6,7 @@ import src.games.orderings.TopDownOrdering;
 import src.objs.Card;
 import src.objs.Suit;
 
-public class TopDown implements IGame {
+public class TopDown implements IGamemode {
     private int type;
 
     public int getType() {

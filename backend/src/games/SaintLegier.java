@@ -10,7 +10,7 @@ import src.games.orderings.TopDownOrdering;
 import src.objs.Card;
 import src.objs.Suit;
 
-public class SaintLegier implements IGame {
+public class SaintLegier implements IGamemode {
     private Map<Suit, String> mapping;
 
     public Map<Suit, String> getMapping() {

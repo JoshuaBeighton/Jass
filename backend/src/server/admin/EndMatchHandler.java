@@ -1,7 +1,6 @@
 package src.server.admin;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
@@ -14,13 +13,13 @@ import src.server.JassHttpHandler;
 /**
  * HTTP handler for retrieving and adding players to a game room.
  */
-public class EndGameHandler extends JassHttpHandler implements HttpHandler {
+public class EndMatchHandler extends JassHttpHandler implements HttpHandler {
     /**
      * Creates a new player handler.
      *
      * @param managers shared map of room ids to GameManager instances
      */
-    public EndGameHandler(Map<Integer, GameManager> managers) {
+    public EndMatchHandler(Map<Integer, GameManager> managers) {
         super(managers);
     }
 
@@ -40,17 +39,15 @@ public class EndGameHandler extends JassHttpHandler implements HttpHandler {
     }
 
     /**
-     * Adds a new player to the requested game room.
-     *
+     * Resets match.
+     * 
      * @param exchange the HTTP exchange
      * @throws IOException if reading or writing the request/response fails
      */
     private void handlePost(HttpExchange exchange) throws IOException {
-        int key = Integer.parseInt(exchange.getRequestHeaders().get("gameroom").get(0));
-        GameManager manager = managers.get(key);
-        InputStream is = exchange.getRequestBody();
-        String toRemove = new String(is.readAllBytes());
-        manager.resetMatch(toRemove);
+        int room = getRoom(exchange);
+        GameManager manager = managers.get(room);
+        manager.resetMatch();
         String response = "Success";
         exchange.sendResponseHeaders(200, response.length());
         exchange.getResponseHeaders().add("Content-Type", "application/json");

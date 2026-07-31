@@ -58,9 +58,6 @@ public class NextCardHandler extends JassHttpHandler implements HttpHandler {
 
         String response = success ? "success" : "failure";
         int code = success ? 200 : 401;
-        if (!success) {
-            System.out.println("Failed");
-        }
         exchange.sendResponseHeaders(code, response.length());
         OutputStream os = exchange.getResponseBody();
         os.write(response.getBytes());

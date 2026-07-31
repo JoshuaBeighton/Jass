@@ -9,7 +9,7 @@ import type GameMode from './interfaces/GameMode.ts'
 import RoomChooser from './components/login/RoomChooser.vue'
 import WinScreen from './components/game/WinScreen.vue'
 import Scoreboard from './components/game/Scoreboard.vue'
-import ConfigureGame from './components/game/ConfigureGame.vue'
+import ConfigureMultipliers from './components/game/ConfigureMultipliers.vue'
 
 // Current gameroom (default 1001 for local testing)
 const gameroomNumber = ref(1001)
@@ -100,7 +100,11 @@ function onConfigEnd() {
 </script>
 
 <template>
-  <ConfigureGame v-if="configure" :room-id="gameroomNumber.toString()" @confirm="onConfigEnd" />
+  <ConfigureMultipliers
+    v-if="configure"
+    :room-id="gameroomNumber.toString()"
+    @confirm="onConfigEnd"
+  />
 
   <RoomChooser v-if="gameroomNumber == -1" @update:selected="(val) => (gameroomNumber = val)" />
   <div v-else>

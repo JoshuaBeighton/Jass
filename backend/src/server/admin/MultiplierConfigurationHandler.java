@@ -18,14 +18,14 @@ import src.utils.JsonManager;
  * HTTP handler for room synchronization. GET - Establishes a long-lived SSE connection to stream room state updates.
  * POST - Accepts updated room state and applies it to the GameManager.
  */
-public class GameOptionsSelectionHandler extends JassHttpHandler implements HttpHandler {
+public class MultiplierConfigurationHandler extends JassHttpHandler implements HttpHandler {
 
     /**
      * Creates a new room state handler.
      *
      * @param managers shared map of room ids to GameManager instances
      */
-    public GameOptionsSelectionHandler(Map<Integer, GameManager> managers) {
+    public MultiplierConfigurationHandler(Map<Integer, GameManager> managers) {
         super(managers);
     }
 
@@ -50,7 +50,7 @@ public class GameOptionsSelectionHandler extends JassHttpHandler implements Http
      * Handles GET requests: Streams real-time room updates over SSE.
      */
     private void handleGet(HttpExchange exchange) throws IOException {
-        int roomId = getGameroom(exchange);
+        int roomId = getRoom(exchange);
         GameManager manager = managers.get(roomId);
 
         if (manager == null) {
@@ -68,9 +68,9 @@ public class GameOptionsSelectionHandler extends JassHttpHandler implements Http
 
                 while (!Thread.currentThread().isInterrupted()) {
                     // Convert active state into JSON payload
-                    String currentJson = JsonManager.roomStateToJSON(
+                    String currentJson = JsonManager.multipliersToJSON(
                             manager.getActiveMultipliers(),
-                            manager.getAssignments());
+                            manager.getGamemodes());
 
                     // Push event down stream if state changed
                     if (!Objects.equals(currentJson, lastSentJson)) {
@@ -107,7 +107,7 @@ public class GameOptionsSelectionHandler extends JassHttpHandler implements Http
      * Handles POST requests: Receives new table state from client and updates GameManager.
      */
     private void handlePost(HttpExchange exchange) throws IOException {
-        int roomId = getGameroom(exchange);
+        int roomId = getRoom(exchange);
         GameManager manager = managers.get(roomId);
 
         if (manager == null) {
@@ -119,11 +119,11 @@ public class GameOptionsSelectionHandler extends JassHttpHandler implements Http
         try (InputStream is = exchange.getRequestBody()) {
             String requestBody = new String(is.readAllBytes(), StandardCharsets.UTF_8);
             if (requestBody.equals("done")) {
-                manager.confirmConfig();
+                manager.confirmMultipliers();
                 return;
             }
             // Mutate state in shared GameManager
-            JsonManager.updateRoomStateFromJSON(manager, requestBody);
+            JsonManager.updateMultipliersFromJSON(manager, requestBody);
 
             byte[] response = "{\"status\":\"ok\"}".getBytes(StandardCharsets.UTF_8);
             exchange.getResponseHeaders().set("Content-Type", "application/json");

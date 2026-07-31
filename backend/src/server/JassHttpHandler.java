@@ -37,7 +37,7 @@ public class JassHttpHandler {
         exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type, Gameroom");
     }
 
-    protected int getGameroom(HttpExchange exchange) {
+    protected int getRoom(HttpExchange exchange) {
         String header = exchange.getRequestHeaders().getFirst("gameroom");
         if (header != null && !header.isBlank()) {
             return Integer.parseInt(header);

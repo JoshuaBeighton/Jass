@@ -4,7 +4,7 @@ import java.util.List;
 
 import src.objs.Card;
 
-public class Slalom implements IGame {
+public class Slalom implements IGamemode {
     public Slalom(String start) {
         if (start.equals("top")) {
             type = 0;

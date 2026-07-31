@@ -6,7 +6,7 @@ import src.games.orderings.Jack9Ordering;
 import src.objs.Card;
 import src.objs.Suit;
 
-public class Jack9 implements IGame {
+public class Jack9 implements IGamemode {
     private int type;
 
     public int getType() {
