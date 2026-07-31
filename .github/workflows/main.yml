@@ -66,7 +66,6 @@ jobs:
           key: ${{ secrets.DEPLOY_KEY }}
           passphrase: ${{ secrets.DEPLOY_PASSPHRASE }}
           script: |
-          
             cd /var/www/Jass/backend
         
             if [ -f jass.pid ]; then
