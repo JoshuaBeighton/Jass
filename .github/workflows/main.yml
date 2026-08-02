@@ -31,7 +31,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: 24
+          java-version: 21
           distribution: temurin
 
       - name: Build backend
