@@ -70,8 +70,10 @@ jobs:
         
             if [ -f jass.pid ]; then
               kill $(cat jass.pid) || true
+              sleep 2
               rm jass.pid
             fi
 
         
             nohup ./run.sh > jass.log 2>&1 &
+            echo $! > jass.pid
