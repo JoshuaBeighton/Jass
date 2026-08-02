@@ -30,21 +30,21 @@ public class JassHttpServer {
         try {
             HttpServer server = HttpServer.create(new InetSocketAddress(9000), 0);
 
-            server.createContext("/api/player", new PlayerHandler(manager));
-            server.createContext("/api/nextPlayer", new NextPlayerHandler(manager));
-            server.createContext("/api/teams", new TeamHandler(manager));
-            server.createContext("/api/teamWait", new TeamWaitHandler(manager));
-            server.createContext("/api/hand", new HandHandler(manager));
-            server.createContext("/api/gamemodeChoice", new GamemodeChoiceHandler(manager));
-            server.createContext("/api/cardWait", new CardWaitHandler(manager));
-            server.createContext("/api/nextCard", new NextCardHandler(manager));
-            server.createContext("/api/resetTrick", new ResetTrickHandler(manager));
-            server.createContext("/api/multipliers", new MultipliersHandler(manager));
-            server.createContext("/api/room", new RoomHandler(manager));
-            server.createContext("/api/publicroomlist", new PublicRoomListHandler(manager));
-            server.createContext("/api/endMatch", new EndMatchHandler(manager));
-            server.createContext("/api/gamemodeList", new GamemodeListHandler(manager));
-            server.createContext("/api/multiplierConfiguration", new MultiplierConfigurationHandler(manager));
+            server.createContext("/player", new PlayerHandler(manager));
+            server.createContext("/nextPlayer", new NextPlayerHandler(manager));
+            server.createContext("/teams", new TeamHandler(manager));
+            server.createContext("/teamWait", new TeamWaitHandler(manager));
+            server.createContext("/hand", new HandHandler(manager));
+            server.createContext("/gamemodeChoice", new GamemodeChoiceHandler(manager));
+            server.createContext("/cardWait", new CardWaitHandler(manager));
+            server.createContext("/nextCard", new NextCardHandler(manager));
+            server.createContext("/resetTrick", new ResetTrickHandler(manager));
+            server.createContext("/multipliers", new MultipliersHandler(manager));
+            server.createContext("/room", new RoomHandler(manager));
+            server.createContext("/publicroomlist", new PublicRoomListHandler(manager));
+            server.createContext("/endMatch", new EndMatchHandler(manager));
+            server.createContext("/gamemodeList", new GamemodeListHandler(manager));
+            server.createContext("/multiplierConfiguration", new MultiplierConfigurationHandler(manager));
 
             server.setExecutor(Executors.newFixedThreadPool(100));
             server.start();
