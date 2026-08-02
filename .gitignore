@@ -1,5 +1,7 @@
 backend/lib
 backend/bin
+backend/jass.pid
+backend/jass.log
 node_modules
 .DS_Store
 node_modules
