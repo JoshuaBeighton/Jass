@@ -15,12 +15,12 @@ let eventSource: EventSource | null = null
 
 // Open an SSE stream to `/teamWait` to receive updates as players join
 function connectTeamsStream() {
-  const host = window.location.hostname
+  const apiUrl = import.meta.env.VITE_API_URL
   if (eventSource) {
     eventSource.close()
   }
 
-  eventSource = new EventSource(`/api/teamWait/${counter}?gameroom=${props.gameroom}`, {
+  eventSource = new EventSource(`${apiUrl}/teamWait/${counter}?gameroom=${props.gameroom}`, {
     withCredentials: false,
   })
 

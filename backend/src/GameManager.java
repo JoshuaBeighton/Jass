@@ -93,6 +93,10 @@ public class GameManager {
         }
     }
 
+    public int getTrickCount() {
+        return trickCount;
+    }
+
     public Map<Integer, List<String>> getGamemodes() {
         assignmentLock.lock();
         try {
@@ -417,6 +421,15 @@ public class GameManager {
      */
     public int getNextPlayer() {
         return nextPlayer;
+    }
+
+    /**
+     * Returns the index of the player who initially chose the current game.
+     *
+     * @return the game caller index, or -1 if no game is active
+     */
+    public int getGameCaller() {
+        return gameCaller;
     }
 
     /**

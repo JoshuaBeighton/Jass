@@ -59,10 +59,10 @@ function setElephantTrump(suit: string) {
 
 // Fetch player order from the backend and rotate it so the current player is at bottom.
 async function getPlayers() {
-  const host = window.location.hostname
+  const apiUrl = import.meta.env.VITE_API_URL
 
   try {
-    const res = await fetch(`/api/player/`, {
+    const res = await fetch(`${apiUrl}/player/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -101,13 +101,13 @@ async function getPlayers() {
 
 // Start or restart the server-sent event stream for trick updates.
 function getNextCard() {
-  const host = window.location.hostname
+  const apiUrl = import.meta.env.VITE_API_URL
   if (eventSource) {
     eventSource.close()
   }
 
   eventSource = new EventSource(
-    `/api/cardWait/${count.value % 4}?gameroom=${props.gameroom}&player=${props.name}`,
+    `${apiUrl}/cardWait/${count.value % 4}?gameroom=${props.gameroom}&player=${props.name}`,
     {
       withCredentials: false,
     },
@@ -118,6 +118,7 @@ function getNextCard() {
       const data = JSON.parse(event.data)
       nextPlayer.value = data.next
       firstPlayer.value = data.start
+      tricksPlayed.value = data.tricksPlayed
       updateCard(data.currentTrick)
       isMe.value = nextPlayer.value == props.name ? data.playable : false
       console.log(isMe)
@@ -155,6 +156,7 @@ function updateCard(cards: [CardInterface]) {
         break
       case 3:
         leftCard.value = currentCard
+        break
     }
   }
 
@@ -173,7 +175,7 @@ async function clearDeck() {
   tricksPlayed.value++
   console.log('Tricks Played:' + tricksPlayed.value)
 
-  const host = window.location.hostname
+  const apiUrl = import.meta.env.VITE_API_URL
   count.value = -1
   leftCard.value = undefined
   topCard.value = undefined
@@ -187,7 +189,7 @@ async function clearDeck() {
     },
   }
 
-  const res = await fetch(`/api/resetTrick`, settings)
+  const res = await fetch(`${apiUrl}/resetTrick`, settings)
   if (!res.ok) throw new Error('Network response was not OK')
   const data = await res.json()
   scores.value = data.scores
@@ -224,8 +226,8 @@ async function clearDeck() {
   }
 }
 
-onMounted(() => {
-  getPlayers()
+onMounted(async () => {
+  await getPlayers()
   getNextCard()
 })
 

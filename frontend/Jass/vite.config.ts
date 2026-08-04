@@ -13,6 +13,10 @@ export default defineConfig({
     },
   },
   server: {
-    allowedHosts: ['coiffeurjass.com', 'www.coiffeurjass.com'],
+    allowedHosts: [
+      'coiffeurjass.com',
+      'www.coiffeurjass.com',
+      'https://jb478.teaching.cs.st-andrews.ac.uk',
+    ],
   },
 })

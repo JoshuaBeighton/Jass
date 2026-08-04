@@ -23,10 +23,10 @@ const cards = ref<CardInterface[]>([])
  * - Updates `cards` and bumps `round` to trigger reactivity in the template
  */
 async function fetchHand() {
-  const host = window.location.hostname
+  const apiUrl = import.meta.env.VITE_API_URL
 
   try {
-    const res = await fetch(`/api/hand/${props.name}`, {
+    const res = await fetch(`${apiUrl}/hand/${props.name}`, {
       headers: {
         Gameroom: props.gameroom.toString(),
       },

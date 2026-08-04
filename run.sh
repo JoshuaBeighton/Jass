@@ -16,12 +16,14 @@ trap cleanup INT TERM
 
 (
     cd ./frontend/Jass || exit 1
+    npm install
     npm run dev -- --host 0.0.0.0
 ) &
 FRONTEND_PID=$!
 
 (
     cd ./backend || exit 1
+    ./build.sh
     ./run.sh
 ) &
 BACKEND_PID=$!

@@ -20,8 +20,8 @@ const fetchGames = async () => {
   isLoading.value = true
   error.value = null
   try {
-    const host = window.location.hostname
-    const response = await fetch(`/api/publicroomlist`)
+    const apiUrl = import.meta.env.VITE_API_URL
+    const response = await fetch(`${apiUrl}/publicroomlist`)
     if (!response.ok) {
       throw new Error(`Failed to load games (${response.status})`)
     }
@@ -64,8 +64,8 @@ const joinGame = async (roomNo: number | undefined) => {
 // makeGame: create a public or private gameroom via backend and emit its id
 const makeGame = async (visible: boolean) => {
   try {
-    const host = window.location.hostname
-    const url = `/api/room/` + (visible ? 'public' : 'private')
+    const apiUrl = import.meta.env.VITE_API_URL
+    const url = `${apiUrl}/room/` + (visible ? 'public' : 'private')
     const response = await fetch(url)
     if (!response.ok) {
       throw new Error(`Failed to join game (${response.status})`)

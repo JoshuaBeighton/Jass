@@ -2,11 +2,6 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import type GameMode from '@/interfaces/GameMode.ts'
 
-interface Team {
-  name: string
-  score: number
-}
-
 // --- Props & Emits ---
 
 const props = defineProps<{
@@ -61,8 +56,6 @@ function typeLabel(typeKey: string) {
 // --- Game Actions ---
 
 async function sendGame(game: string) {
-  const host = window.location.hostname
-
   let body: Record<string, any> = { gamemode: game }
   if (game.startsWith('trumps-')) {
     body['gamemode'] = game.split('-')[0]
@@ -77,7 +70,8 @@ async function sendGame(game: string) {
     body['color'] = game.split('-')[1]
   }
 
-  const res = await fetch(`/api/gamemodeChoice`, {
+  const apiUrl = import.meta.env.VITE_API_URL
+  const res = await fetch(`${apiUrl}/gamemodeChoice`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -100,14 +94,14 @@ async function sendGame(game: string) {
 async function sendSaintLegier() {
   if (!saintlegierComplete.value) return
 
-  const host = window.location.hostname
-
-  let body: Record<string, any> = { name: 'saint legier' }
+  let body: Record<string, any> = { gamemode: 'saint legier' }
   for (const suit of suitNames) {
     body[suit.toLowerCase()] = saintlegierAssignments.value[suit]
   }
 
-  const res = await fetch(`/api/gamemodeChoice`, {
+  const apiUrl = import.meta.env.VITE_API_URL
+
+  const res = await fetch(`${apiUrl}/gamemodeChoice`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

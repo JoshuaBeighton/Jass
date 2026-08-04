@@ -36,6 +36,7 @@ public class JassHttpServer {
             server.createContext("/teamWait", new TeamWaitHandler(manager));
             server.createContext("/hand", new HandHandler(manager));
             server.createContext("/gamemodeChoice", new GamemodeChoiceHandler(manager));
+            server.createContext("/gameState", new GameStateHandler(manager));
             server.createContext("/cardWait", new CardWaitHandler(manager));
             server.createContext("/nextCard", new NextCardHandler(manager));
             server.createContext("/resetTrick", new ResetTrickHandler(manager));

@@ -45,9 +45,9 @@ const scores = ref<Scores>({
 })
 
 async function fetchScores() {
-  const host = window.location.hostname
+  const apiUrl = import.meta.env.VITE_API_URL
   try {
-    const res = await fetch(`/api/multipliers`, {
+    const res = await fetch(`${apiUrl}/multipliers`, {
       headers: {
         gameroom: props.gameroom.toString(),
       },
@@ -146,13 +146,13 @@ function resetSelectionSubStates() {
 // --- SSE Connection ---
 
 function connectGameChoiceStream() {
-  const host = window.location.hostname
+  const apiUrl = import.meta.env.VITE_API_URL
   if (eventSource) {
     eventSource.close()
   }
 
   eventSource = new EventSource(
-    `/api/gamemodeChoice?name=${props.name}&lastidx=${counter}&gameroom=${props.gameroom}`,
+    `${apiUrl}/gamemodeChoice?name=${props.name}&lastidx=${counter}&gameroom=${props.gameroom}`,
     { withCredentials: false },
   )
 
@@ -209,8 +209,6 @@ async function sendGame(game: string) {
     return
   }
 
-  const host = window.location.hostname
-
   let body: Record<string, any> = { gamemode: game }
   if (game.startsWith('trumps-')) {
     body['gamemode'] = game.split('-')[0]
@@ -225,7 +223,8 @@ async function sendGame(game: string) {
     body['color'] = game.split('-')[1]
   }
 
-  const res = await fetch(`/api/gamemodeChoice`, {
+  const apiUrl = import.meta.env.VITE_API_URL
+  const res = await fetch(`${apiUrl}/gamemodeChoice`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -248,35 +247,6 @@ async function sendGame(game: string) {
     }
     emits('update:selected', gameMode)
   }
-}
-
-async function sendSaintLegier() {
-  if (!saintlegierComplete.value) return
-
-  const host = window.location.hostname
-
-  let body: Record<string, any> = { gamemode: 'saint legier' }
-  for (const suit of suitNames) {
-    body[suit.toLowerCase()] = saintlegierAssignments.value[suit]
-  }
-
-  const res = await fetch(`/api/gamemodeChoice`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      gameroom: props.gameroom.toString(),
-    },
-    body: JSON.stringify(body),
-  })
-  const data = await res.json()
-  const gameMode: GameMode = {
-    game: data.game,
-    suit: data.suit,
-    start: data.start,
-    caller: data.caller,
-    cross: data.cross,
-  }
-  emits('update:selected', gameMode)
 }
 
 // Lifecycle

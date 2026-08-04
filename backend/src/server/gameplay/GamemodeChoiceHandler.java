@@ -52,6 +52,7 @@ public class GamemodeChoiceHandler extends JassHttpHandler implements HttpHandle
      * @throws IOException if writing the response fails
      */
     private void handleGet(HttpExchange exchange) throws IOException {
+        System.out.println("Handling GET request for gamemode choice");
         int key = getRoom(exchange);
         GameManager manager = managers.get(key);
         String uri = exchange.getRequestURI().toString();
@@ -142,24 +143,33 @@ public class GamemodeChoiceHandler extends JassHttpHandler implements HttpHandle
      * @throws IOException if reading or writing the request/response fails
      */
     private void handlePost(HttpExchange exchange) throws IOException {
+        System.out.println("Handling POST request for gamemode choice");
         int key = getRoom(exchange);
         GameManager manager = managers.get(key);
         InputStream is = exchange.getRequestBody();
         String requestString = new String(is.readAllBytes());
 
         if (manager.getGamemode() == null) {
-            IGamemode request = JsonManager.jsonToIGame(requestString);
-            if (request != null) {
-                manager.setGamemode(request);
+            try {
+                IGamemode request = JsonManager.jsonToIGame(requestString);
+                if (request != null) {
+                    manager.setGamemode(request);
+                }
+                manager.incrementChooser();
+                String response = JsonManager.gamemodeChoiceToJson(manager.getNextToChoose() == -1 ? manager.getNextPlayer() : manager.getNextToChoose(), manager.getPlayers(), manager.getGamemode(), manager.isForced());
+                exchange.sendResponseHeaders(200, response.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
             }
-            manager.incrementChooser();
-            String response = JsonManager.gamemodeChoiceToJson(manager.getNextToChoose() == -1 ? manager.getNextPlayer() : manager.getNextToChoose(), manager.getPlayers(), manager.getGamemode(), manager.isForced());
-            exchange.sendResponseHeaders(200, response.length());
-            OutputStream os = exchange.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
+            catch (Exception e) {
+                String response = e.getMessage();
+                exchange.sendResponseHeaders(400, response.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            }
         }
-
 
         if (manager.getGamemode() instanceof Elephant) {
             String payload = requestString.trim();
@@ -174,6 +184,8 @@ public class GamemodeChoiceHandler extends JassHttpHandler implements HttpHandle
             os.close();
             return;
         }
+
+        System.out.println("Received gamemode choice: " + requestString);
     }
 }
 

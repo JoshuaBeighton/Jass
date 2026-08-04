@@ -21,10 +21,10 @@ async function finishSelection() {
     return
   }
 
-  const host = window.location.hostname
+  const apiUrl = import.meta.env.VITE_API_URL
 
   try {
-    const response = await fetch(`/api/gamemodeChoice`, {
+    const response = await fetch(`${apiUrl}/gamemodeChoice`, {
       method: 'POST',
       headers: {
         'Content-Type': 'text/plain',
