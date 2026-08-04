@@ -78,8 +78,8 @@ async function broadcastStateChange(): Promise<void> {
 
   // 2. Broadcast state update to SSE room server
   try {
-    const host = window.location.hostname
-    await fetch(`/api/multiplierConfiguration/?gameroom=${props.roomId}`, {
+    const apiUrl = import.meta.env.VITE_API_URL
+    await fetch(`${apiUrl}/multiplierConfiguration/?gameroom=${props.roomId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -109,8 +109,8 @@ function applyRemoteState(data: Partial<RoomStatePayload>): void {
 
 // Establish SSE connection
 function connectSSE(): void {
-  const host = window.location.hostname
-  eventSource = new EventSource(`/api/multiplierConfiguration/?gameroom=${props.roomId}`)
+  const apiUrl = import.meta.env.VITE_API_URL
+  eventSource = new EventSource(`${apiUrl}/multiplierConfiguration/?gameroom=${props.roomId}`)
 
   eventSource.onmessage = (event: MessageEvent) => {
     try {
@@ -134,8 +134,8 @@ async function loadGameOptions(): Promise<void> {
   loading.value = true
   loadError.value = ''
   try {
-    const host = window.location.hostname
-    const response = await fetch(`/api/gamemodeList`)
+    const apiUrl = import.meta.env.VITE_API_URL
+    const response = await fetch(`${apiUrl}/gamemodeList`)
     if (!response.ok) {
       throw new Error(`Request failed with status ${response.status}`)
     }
@@ -243,8 +243,8 @@ function onDrop(target: number | string): void {
 async function confirm() {
   if (!allTiersFilled.value) return
   try {
-    const host = window.location.hostname
-    await fetch(`/api/multiplierConfiguration/?gameroom=${props.roomId}`, {
+    const apiUrl = import.meta.env.VITE_API_URL
+    await fetch(`${apiUrl}/multiplierConfiguration/?gameroom=${props.roomId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: 'done',

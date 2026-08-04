@@ -137,6 +137,7 @@ public class JsonManager {
             }
             result.put("playable", arr);
         }
+        result.put("tricksPlayed", manager.getTrickCount());
         return result.toString();
     }
 

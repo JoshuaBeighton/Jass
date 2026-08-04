@@ -2,15 +2,16 @@
 // LoginCard component
 // - Collects a player's name and team/index selection, posts to the
 //   backend to register the player, and shows a waiting state once selected.
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import TeamInfo from './TeamInfo.vue'
 import WaitingJoin from './WaitingJoin.vue'
+import { setStoredValue } from '@/utils/storage.ts'
 
 // Reactive form state
 const name = ref('')
 const idx = ref<number | undefined>()
 const selected = ref(false)
-const props = defineProps<{ gameroom: number }>()
+const props = defineProps<{ gameroom: number; name: string }>()
 
 /**
  * login
@@ -20,9 +21,10 @@ const props = defineProps<{ gameroom: number }>()
 async function login() {
   // Prevent login if name or idx is not set
   if (!name.value || idx.value === undefined) return
-  const host = window.location.hostname
+  const apiUrl = import.meta.env.VITE_API_URL
   selected.value = true
-  await fetch(`/api/player`, {
+  emit('update:name', name.value)
+  await fetch(`${apiUrl}/player`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -45,6 +47,10 @@ const emit = defineEmits<{
   (e: 'update:ready', value: boolean): void
   (e: 'update:name', value: string): void
 }>()
+
+onMounted(() => {
+  name.value = props.name
+})
 </script>
 
 <template>

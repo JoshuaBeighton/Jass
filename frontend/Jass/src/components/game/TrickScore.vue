@@ -3,7 +3,7 @@
 // - Shows a brief description of the current game mode and a per-team
 //   breakdown of trick scores (used while playing a specific game)
 import type GameMode from '@/interfaces/GameMode'
-import { isRed, suitToUnicode } from '@/utils/SuitManipulation'
+import { suitToUnicode } from '@/utils/SuitManipulation'
 import { computed } from 'vue'
 import SaintLegierCross from './SaintLegierCross.vue'
 

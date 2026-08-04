@@ -32,8 +32,8 @@ const played = ref(false)
  */
 async function sendCard() {
   if (props.canPlay && props.card) {
-    const host = window.location.hostname
-    let res = await fetch(`/api/nextCard`, {
+    const apiUrl = import.meta.env.VITE_API_URL
+    let res = await fetch(`${apiUrl}/nextCard`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
