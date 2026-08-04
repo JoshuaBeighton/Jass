@@ -117,28 +117,33 @@ public class JsonManager {
      * @return JSON string describing the current trick state
      */
     public static String currentTrickToJSON(GameManager manager, String player) {
-        JSONObject result = new JSONObject();
-        result.put("currentTrick", cardsToJsonArray(manager.getCurrentTrick()));
-        result.put("next", manager.getPlayers().get(manager.getNextPlayer()).getPlayerName());
-        result.put("start", manager.getPlayers().get(
-                Math.floorMod(
-                        manager.getNextPlayer() - manager.getCurrentTrick().size(),
-                        4))
-                .getPlayerName());
-        if (manager.getPlayers().get(manager.getNextPlayer()).getPlayerName().equals(player)) {
-            Map<Card, Boolean> playable = manager.getPlayers().get(manager.getNextPlayer()).playable(manager.getCurrentTrick(), manager.getGamemode());
-            JSONArray arr = new JSONArray();
-            for (Entry<Card, Boolean> entry : playable.entrySet()) {
-                JSONObject playableObj = new JSONObject();
-                playableObj.put("suit", entry.getKey().getSuit().name());
-                playableObj.put("value", entry.getKey().getVal());
-                playableObj.put("playable", entry.getValue());
-                arr.put(playableObj);
+        try {
+            JSONObject result = new JSONObject();
+            result.put("currentTrick", cardsToJsonArray(manager.getCurrentTrick()));
+            result.put("next", manager.getPlayers().get(manager.getNextPlayer()).getPlayerName());
+            result.put("start", manager.getPlayers().get(
+                    Math.floorMod(
+                            manager.getNextPlayer() - manager.getCurrentTrick().size(),
+                            4))
+                    .getPlayerName());
+            if (manager.getPlayers().get(manager.getNextPlayer()).getPlayerName().equals(player)) {
+                Map<Card, Boolean> playable = manager.getPlayers().get(manager.getNextPlayer()).playable(manager.getCurrentTrick(), manager.getGamemode());
+                JSONArray arr = new JSONArray();
+                for (Entry<Card, Boolean> entry : playable.entrySet()) {
+                    JSONObject playableObj = new JSONObject();
+                    playableObj.put("suit", entry.getKey().getSuit().name());
+                    playableObj.put("value", entry.getKey().getVal());
+                    playableObj.put("playable", entry.getValue());
+                    arr.put(playableObj);
+                }
+                result.put("playable", arr);
             }
-            result.put("playable", arr);
+            result.put("tricksPlayed", manager.getTrickCount());
+            return result.toString();
         }
-        result.put("tricksPlayed", manager.getTrickCount());
-        return result.toString();
+        catch (Exception e) {
+            return "{}";
+        }
     }
 
     /**
@@ -180,7 +185,7 @@ public class JsonManager {
             }
         }
 
-        if (root.has("assignments")) {
+        if (root.has("gamemodes")) {
             JSONObject gamemodesObj = root.getJSONObject("gamemodes");
             for (String key : gamemodesObj.keySet()) {
                 int mult = Integer.parseInt(key);
@@ -188,8 +193,17 @@ public class JsonManager {
                 List<String> gamemodesList = new ArrayList<>();
 
                 for (int i = 0; i < gamemodeArr.length(); i++) {
-                    JSONObject gameObj = gamemodeArr.getJSONObject(i);
-                    gamemodesList.add(gameObj.getString("id"));
+                    Object item = gamemodeArr.get(i);
+                    if (item instanceof JSONObject) {
+                        JSONObject gameObj = (JSONObject) item;
+                        if (gameObj.has("id")) {
+                            gamemodesList.add(gameObj.getString("id"));
+                        } else if (gameObj.has("name")) {
+                            gamemodesList.add(gameObj.getString("name"));
+                        }
+                    } else if (item instanceof String) {
+                        gamemodesList.add((String) item);
+                    }
                 }
                 assignments.put(mult, gamemodesList);
             }

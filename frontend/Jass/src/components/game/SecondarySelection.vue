@@ -2,11 +2,6 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import type GameMode from '@/interfaces/GameMode.ts'
 
-interface Team {
-  name: string
-  score: number
-}
-
 // --- Props & Emits ---
 
 const props = defineProps<{
