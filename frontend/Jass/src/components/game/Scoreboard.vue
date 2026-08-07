@@ -280,7 +280,9 @@ onBeforeUnmount(() => {
         <thead>
           <tr>
             <th class="col-game">Game</th>
-            <th class="col-game">Multiplier</th>
+            <th class="col-game">
+              <span class="mobile-hide">Multiplier</span><span class="mobile-only">Mult</span>
+            </th>
             <th class="col-team">{{ scores.teams[0]?.name ?? 'Loading...' }}</th>
             <th class="col-team">{{ scores.teams[1]?.name ?? 'Loading...' }}</th>
             <th class="col-team">{{ scores.teams[0]?.name ?? 'Loading...' }}</th>
@@ -361,6 +363,49 @@ onBeforeUnmount(() => {
   margin: 0;
   font-size: 1.5rem;
   color: var(--color-heading);
+}
+
+@media (max-width: 768px) {
+  .scoreboard-container {
+    padding: 6px;
+    gap: 6px;
+  }
+
+  .header-status {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .scoreboard-heading {
+    font-size: 1.15rem;
+  }
+
+  .header-status h2 {
+    font-size: 0.95rem;
+  }
+
+  .scoreboard-card {
+    overflow-x: auto;
+  }
+
+  .scoreboard-table {
+    min-width: 420px;
+    font-size: 0.85rem;
+  }
+
+  .col-game,
+  .col-team {
+    padding: 7px;
+    max-width: 80px;
+  }
+
+  .cell-score,
+  .cell-game {
+    padding: 7px;
+    margin: 0;
+    max-width: 80px;
+  }
 }
 
 .waitingText {
@@ -468,14 +513,22 @@ th {
   border-bottom: 2px solid var(--color-border);
 }
 
-.col-game {
-  max-width: 40%;
+.mobile-hide {
+  display: inline;
 }
 
-.col-team {
-  max-width: 30%;
-  text-align: center;
-  color: var(--color-text);
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-hide {
+    display: none;
+  }
+
+  .mobile-only {
+    display: inline;
+  }
 }
 
 tr {

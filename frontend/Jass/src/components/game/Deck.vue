@@ -52,8 +52,9 @@ onMounted(() => {
  */
 function cardStyle(i: number) {
   const total = cards.value.length
-  const spread = 50
-  const angleSpread = 10
+  const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
+  const spread = isMobile ? 28 : 40
+  const angleSpread = isMobile ? 7 : 10
 
   const center = (total - 1) / 2
   const offset = i - center
@@ -123,6 +124,14 @@ defineExpose({
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .cards {
+    height: 130px;
+    top: 6px;
+    margin: 6px 0;
+  }
 }
 
 .cards > * {

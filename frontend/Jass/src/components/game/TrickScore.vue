@@ -150,6 +150,15 @@ function getSubText(): String {
   border: 1px solid var(--color-border);
 }
 
+@media (max-width: 768px) {
+  .game-card {
+    padding: 6px 8px;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
 .game-header {
   margin-bottom: 16px;
 }

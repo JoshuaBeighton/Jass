@@ -275,7 +275,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
       </div>
-      <TrickScore :scores="scores" :game="props.game" :played="tricksPlayed" />
+      <TrickScore :scores="scores" :game="props.game" :played="tricksPlayed" class="trick-score" />
     </div>
     <button class="continue-button" v-if="freeze" v-on:click="clearDeck">Continue</button>
     <ElephantSelector
@@ -320,6 +320,50 @@ onBeforeUnmount(() => {
     inset 0 0 30px rgba(0, 0, 0, 0.5),
     0 8px 16px rgba(0, 0, 0, 0.2);
   box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .mat {
+    width: 350px;
+    height: 350px;
+  }
+
+  .row {
+    flex-direction: column-reverse;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .trick-area {
+    width: 220px;
+    height: 220px;
+  }
+
+  .card-slot {
+    width: 64px;
+    height: 96px;
+  }
+
+  .card-bottom {
+    bottom: 14px;
+  }
+
+  .card-top {
+    top: 14px;
+    transform: translateX(-50%) scale(0.9);
+  }
+
+  .card-left {
+    left: 14px;
+  }
+
+  .card-right {
+    right: 14px;
+  }
+
+  .trick-score {
+    width: 100%;
+  }
 }
 
 .player-info {

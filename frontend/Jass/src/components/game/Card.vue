@@ -67,12 +67,18 @@ async function sendCard() {
 <style scoped>
 /* Styles for the card container and suit color helpers */
 .card {
-  width: 100px;
   height: 145px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
+@media (max-width: 768px) {
+  .card {
+    height: 100px;
+  }
+}
+
 .red {
   /* Applied to red suits (hearts, diamonds) */
   color: var(--color-red-suit, red);
