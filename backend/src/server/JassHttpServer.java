@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import com.sun.net.httpserver.HttpServer;
 
@@ -53,6 +54,14 @@ public class JassHttpServer {
         }
         catch (IOException e) {
             System.out.println("Error starting the server: " + e.getMessage());
+        }
+
+        try {
+            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+            scheduler.scheduleAtFixedRate(new RoomCuller(manager), 0, 1, java.util.concurrent.TimeUnit.MINUTES);
+        }
+        catch (Exception e) {
+            System.out.println("Error starting the scheduler: " + e.getMessage());
         }
     }
 }

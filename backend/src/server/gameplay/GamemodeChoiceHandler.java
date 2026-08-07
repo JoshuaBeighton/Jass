@@ -52,9 +52,7 @@ public class GamemodeChoiceHandler extends JassHttpHandler implements HttpHandle
      * @throws IOException if writing the response fails
      */
     private void handleGet(HttpExchange exchange) throws IOException {
-        System.out.println("Handling GET request for gamemode choice");
-        int key = getRoom(exchange);
-        GameManager manager = managers.get(key);
+        GameManager manager = getRoom(exchange, managers);
         String uri = exchange.getRequestURI().toString();
 
         if (manager.getGamemode() instanceof Elephant) {
@@ -143,9 +141,7 @@ public class GamemodeChoiceHandler extends JassHttpHandler implements HttpHandle
      * @throws IOException if reading or writing the request/response fails
      */
     private void handlePost(HttpExchange exchange) throws IOException {
-        System.out.println("Handling POST request for gamemode choice");
-        int key = getRoom(exchange);
-        GameManager manager = managers.get(key);
+        GameManager manager = getRoom(exchange, managers);
         InputStream is = exchange.getRequestBody();
         String requestString = new String(is.readAllBytes());
 

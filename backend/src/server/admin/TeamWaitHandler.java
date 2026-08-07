@@ -43,8 +43,7 @@ public class TeamWaitHandler extends JassHttpHandler implements HttpHandler {
      * @throws IOException if writing the response fails
      */
     private void handleGet(HttpExchange exchange) throws IOException {
-        int key = getRoom(exchange);
-        GameManager manager = managers.get(key);
+        GameManager manager = getRoom(exchange, managers);
         String pathSegment = exchange.getRequestURI().getPath().split("/teamWait/")[1];
         int count = pathSegment.equals("-1") ? 0 : Integer.parseInt(pathSegment);
 

@@ -33,8 +33,7 @@ public class GameStateHandler extends JassHttpHandler implements HttpHandler {
 
     private void handleGet(HttpExchange exchange) throws IOException {
         try {
-            int room = getRoom(exchange);
-            GameManager manager = managers.get(room);
+            GameManager manager = getRoom(exchange, managers);
             if (manager == null) {
                 String response = "room not found";
                 exchange.sendResponseHeaders(404, response.length());

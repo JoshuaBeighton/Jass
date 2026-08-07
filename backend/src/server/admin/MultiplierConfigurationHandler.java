@@ -50,8 +50,7 @@ public class MultiplierConfigurationHandler extends JassHttpHandler implements H
      * Handles GET requests: Streams real-time room updates over SSE.
      */
     private void handleGet(HttpExchange exchange) throws IOException {
-        int roomId = getRoom(exchange);
-        GameManager manager = managers.get(roomId);
+        GameManager manager = getRoom(exchange, managers);
 
         if (manager == null) {
             exchange.sendResponseHeaders(404, -1);
@@ -107,8 +106,7 @@ public class MultiplierConfigurationHandler extends JassHttpHandler implements H
      * Handles POST requests: Receives new table state from client and updates GameManager.
      */
     private void handlePost(HttpExchange exchange) throws IOException {
-        int roomId = getRoom(exchange);
-        GameManager manager = managers.get(roomId);
+        GameManager manager = getRoom(exchange, managers);
 
         if (manager == null) {
             exchange.sendResponseHeaders(404, -1);

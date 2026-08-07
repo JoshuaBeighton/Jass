@@ -37,10 +37,13 @@ public class JassHttpHandler {
         exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type, Gameroom");
     }
 
-    protected int getRoom(HttpExchange exchange) {
+    protected GameManager getRoom(HttpExchange exchange, Map<Integer, GameManager> managers) {
         String header = exchange.getRequestHeaders().getFirst("gameroom");
+        GameManager manager = null;
         if (header != null && !header.isBlank()) {
-            return Integer.parseInt(header);
+            int roomId = Integer.parseInt(header);
+            manager = managers.get(roomId);
+
         }
 
         String query = exchange.getRequestURI().getQuery();
@@ -48,12 +51,22 @@ public class JassHttpHandler {
             for (String param : query.split("&")) {
                 String[] parts = param.split("=", 2);
                 if (parts.length == 2 && "gameroom".equals(parts[0])) {
-                    return Integer.parseInt(parts[1]);
+                    int roomId = Integer.parseInt(parts[1]);
+                    manager = managers.get(roomId);
                 }
             }
         }
-
-        throw new IllegalArgumentException("Missing gameroom");
+        if (manager == null) {
+            try (OutputStream os = exchange.getResponseBody()) {
+                exchange.sendResponseHeaders(404, 0);
+                os.write("Game room not found".getBytes(StandardCharsets.UTF_8));
+                os.close();
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return manager;
     }
 
     /**

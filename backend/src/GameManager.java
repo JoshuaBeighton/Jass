@@ -21,6 +21,8 @@ import src.utils.CardComparator;
  * Manages game state for a single Jass room.
  */
 public class GameManager {
+    private static int lastTime = 0;
+
     public static final String[] GAMES = {
             "Top Down", "Bottom Up", "Misere", "Middle", "Trumps", "Slalom", "FiveFour", "Elephant", "Saint Legier", "Jack9", "Rio"
     };
@@ -58,6 +60,7 @@ public class GameManager {
      * @param visible whether the room should be publicly discoverable
      */
     public GameManager(boolean visible) {
+        setLastTime();
         players = new ArrayList<Player>();
         teams = new ArrayList<Team>();
         teams.add(new Team(0));
@@ -83,7 +86,16 @@ public class GameManager {
         this.visible = visible;
     }
 
+    public int getLastTime() {
+        return lastTime;
+    }
+
+    private void setLastTime() {
+        lastTime = (int) (System.currentTimeMillis() / 1000);
+    }
+
     public List<Integer> getActiveMultipliers() {
+        setLastTime();
         assignmentLock.lock();
         try {
             return new ArrayList<>(activeMultipliers);
@@ -94,10 +106,12 @@ public class GameManager {
     }
 
     public int getTrickCount() {
+        setLastTime();
         return trickCount;
     }
 
     public Map<Integer, List<String>> getGamemodes() {
+        setLastTime();
         assignmentLock.lock();
         try {
             Map<Integer, List<String>> copy = new HashMap<>();
@@ -113,6 +127,7 @@ public class GameManager {
      * Dynamically updates multipliers and game assignments from client input.
      */
     public void updateAssignments(List<Integer> newMultipliers, Map<Integer, List<String>> newAssignments) {
+        setLastTime();
         assignmentLock.lock();
         try {
             this.activeMultipliers = new ArrayList<>(newMultipliers);
@@ -128,6 +143,7 @@ public class GameManager {
      * Returns the multiplier value assigned to a specific game mode name.
      */
     public int getMultiplierForGame(String gameName) {
+        setLastTime();
         assignmentLock.lock();
         try {
             for (Map.Entry<Integer, List<String>> entry : gamemodes.entrySet()) {
@@ -143,6 +159,7 @@ public class GameManager {
     }
 
     public int getTrickWinner() {
+        setLastTime();
         return trickWinner;
     }
 
@@ -194,6 +211,7 @@ public class GameManager {
      * @return current player list
      */
     public List<Player> getPlayers() {
+        setLastTime();
         return players;
     }
 
@@ -203,6 +221,7 @@ public class GameManager {
      * @return current team list
      */
     public List<Team> getTeams() {
+        setLastTime();
         return teams;
     }
 
@@ -212,6 +231,7 @@ public class GameManager {
      * @param p player to add
      */
     public void addPlayer(Player p) {
+        setLastTime();
         players.add(p);
         p.getTeam().players.add(p);
         if (players.size() == 4) {
@@ -260,6 +280,7 @@ public class GameManager {
      * @return next chooser index
      */
     public int getNextToChoose() {
+        setLastTime();
         int temp = 0;
         nextToChooseLock.lock();
         try {
@@ -282,6 +303,7 @@ public class GameManager {
      * @return the current chooser index after waiting
      */
     public int waitForChooserChange(int lastIndex, long timeoutMillis) {
+        setLastTime();
         long deadline = System.currentTimeMillis() + timeoutMillis;
         while (System.currentTimeMillis() < deadline) {
             int current = getNextToChoose();
@@ -305,6 +327,7 @@ public class GameManager {
      * @return current trick list
      */
     public List<Card> getCurrentTrick() {
+        setLastTime();
         List<Card> temp = new ArrayList<Card>();
         trickLock.lock();
         try {
@@ -329,6 +352,7 @@ public class GameManager {
      * @return the current trick size after waiting
      */
     public int waitForTrickChange(int lastSize, long timeoutMillis) {
+        setLastTime();
         long deadline = System.currentTimeMillis() + timeoutMillis;
         while (System.currentTimeMillis() < deadline) {
             int currentSize = getCurrentTrick().size();
@@ -352,6 +376,7 @@ public class GameManager {
      * @return true if the chooser must choose a game, false otherwise
      */
     public boolean isForced() {
+        setLastTime();
         boolean forced = false;
         nextToChooseLock.lock();
         try {
@@ -372,6 +397,7 @@ public class GameManager {
      * Advances the chooser index and decrements the forced-choice counter.
      */
     public void incrementChooser() {
+        setLastTime();
         nextToChooseLock.lock();
         try {
             nextToChoose++;
@@ -393,6 +419,7 @@ public class GameManager {
      * @return the current game or null if none is selected
      */
     public IGamemode getGamemode() {
+        setLastTime();
         return currentGamemode;
     }
 
@@ -402,6 +429,7 @@ public class GameManager {
      * @param g the chosen game mode
      */
     public void setGamemode(IGamemode g) {
+        setLastTime();
         try {
             currentGamemode = g;
             nextPlayer = nextToChoose;
@@ -420,6 +448,7 @@ public class GameManager {
      * @return next player index
      */
     public int getNextPlayer() {
+        setLastTime();
         return nextPlayer;
     }
 
@@ -429,6 +458,7 @@ public class GameManager {
      * @return the game caller index, or -1 if no game is active
      */
     public int getGameCaller() {
+        setLastTime();
         return gameCaller;
     }
 
@@ -439,6 +469,7 @@ public class GameManager {
      * @return true if the card was successfully played, false otherwise
      */
     public boolean playCard(String s) {
+        setLastTime();
         try {
             if (currentGamemode == null || currentTrick == null) {
                 return false;
@@ -472,6 +503,7 @@ public class GameManager {
      * Resolves the current trick, awards points to the winning team, and advances the next player.
      */
     public void resetTrick() {
+        setLastTime();
         trickLock.lock();
         try {
             if (currentTrick != null && currentTrick.size() >= 4) {
@@ -503,6 +535,7 @@ public class GameManager {
      * Resets the game state and prepares a new round.
      */
     public void resetGame() {
+        setLastTime();
         for (Entry<Integer, List<String>> t : gamemodes.entrySet()) {
             if (t.getValue().contains(currentGamemode.getName())) {
                 players.get(gameCaller).getTeam().setMultiplierScore(t.getKey(), players.get(gameCaller).getTeam().getGameScore());
@@ -527,6 +560,7 @@ public class GameManager {
      * Reset the whole match.
      */
     public void resetMatch() {
+        setLastTime();
         if (reset) {
             players.clear();
             teams.get(0).resetMatch(activeMultipliers);
@@ -537,6 +571,7 @@ public class GameManager {
     }
 
     public void confirmMultipliers() {
+        setLastTime();
         gamesConfigrured = true;
         teams.get(0).configureMultipliers(activeMultipliers);
         teams.get(1).configureMultipliers(activeMultipliers);

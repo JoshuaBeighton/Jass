@@ -45,8 +45,7 @@ public class TeamHandler extends JassHttpHandler implements HttpHandler {
      * @throws IOException if writing the response fails
      */
     private void handleGet(HttpExchange exchange) throws IOException {
-        int room = getRoom(exchange);
-        GameManager manager = managers.get(room);
+        GameManager manager = getRoom(exchange, managers);
 
         String response = JsonManager.teamsToJson(manager.getTeams());
         exchange.sendResponseHeaders(200, response.length());

@@ -45,8 +45,7 @@ public class EndMatchHandler extends JassHttpHandler implements HttpHandler {
      * @throws IOException if reading or writing the request/response fails
      */
     private void handlePost(HttpExchange exchange) throws IOException {
-        int room = getRoom(exchange);
-        GameManager manager = managers.get(room);
+        GameManager manager = getRoom(exchange, managers);
         manager.resetMatch();
         String response = "Success";
         exchange.sendResponseHeaders(200, response.length());
