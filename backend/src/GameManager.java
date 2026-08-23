@@ -34,6 +34,7 @@ public class GameManager {
     private final int LAST_BONUS = 5;
     public boolean gamesConfigrured = false;
     private IGamemode currentGamemode;
+    private int nextToStart = 0;
     private int nextToChoose = 0;
     private int choicesUntilForced = 4;
     private int nextPlayer = -1;
@@ -553,7 +554,8 @@ public class GameManager {
         sortCards();
         trickCount = 0;
         currentGamemode = null;
-        nextToChoose = 0;
+        nextToStart = (nextToStart + 1) % 4;
+        nextToChoose = nextToStart;
         choicesUntilForced = 4;
         nextPlayer = -1;
         currentTrick.clear();
