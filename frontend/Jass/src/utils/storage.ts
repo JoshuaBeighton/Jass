@@ -1,4 +1,4 @@
-const storage = import.meta.env.DEV ? window.sessionStorage : window.localStorage
+const storage = window.sessionStorage
 
 export function getStoredValue<T>(key: string, fallback: T): T {
   if (typeof window === 'undefined') {

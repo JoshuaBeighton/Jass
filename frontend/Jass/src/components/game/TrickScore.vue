@@ -77,6 +77,8 @@ function getSubText(): String {
       }
     case 'trumps':
       return suitToUnicode(props.game.suit ?? 'error')
+    case 'rio':
+      return props.game.suit?.toLowerCase() == 'hearts' ? 'Red' : 'Black'
   }
   return ''
 }
@@ -84,10 +86,10 @@ function getSubText(): String {
 
 <template>
   <!-- Display current game title, optional suit/start, and a short description -->
-  <div class="game-card">
+  <div class="game-card" :class="props.game.isJoker ? 'joker' : 'not-joker'">
     <header class="game-header">
       <div class="game-title-container">
-        <h2 class="game-title">{{ game.game }}</h2>
+        <h2 class="game-title">{{ game.game + (props.game.isJoker ? ' (Joker)' : '') }}</h2>
         <h2 class="game-title">{{ getSubText() }}</h2>
       </div>
       <p class="game-description">{{ description }}</p>
@@ -128,6 +130,14 @@ function getSubText(): String {
 </template>
 
 <style scoped>
+.joker {
+  background-color: var(--color-background-joker);
+}
+
+.not-joker {
+  background-color: var(--color-background);
+}
+
 .game-title-container {
   display: flex;
   flex-direction: row;
@@ -142,12 +152,15 @@ function getSubText(): String {
 }
 
 .game-card {
-  background-color: var(--color-background);
   max-width: 300px;
   border-radius: 12px;
   padding: 6px 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   border: 1px solid var(--color-border);
+}
+
+.not-joker {
+  background-color: var(--color-background);
 }
 
 @media (max-width: 768px) {

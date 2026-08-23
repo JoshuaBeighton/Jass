@@ -60,6 +60,7 @@ const name = ref(getStoredValue<string>(STORAGE_KEYS.name, ''))
 
 const defaultGame: GameMode = {
   game: '',
+  isJoker: false,
   suit: undefined,
   start: undefined,
   caller: '',
@@ -157,6 +158,7 @@ async function refreshCurrentGame() {
       start: data.start ?? undefined,
       caller: data.caller ?? '',
       cross: data.cross ?? undefined,
+      isJoker: data.isJoker ?? false,
     }
     console.log('Fetched current game state:', currentGame.value)
     if (currentGame.value.game === '') {

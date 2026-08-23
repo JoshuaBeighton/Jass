@@ -8,6 +8,7 @@ import type { CrossData } from './SaintLegier'
 // - `caller`: player name who called/selected this game
 export default interface GameMode {
   game: string
+  isJoker: boolean
   suit: string | undefined
   start: string | undefined
   cross: CrossData | undefined
