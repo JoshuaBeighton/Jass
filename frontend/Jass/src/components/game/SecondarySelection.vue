@@ -7,6 +7,7 @@ import type GameMode from '@/interfaces/GameMode.ts'
 const props = defineProps<{
   name: string
   gameroom: number
+  isJoker: boolean
 }>()
 
 const emits = defineEmits<{
@@ -69,6 +70,7 @@ async function sendGame(game: string) {
     body['gamemode'] = game.split('-')[0]
     body['color'] = game.split('-')[1]
   }
+  body['isJoker'] = props.isJoker
 
   const apiUrl = import.meta.env.VITE_API_URL
   const res = await fetch(`${apiUrl}/gamemodeChoice`, {
@@ -87,6 +89,7 @@ async function sendGame(game: string) {
     start: data.start,
     caller: data.caller,
     cross: data.cross,
+    isJoker: data.isJoker ?? false,
   }
   emits('update:finished', gameMode)
 }
@@ -116,6 +119,7 @@ async function sendSaintLegier() {
     start: data.start,
     caller: data.caller,
     cross: data.cross,
+    isJoker: data.isJoker ?? false,
   }
   emits('update:finished', gameMode)
 }

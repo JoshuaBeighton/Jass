@@ -10,6 +10,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import src.games.IGamemode;
+import src.games.Joker;
 import src.games.Misere;
 import src.objs.Card;
 import src.objs.Player;
@@ -24,7 +25,7 @@ public class GameManager {
     private static int lastTime = 0;
 
     public static final String[] GAMES = {
-            "Top Down", "Bottom Up", "Misere", "Middle", "Trumps", "Slalom", "FiveFour", "Elephant", "Saint Legier", "Jack9", "Rio"
+            "Top Down", "Bottom Up", "Misere", "Middle", "Trumps", "Slalom", "FiveFour", "Elephant", "Saint Legier", "Jack9", "Rio", "Joker"
     };
 
     private List<Integer> activeMultipliers;
@@ -74,10 +75,11 @@ public class GameManager {
                 List.of("Misere"),
                 List.of("Rio", "Jack9"),
                 List.of("Middle", "Saint Legier"),
-                List.of("Slalom", "FiveFour"));
+                List.of("Slalom", "FiveFour"),
+                List.of("Joker"));
 
         // Initialize default multipliers 1..5
-        for (int i = 1; i <= 6; i++) {
+        for (int i = 1; i <= assignmentStrings.size(); i++) {
             activeMultipliers.add(i);
             gamemodes.put(i, assignmentStrings.get(i - 1));
         }
@@ -536,8 +538,12 @@ public class GameManager {
      */
     public void resetGame() {
         setLastTime();
+        String name = currentGamemode.getName();
+        if (currentGamemode instanceof Joker) {
+            name = "Joker";
+        }
         for (Entry<Integer, List<String>> t : gamemodes.entrySet()) {
-            if (t.getValue().contains(currentGamemode.getName())) {
+            if (t.getValue().contains(name)) {
                 players.get(gameCaller).getTeam().setMultiplierScore(t.getKey(), players.get(gameCaller).getTeam().getGameScore());
             }
         }

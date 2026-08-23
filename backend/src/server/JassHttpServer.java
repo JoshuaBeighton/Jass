@@ -50,6 +50,7 @@ public class JassHttpServer {
             server.createContext("/", new FallbackHandler());
             server.setExecutor(Executors.newFixedThreadPool(100));
             server.start();
+            System.out.println("Server started on port 9000");
 
         }
         catch (IOException e) {

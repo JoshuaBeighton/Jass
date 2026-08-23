@@ -221,26 +221,35 @@ public class JsonManager {
     public static IGamemode jsonToIGame(String json) {
         JSONObject jo = new JSONObject(json);
         String gamemode = jo.getString("gamemode");
+        IGamemode gamemodeInstance = null;
         switch (gamemode.toLowerCase()) {
             case "pass":
                 return null;
             case "top down":
-                return new TopDown();
+                gamemodeInstance = new TopDown();
+                break;
             case "bottom up":
-                return new BottomUp();
+                gamemodeInstance = new BottomUp();
+                break;
             case "middle":
-                return new Middle();
+                gamemodeInstance = new Middle();
+                break;
             case "trumps":
                 String suit = jo.getString("suit");
-                return new Trumps(Suit.fromChar(suit.charAt(0)));
+                gamemodeInstance = new Trumps(Suit.fromChar(suit.charAt(0)));
+                break;
             case "slalom":
                 String start = jo.getString("start");
-                return new Slalom(start);
+                System.out.println("Start: " + start);
+                gamemodeInstance = new Slalom(start);
+                break;
             case "fivefour":
                 start = jo.getString("start");
-                return new FiveFour(start);
+                gamemodeInstance = new FiveFour(start);
+                break;
             case "elephant":
-                return new Elephant();
+                gamemodeInstance = new Elephant();
+                break;
             case "saint legier":
                 Map<Suit, String> mapping = new HashMap<Suit, String>();
                 String diamonds = jo.getString("diamonds");
@@ -251,18 +260,26 @@ public class JsonManager {
                 mapping.put(Suit.SPADES, spades);
                 mapping.put(Suit.HEARTS, hearts);
                 mapping.put(Suit.CLUBS, clubs);
-                return new SaintLegier(mapping);
+                gamemodeInstance = new SaintLegier(mapping);
+                break;
             case "jack9":
-                return new Jack9();
+                gamemodeInstance = new Jack9();
+                break;
             case "misere":
-                return new Misere();
+                gamemodeInstance = new Misere();
+                break;
             case "rio":
                 String suitColor = jo.getString("color");
-                return new Rio(suitColor);
+                gamemodeInstance = new Rio(suitColor);
+                break;
             default:
                 break;
         }
-        return null;
+        boolean joker = jo.optBoolean("isJoker", false);
+        if (joker && gamemodeInstance != null) {
+            return new Joker(gamemodeInstance);
+        }
+        return gamemodeInstance;
     }
 
     /**
@@ -278,16 +295,23 @@ public class JsonManager {
         JSONObject jo = new JSONObject();
         if (g == null) {
             jo.put("chooser", players.get(index).getPlayerName());
-        } else {
+        } else {            
             jo.put("game", g.getName());
+            jo.put("isJoker", g instanceof Joker);
             jo.put("caller", players.get(index).getPlayerName());
-            if (g instanceof Trumps) {
+            if (g.getName().equalsIgnoreCase("trumps")) {
                 jo.put("suit", Suit.toString(Suit.fromIndex(g.getType())));
             }
-            if (g instanceof Slalom || g instanceof FiveFour) {
+            if (g.getName().equalsIgnoreCase("rio")) {
+                jo.put("suit", g.getType() == 0 ? "Hearts" : "Spades");
+            }
+
+            if (g.getName().equalsIgnoreCase("slalom") || g.getName().equalsIgnoreCase("fivefour")) {
                 jo.put("start", g.getType() == 0 ? "Top" : "Bottom");
             }
-            if (g instanceof SaintLegier) {
+            
+
+            if (g.getName().equalsIgnoreCase("saint legier")) {
                 JSONObject cross = new JSONObject();
                 for (Entry<Suit, String> r : ((SaintLegier) g).getMapping().entrySet()) {
                     cross.put(Suit.toString(r.getKey()), r.getValue());

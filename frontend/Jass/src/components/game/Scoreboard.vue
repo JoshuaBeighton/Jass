@@ -87,6 +87,8 @@ let gameIdCounter = 0
 let counter = -1
 let eventSource: EventSource | null = null
 
+
+
 const games = ref([
   { id: gameIdCounter++, text: 'Top Down', key: 'Top Down' },
   { id: gameIdCounter++, text: 'Bottom Up', key: 'Bottom Up' },
@@ -109,34 +111,7 @@ const gameTypeOptions: { key: string; text: string; max: number }[] = [
 ]
 const saintlegierAssignments = ref<Record<string, string>>({})
 
-function remainingCount(typeKey: string) {
-  const max = gameTypeOptions.find((o) => o.key === typeKey)?.max ?? 0
-  const used = Object.values(saintlegierAssignments.value).filter((v) => v === typeKey).length
-  return max - used
-}
-
-const saintlegierComplete = computed(
-  () => Object.keys(saintlegierAssignments.value).length === suitNames.length,
-)
-
-function assignSuit(suit: string, typeKey: string) {
-  if (remainingCount(typeKey) <= 0) return
-  saintlegierAssignments.value = { ...saintlegierAssignments.value, [suit]: typeKey }
-}
-
-function unassignSuit(suit: string) {
-  const updated = { ...saintlegierAssignments.value }
-  delete updated[suit]
-  saintlegierAssignments.value = updated
-}
-
-function typeLabel(typeKey: string) {
-  return gameTypeOptions.find((o) => o.key === typeKey)?.text ?? typeKey
-}
-
-function showMainButtons() {
-  return secondaryChoice.value == ''
-}
+const isJoker = ref(false)
 
 function resetSelectionSubStates() {
   secondaryChoice.value = ''
@@ -176,6 +151,7 @@ function connectGameChoiceStream() {
       } else {
         const gameMode: GameMode = {
           game: data.game,
+          isJoker: data.isJoker,
           suit: data.suit,
           start: data.start,
           caller: data.caller,
@@ -203,13 +179,18 @@ function connectGameChoiceStream() {
 // --- Game Actions ---
 
 async function sendGame(game: string) {
+  if (game.toLowerCase() === 'joker') {
+    isJoker.value = !isJoker.value
+    return
+  }
+
   if (['trumps', 'slalom', 'fivefour', 'saint legier', 'rio'].includes(game.toLowerCase())) {
     secondaryChoice.value = game.toLowerCase()
     console.log(secondaryChoice.value)
     return
   }
 
-  let body: Record<string, any> = { gamemode: game }
+  let body: Record<string, any> = { gamemode: game, isJoker: isJoker.value }
   if (game.startsWith('trumps-')) {
     body['gamemode'] = game.split('-')[0]
     body['suit'] = game.split('-')[1]
@@ -240,6 +221,7 @@ async function sendGame(game: string) {
     const data = await res.json()
     const gameMode: GameMode = {
       game: data.game,
+      isJoker: data.isJoker,
       suit: data.suit,
       start: data.start,
       caller: data.caller,
@@ -275,7 +257,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Scoreboard Card Table -->
-    <div class="scoreboard-card">
+    <div class="scoreboard-card" :class="isJoker ? 'joker' : 'not-joker'">
       <table class="scoreboard-table">
         <thead>
           <tr>
@@ -332,13 +314,12 @@ onBeforeUnmount(() => {
         </tbody>
       </table>
     </div>
-    <SecondarySelection v-if="isMe" :gameroom="gameroom" :name="secondaryChoice" />
+    <SecondarySelection v-if="isMe" :gameroom="gameroom" :name="secondaryChoice" :isJoker="isJoker" />
   </div>
 </template>
 
 <style scoped>
 .scoreboard-container {
-  background-color: var(--color-background);
   z-index: 1;
   display: flex;
   flex-direction: column;
@@ -350,6 +331,14 @@ onBeforeUnmount(() => {
   padding: 8px;
   color: var(--color-text);
   gap: 8px;
+}
+
+.not-joker {
+  background-color: var(--color-background);
+}
+
+.joker {
+  background-color: var(--color-background-joker);
 }
 
 .header-status {
