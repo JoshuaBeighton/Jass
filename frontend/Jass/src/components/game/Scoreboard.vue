@@ -296,7 +296,7 @@ onBeforeUnmount(() => {
                 @click="sendGame(game)"
                 v-else-if="isMe && scores.teams[1]?.name.includes(props.name)"
               >
-                Play {{ game }}
+                {{(game.toLowerCase() == 'joker' && isJoker) ? "Cancel Joker" : "Play " + game }}
               </button>
             </td>
             <td class="cell-score">
