@@ -12,6 +12,7 @@ const name = ref('')
 const idx = ref<number | undefined>()
 const selected = ref(false)
 const props = defineProps<{ gameroom: number; name: string }>()
+const containsInvalidChar = ref(false)
 
 /**
  * login
@@ -51,6 +52,18 @@ const emit = defineEmits<{
 onMounted(() => {
   name.value = props.name
 })
+
+const invalidChars = ['/','\\','$','%','^','&','*','(',')','{','}','[',']','!','?','<','>',',','.']
+
+const checkChars = () =>{
+  let valid = true
+  invalidChars.forEach(element => {
+    if (name.value.contains(element)){
+      valid = false
+    }  
+  });
+  containsInvalidChar.value = !valid;
+}
 </script>
 
 <template>
@@ -64,7 +77,8 @@ onMounted(() => {
       <h1>Jass</h1>
       <hr />
       <!-- Player name input -->
-      <input v-model="name" type="text" placeholder="Enter Name" />
+      <input @input="checkChars" v-model="name" type="text" placeholder="Enter Name" />
+      <p v-if="containsInvalidChar" class="errorText">Name Cannot Contain Special Characters</p>
       <!-- TeamInfo lets the player pick a seat/team; emits ready when done -->
       <TeamInfo
         @update:ready="emitReady"
@@ -79,7 +93,11 @@ onMounted(() => {
   </div>
 </template>
 
-<style>
+<style scoped>
+.errorText{
+  color: var(--color-danger);
+}
+
 .header {
   display: flex;
   flex-direction: row;
