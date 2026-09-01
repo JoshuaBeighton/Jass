@@ -21,7 +21,7 @@ const containsInvalidChar = ref(false)
  */
 async function login() {
   // Prevent login if name or idx is not set
-  if (!name.value || idx.value === undefined) return
+  if (!name.value || idx.value === undefined || containsInvalidChar.value) return
   const apiUrl = import.meta.env.VITE_API_URL
   selected.value = true
   emit('update:name', name.value)
