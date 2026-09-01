@@ -58,7 +58,7 @@ const invalidChars = ['/','\\','$','%','^','&','*','(',')','{','}','[',']','!','
 const checkChars = () =>{
   let valid = true
   invalidChars.forEach(element => {
-    if (name.value.contains(element)){
+    if (name.value.includes(element)){
       valid = false
     }  
   });
